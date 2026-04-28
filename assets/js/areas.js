@@ -4,6 +4,49 @@ let filteredAreas = [...AREAS_DATA];
 let selectedAreas = [];
 let currentPage = 1;
 
+// Wizard State
+let currentStep = 1;
+let selectedUserIdList = [];
+
+// Configuration
+const iconsMap = {
+    'server': '<i class="fas fa-server"></i>',
+    'cloud': '<i class="fas fa-cloud"></i>',
+    'cpu': '<i class="fas fa-microchip"></i>',
+    'database': '<i class="fas fa-database"></i>',
+    'lock': '<i class="fas fa-lock"></i>',
+    'code': '<i class="fas fa-code"></i>',
+    'terminal': '<i class="fas fa-terminal"></i>',
+    'monitor': '<i class="fas fa-desktop"></i>',
+    'activity': '<i class="fas fa-chart-line"></i>',
+    'shield': '<i class="fas fa-shield-alt"></i>',
+    'wifi': '<i class="fas fa-wifi"></i>',
+    'globe': '<i class="fas fa-globe"></i>',
+    'hard-drive': '<i class="fas fa-hdd"></i>',
+    'key': '<i class="fas fa-key"></i>',
+    'settings': '<i class="fas fa-cog"></i>',
+    'layers': '<i class="fas fa-layer-group"></i>',
+    'smartphone': '<i class="fas fa-mobile-alt"></i>',
+    'tablet': '<i class="fas fa-tablet-alt"></i>',
+    'git-branch': '<i class="fas fa-code-branch"></i>',
+    'hash': '<i class="fas fa-hashtag"></i>',
+    'headphones': '<i class="fas fa-headphones"></i>',
+    'tool': '<i class="fas fa-tools"></i>',
+    'box': '<i class="fas fa-box"></i>',
+    'folder': '<i class="fas fa-folder"></i>',
+    'users': '<i class="fas fa-users"></i>',
+    'heart': '<i class="fas fa-heart"></i>',
+    'briefcase': '<i class="fas fa-briefcase"></i>',
+    'award': '<i class="fas fa-award"></i>',
+    'book': '<i class="fas fa-book"></i>'
+};
+
+const colorsPalette = [
+    '#6366f1', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6',
+    '#ec4899', '#14b8a6', '#f97316', '#475569', '#065f46', '#7c2d12',
+    '#1e3a8a', '#581c87', '#991b1b', '#166534', '#115e59'
+];
+
 function getPageLength() {
     const h = window.innerHeight;
     return h < 900 ? 9 : 10;
@@ -268,14 +311,177 @@ function openAreaModal() {
     document.getElementById('areaId').value = '';
     document.getElementById('modalTitle').textContent = 'Nueva Área';
     
-    // Default Status
+    // Default Identity
+    document.getElementById('areaIcon').value = 'box';
+    document.getElementById('areaColor').value = '#6366f1';
+    selectedUserIdList = [];
+
+    // Reset to Step 1
+    changeStep(1);
+    
+    // Status
     document.getElementById('areaStatus').checked = true;
     document.getElementById('areaStatusLabel').textContent = 'ACTIVO';
-    document.getElementById('areaStatusLabel').className = 'text-xs font-black text-primary uppercase tracking-widest';
+
+    renderPickers();
+    renderUserPicklist();
 }
 
 function closeAreaModal() {
     closeModal('areaModal');
+}
+
+/**
+ * STEP NAVIGATION
+ */
+function changeStep(step) {
+    if (step < 1 || step > 3) return;
+    
+    // Validation for Step 1
+    if (step > currentStep && currentStep === 1) {
+        const name = document.getElementById('areaName').value.trim();
+        if (!name) {
+            showToast('El nombre es obligatorio', 'error');
+            return;
+        }
+    }
+
+    currentStep = step;
+    
+    // Update sections
+    document.querySelectorAll('.step-section').forEach((s, idx) => {
+        s.classList.toggle('hidden', idx !== (step - 1));
+    });
+
+    // Update Pills & Progress
+    const progress = document.getElementById('stepProgress');
+    if (progress) progress.style.width = `${(step - 1) * 50}%`;
+
+    document.querySelectorAll('.step-item').forEach((item, idx) => {
+        const itemStep = idx + 1;
+        const icon = item.querySelector('div');
+        const label = item.querySelector('span');
+        
+        if (itemStep < step) {
+            // Completed
+            icon.className = "w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center font-black text-sm shadow-lg shadow-emerald-500/20 ring-4 ring-panel-fill transition-all";
+            icon.innerHTML = '<i class="fas fa-check"></i>';
+            label.className = "text-[9px] font-black uppercase tracking-widest text-emerald-500";
+        } else if (itemStep === step) {
+            // Active
+            icon.className = "w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-black text-sm shadow-lg shadow-primary/20 ring-4 ring-panel-fill transition-all";
+            icon.innerText = itemStep;
+            label.className = "text-[9px] font-black uppercase tracking-widest text-primary";
+        } else {
+            // Pending
+            icon.className = "w-10 h-10 rounded-full bg-panel-border text-label/40 flex items-center justify-center font-black text-sm ring-4 ring-panel-fill transition-all";
+            icon.innerText = itemStep;
+            label.className = "text-[9px] font-black uppercase tracking-widest text-label/40";
+        }
+    });
+
+    // Update Buttons
+    const btnPrev = document.getElementById('btnPrevStep');
+    const btnNext = document.getElementById('btnNextStep');
+    const btnSave = document.getElementById('btnSaveArea');
+
+    if (step === 1) {
+        btnPrev.classList.add('opacity-0', 'pointer-events-none');
+        btnNext.classList.remove('hidden');
+        btnSave.classList.add('hidden');
+    } else if (step === 3) {
+        btnPrev.classList.remove('opacity-0', 'pointer-events-none');
+        btnNext.classList.add('hidden');
+        btnSave.classList.remove('hidden');
+    } else {
+        btnPrev.classList.remove('opacity-0', 'pointer-events-none');
+        btnNext.classList.remove('hidden');
+        btnSave.classList.add('hidden');
+    }
+}
+
+/**
+ * PICKER RENDERING
+ */
+function renderPickers() {
+    const iconGrid = document.getElementById('iconGrid');
+    const colorGrid = document.getElementById('colorGrid');
+    if (!iconGrid || !colorGrid) return;
+
+    const currentIcon = document.getElementById('areaIcon').value;
+    const currentColor = document.getElementById('areaColor').value;
+
+    // Icons
+    iconGrid.innerHTML = '';
+    Object.entries(iconsMap).forEach(([key, svg]) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `w-12 h-12 flex items-center justify-center rounded-xl border-2 transition-all ${currentIcon === key ? 'border-primary bg-primary/10 text-primary shadow-lg shadow-primary/10' : 'border-panel-border bg-surface-container/20 text-label/40 hover:border-primary/40'}`;
+        btn.innerHTML = svg;
+        btn.onclick = () => {
+            document.getElementById('areaIcon').value = key;
+            renderPickers();
+        };
+        iconGrid.appendChild(btn);
+    });
+
+    // Colors
+    colorGrid.innerHTML = '';
+    colorsPalette.forEach(color => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `w-10 h-10 rounded-full border-4 transition-all ${currentColor === color ? 'border-white ring-4 ring-primary/40 shadow-xl scale-110' : 'border-transparent opacity-60 hover:opacity-100 hover:scale-105'}`;
+        btn.style.background = color;
+        btn.onclick = () => {
+            document.getElementById('areaColor').value = color;
+            renderPickers();
+        };
+        colorGrid.appendChild(btn);
+    });
+}
+
+/**
+ * USER PICKLIST
+ */
+function renderUserPicklist() {
+    const availableList = document.getElementById('availableUsersList');
+    const selectedList = document.getElementById('selectedUsersList');
+    if (!availableList || !selectedList) return;
+
+    availableList.innerHTML = '';
+    selectedList.innerHTML = '';
+
+    ALL_USERS.forEach(user => {
+        const isSelected = selectedUserIdList.includes(user.id);
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = "w-full flex items-center justify-between p-3 rounded-xl transition-all group " + (isSelected ? "bg-primary/10 hover:bg-primary/20" : "bg-panel-fill/40 hover:bg-surface-container/60");
+        
+        item.innerHTML = `
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg ${isSelected ? 'bg-primary text-white' : 'bg-label/10 text-label/60'} flex items-center justify-center text-xs">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="text-left">
+                    <div class="text-[11px] font-black uppercase text-label leading-none mb-1">${user.name}</div>
+                    <div class="text-[9px] font-bold text-label/40 uppercase tracking-tighter">${user.email}</div>
+                </div>
+            </div>
+            <i class="fas ${isSelected ? 'fa-minus-circle text-primary' : 'fa-plus-circle text-label/20 group-hover:text-primary'} text-sm transition-colors"></i>
+        `;
+
+        item.onclick = () => toggleUserSelection(user.id);
+
+        if (isSelected) selectedList.appendChild(item);
+        else availableList.appendChild(item);
+    });
+}
+
+function toggleUserSelection(userId) {
+    const idx = selectedUserIdList.indexOf(userId);
+    if (idx === -1) selectedUserIdList.push(userId);
+    else selectedUserIdList.splice(idx, 1);
+    renderUserPicklist();
 }
 
 function editArea(id) {
@@ -291,9 +497,25 @@ function editArea(id) {
     const isActive = area.status === 'Activo' || area.status === 'activo' || area.status === true;
     document.getElementById('areaStatus').checked = isActive;
     document.getElementById('areaStatusLabel').textContent = isActive ? 'ACTIVO' : 'INACTIVO';
-    document.getElementById('areaStatusLabel').className = isActive ? 'text-xs font-black text-primary uppercase tracking-widest' : 'text-xs font-black text-label/40 uppercase tracking-widest';
+    
+    // Image Identity
+    document.getElementById('areaIcon').value = area.icon || 'box';
+    document.getElementById('areaColor').value = area.color || '#6366f1';
+
+    // Fetch Linked Users for this area
+    selectedUserIdList = [];
+    fetch(`/admin/areas/users/${id}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                selectedUserIdList = data.selected_ids || [];
+                renderUserPicklist();
+            }
+        });
 
     document.getElementById('modalTitle').textContent = 'Modificar Área';
+    changeStep(1);
+    renderPickers();
 }
 
 async function saveArea() {
@@ -310,13 +532,16 @@ async function saveArea() {
     const url = id ? `/admin/areas/edit/${id}` : '/admin/areas/add';
     const method = 'POST'; // Backend supports POST for both add and edit/int:id
 
+    const icon = document.getElementById('areaIcon').value;
+    const color = document.getElementById('areaColor').value;
+
     showToast('Guardando...', 'info');
 
     try {
         const response = await fetch(url, {
             method: method,
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, description, status, user_ids: [] })
+            body: JSON.stringify({ name, description, status, icon, color, user_ids: selectedUserIdList })
         });
         const data = await response.json();
         
