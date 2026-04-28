@@ -28,52 +28,52 @@
     <!-- DASHBOARD VIEW -->
     <div id="dashboardView" class="flex flex-col gap-8 animate-in fade-in duration-500">
         <!-- Stats Summary Row -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="request-stats-grid">
             <!-- Pendientes -->
-            <div class="bg-surface-container border border-surface-container-border rounded-2xl p-6 flex items-center gap-5 group cursor-pointer hover:border-amber-500 transition-all shadow-sm" onclick="filterByStatus('Pendiente')">
-                <div class="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <div class="request-card-stat" onclick="filterByStatus('Pendiente')">
+                <div class="stat-icon pending">
+                    <i class="fas fa-clock"></i>
                 </div>
-                <div class="flex-1">
-                    <p class="text-[10px] font-black text-label/40 uppercase tracking-widest mb-0.5">Pendientes</p>
-                    <h3 class="text-2xl font-black text-amber-500 tabular-nums leading-none">{{ counts.pending }}</h3>
-                    <p class="text-[9px] font-bold text-label/20 uppercase tracking-tighter mt-1">Acción Requerida</p>
+                <div class="stat-info">
+                    <p class="stat-label">Pendientes</p>
+                    <h3 class="stat-value">{{ counts.pending }}</h3>
+                    <p class="stat-subtitle">Acción Requerida</p>
                 </div>
             </div>
 
             <!-- Aprobadas -->
-            <div class="bg-surface-container border border-surface-container-border rounded-2xl p-6 flex items-center gap-5 group cursor-pointer hover:border-emerald-500 transition-all shadow-sm" onclick="filterByStatus('Aprobado')">
-                <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 group-hover:scale-110 transition-transform">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <div class="request-card-stat" onclick="filterByStatus('Aprobado')">
+                <div class="stat-icon approved">
+                    <i class="fas fa-check-circle"></i>
                 </div>
-                <div class="flex-1">
-                    <p class="text-[10px] font-black text-label/40 uppercase tracking-widest mb-0.5">Aprobadas</p>
-                    <h3 class="text-2xl font-black text-emerald-500 tabular-nums leading-none">{{ counts.approved }}</h3>
-                    <p class="text-[9px] font-bold text-label/20 uppercase tracking-tighter mt-1">Historial Éxito</p>
+                <div class="stat-info">
+                    <p class="stat-label">Aprobadas</p>
+                    <h3 class="stat-value">{{ counts.approved }}</h3>
+                    <p class="stat-subtitle">Historial Éxito</p>
                 </div>
             </div>
 
             <!-- Denegadas -->
-            <div class="bg-surface-container border border-surface-container-border rounded-2xl p-6 flex items-center gap-5 group cursor-pointer hover:border-rose-500 transition-all shadow-sm" onclick="filterByStatus('rejected')">
-                <div class="w-14 h-14 rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-500 group-hover:scale-110 transition-transform">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            <div class="request-card-stat" onclick="filterByStatus('rejected')">
+                <div class="stat-icon rejected">
+                    <i class="fas fa-times-circle"></i>
                 </div>
-                <div class="flex-1">
-                    <p class="text-[10px] font-black text-label/40 uppercase tracking-widest mb-0.5">Denegadas</p>
-                    <h3 class="text-2xl font-black text-rose-500 tabular-nums leading-none">{{ counts.rejected }}</h3>
-                    <p class="text-[9px] font-bold text-label/20 uppercase tracking-tighter mt-1">Historial Crítico</p>
+                <div class="stat-info">
+                    <p class="stat-label">Denegadas</p>
+                    <h3 class="stat-value">{{ counts.rejected }}</h3>
+                    <p class="stat-subtitle">Historial Crítico</p>
                 </div>
             </div>
 
             <!-- Historial -->
-            <div class="bg-surface-container border border-surface-container-border rounded-2xl p-6 flex items-center gap-5 group cursor-pointer hover:border-primary transition-all shadow-sm" onclick="filterByStatus('all')">
-                <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+            <div class="request-card-stat" onclick="filterByStatus('all')">
+                <div class="stat-icon history">
+                    <i class="fas fa-history"></i>
                 </div>
-                <div class="flex-1">
-                    <p class="text-[10px] font-black text-label/40 uppercase tracking-widest mb-0.5">Historial</p>
-                    <h3 class="text-2xl font-black text-primary tabular-nums leading-none">{{ counts.total }}</h3>
-                    <p class="text-[9px] font-bold text-label/20 uppercase tracking-tighter mt-1">Auditoría Total</p>
+                <div class="stat-info">
+                    <p class="stat-label">Historial</p>
+                    <h3 class="stat-value">{{ counts.total }}</h3>
+                    <p class="stat-subtitle">Auditoría Total</p>
                 </div>
             </div>
         </div>
@@ -111,60 +111,48 @@
     </div>
 
     <!-- TABLE VIEW (Hidden by default) -->
-    <div id="tableView" class="hidden flex-shrink-0 min-h-[500px] flex-1 flex flex-col bg-surface-container border border-surface-container-border rounded-3xl overflow-hidden shadow-2xl shadow-black/5 animate-in slide-in-from-bottom-10 duration-500">
-        <!-- Filter Bar -->
-        <div class="p-6 border-b border-surface-container-border bg-surface-container/50 flex items-center justify-between gap-4 flex-shrink-0">
-            <!-- Botón Volver -->
-            <button onclick="showDashboard()" title="Volver al Dashboard" class="w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-2xl border border-panel-border text-label/50 hover:bg-primary hover:text-white hover:border-primary transition-all active:scale-95 group shadow-sm">
-                <svg class="w-5 h-5 group-hover:-translate-x-1.5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
-            </button>
+    <div id="tableView" class="hidden flex-col animate-in slide-in-from-bottom-10 duration-500">
+        <div class="back-btn" onclick="showDashboard()">
+            <i class="fas fa-arrow-left"></i> Volver al Dashboard
+        </div>
 
-            <!-- Buscador Táctico -->
-            <div class="relative flex-grow max-w-md group">
-                <svg class="w-4 h-4 absolute left-5 top-1/2 -translate-y-1/2 text-label/60 group-focus-within:text-primary transition-colors z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input type="text" id="requestSearch" placeholder="Buscar por usuario o plataforma..." 
-                       class="w-full bg-input-bg border-2 border-panel-border rounded-2xl pl-12 pr-5 py-3 text-sm font-bold text-input outline-none focus:border-input-focus focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-label/50">
+        <div class="crud-bar">
+            <div class="search-container flex-grow">
+                <div class="search-input-icon text-muted">
+                    <i class="fas fa-search"></i>
+                </div>
+                <input type="text" placeholder="Buscar por usuario o plataforma..." id="requestSearch" class="w-full search-input-with-icon">
             </div>
 
-            <!-- Filtros y Refrescar -->
-            <div class="flex items-center gap-2">
-                <select id="statusFilter" onchange="applyFiltersFromUI()" class="bg-input-bg border-2 border-panel-border rounded-2xl px-4 py-3 text-[12px] font-black uppercase tracking-widest text-input outline-none focus:border-input-focus focus:ring-4 focus:ring-primary/10 transition-all cursor-pointer">
-                    <option value="all">Todos los Estados</option>
-                    <option value="Pendiente">Pendientes</option>
-                    <option value="Aprobado">Aprobadas</option>
-                    <option value="rejected">Rechazadas</option>
-                </select>
+            <div id="actionButtonsContainer" class="crud-actions">
+                <button class="btn-action-approve" onclick="processSelected('approve')" id="bulkApprove" disabled>✓ Aprobar</button>
+                <button class="btn-action-reject" onclick="processSelected('reject')" id="bulkReject" disabled>✕ Denegar</button>
             </div>
         </div>
 
-        <!-- TABLE AREA (Audit-Style 1:1) -->
-        <div class="dt-container flex-1 min-h-0 flex flex-col mt-2">
-            <!-- Table Row -->
-            <div class="dt-layout-row dt-layout-table flex-1 min-h-0 overflow-hidden">
-                <div class="dt-layout-cell flex-1 min-h-0 flex flex-col">
-                    <table class="w-full text-left table-fixed dataTable">
-                        <thead class="sticky top-0 z-20">
-                            <tr class="bg-slate-900/80 backdrop-blur-md">
-                                <th class="w-[5%] text-center" style="border-left:3px solid transparent;padding:0 0.5rem;">
-                                    <input type="checkbox" id="selectAll" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary flex-shrink-0">
-                                </th>
-                                <th class="w-[18%]">Solicitante</th>
-                                <th class="w-[12%] text-center">Tipo</th>
-                                <th class="w-[18%]">Plataforma</th>
-                                <th class="w-[12%] text-center">Fecha Solicitud</th>
-                                <th class="w-[12%] text-center">Fecha Proceso</th>
-                                <th class="w-[13%] text-center">Estado</th>
-                                <th class="w-[10%] text-right" style="padding-right: 1.25rem;">Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody id="requestsTableBody">
-                            <!-- Dinámico -->
-                        </tbody>
-                    </table>
-                </div>
+        <div class="table-card">
+            <div class="overflow-x-auto">
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th id="selectAllHeader" class="col-cb">
+                                <input type="checkbox" id="selectAll" class="checkbox-compact">
+                            </th>
+                            <th>Solicitante</th>
+                            <th class="text-center">Tipo</th>
+                            <th>Plataforma</th>
+                            <th class="text-center">Fecha Solicitud</th>
+                            <th class="text-center">Fecha Proceso</th>
+                            <th class="text-center">Estado</th>
+                            <th id="actionHeader" class="text-right pr-10">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="requestsTableBody">
+                        <!-- Dinámico -->
+                    </tbody>
+                </table>
             </div>
             
-            <!-- Pagination Row -->
             <div id="requestsPagination">
                 <!-- Inyectado por js -->
             </div>

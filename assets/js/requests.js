@@ -94,62 +94,55 @@ function renderRequestsTable() {
 
     pageData.forEach(r => {
         const isPending = r.status === 'Pendiente';
-        const statusBadge = {
-            'Pendiente': 'nx-badge-warning',
-            'Aprobado': 'nx-badge-success',
-            'Rechazado': 'nx-badge-error',
-            'Denegado': 'nx-badge-error'
-        }[r.status] || 'bg-label/10 text-label/40';
+        const statusClass = r.status === 'Pendiente' ? 'badge-warning' : (r.status === 'Aprobado' ? 'badge-success' : 'badge-danger');
 
-        tbody.innerHTML += `
-            <tr class="group hover:bg-primary/5 transition-all border-b border-panel-border/30 last:border-none h-16">
-                <td class="text-center" style="border-left:3px solid transparent;padding-left:0.5rem;">
-                    <div class="flex items-center justify-center">
-                        <input type="checkbox" data-id="${r.id}" class="request-cb w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary ${!isPending ? 'opacity-0 pointer-events-none' : ''}" 
-                            ${!isPending ? 'disabled' : ''} 
-                            ${selectedRequests.includes(r.id) ? 'checked' : ''}
-                            onchange="toggleSelection(${r.id}, this.checked)">
-                    </div>
-                </td>
-                <td>
-                    <div class="flex flex-col justify-center">
-                        <p class="text-xs font-black text-label uppercase tracking-tight leading-none">${r.user_name}</p>
-                        <p class="text-[10px] font-bold text-label/30 italic mt-1 leading-none">${r.user_email}</p>
-                    </div>
-                </td>
-                <td class="text-center">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-tighter bg-surface-container border border-panel-border text-label/40">Regular</span>
-                </td>
-                <td>
-                    <span class="text-[11px] font-black text-primary uppercase tracking-tight">${r.platform_name}</span>
-                </td>
-                <td class="text-center">
-                     <p class="text-[10px] font-bold text-label/40 tabular-nums uppercase leading-none">${r.created_at}</p>
-                </td>
-                <td class="text-center">
-                     <p class="text-[10px] font-bold text-label/20 tabular-nums uppercase leading-none">${r.processed_at}</p>
-                </td>
-                <td class="text-center">
-                    <div class="flex items-center justify-center">
-                        <span class="nx-badge ${statusBadge}">${r.status.toUpperCase()}</span>
-                    </div>
-                </td>
-                <td class="text-right pr-5">
-                    <div class="flex items-center justify-end gap-2 pr-2">
-                        ${isPending ? `
-                        <button onclick="quickAction(${r.id}, 'approve')" class="w-8 h-8 flex items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500 hover:text-white transition-all shadow-sm" title="Aprobar Solicitud">
-                            <i class="fas fa-check text-[10px]"></i>
-                        </button>
-                        <button onclick="quickAction(${r.id}, 'reject')" class="w-8 h-8 flex items-center justify-center rounded-lg bg-rose-500/10 text-rose-500 border border-rose-500/20 hover:bg-rose-500 hover:text-white transition-all shadow-sm" title="Denegar Solicitud">
-                            <i class="fas fa-times text-[10px]"></i>
-                        </button>
-                        ` : `
-                        <span class="text-[10px] font-black text-label/10 uppercase italic tracking-widest">---</span>
-                        `}
-                    </div>
-                </td>
-            </tr>
+        const tr = document.createElement('tr');
+        tr.className = "animate-in fade-in duration-300";
+        tr.innerHTML = `
+            <td class="col-cb">
+                <input type="checkbox" data-id="${r.id}" class="row-checkbox checkbox-compact ${!isPending ? 'opacity-0 pointer-events-none' : ''}" 
+                    ${!isPending ? 'disabled' : ''} 
+                    ${selectedRequests.includes(r.id) ? 'checked' : ''}
+                    onchange="toggleSelection(${r.id}, this.checked)">
+            </td>
+            <td>
+                <div>
+                    <span class="request-user-primary">${r.user_name}</span>
+                    <div class="request-user-secondary">${r.user_email}</div>
+                </div>
+            </td>
+            <td class="text-center">
+                <span class="request-type-pill">Regular</span>
+            </td>
+            <td>
+                <div>
+                    <span class="request-platform-primary">${r.platform_name}</span>
+                    <div class="request-platform-secondary">Servicio</div>
+                </div>
+            </td>
+            <td class="text-center request-date-cell">${r.created_at}</td>
+            <td class="text-center request-date-cell">${r.processed_at}</td>
+            <td class="text-center">
+                <span class="badge ${statusClass}">
+                    <span class="status-dot"></span> ${r.status.toUpperCase()}
+                </span>
+            </td>
+            <td class="text-right pr-5">
+                <div class="flex items-center justify-end gap-2">
+                    ${isPending ? `
+                    <button onclick="quickAction(${r.id}, 'approve')" class="btn-action-small approve" title="Aprobar">
+                        <i class="fas fa-check"></i>
+                    </button>
+                    <button onclick="quickAction(${r.id}, 'reject')" class="btn-action-small reject" title="Denegar">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    ` : `
+                    <span class="text-[10px] font-black text-label/10 uppercase italic tracking-widest">---</span>
+                    `}
+                </div>
+            </td>
         `;
+        tbody.appendChild(tr);
     });
 
     renderGhostRows(8);
@@ -166,11 +159,8 @@ function renderGhostRows(columns) {
 
     for (let i = 0; i < ghostCount; i++) {
         const tr = document.createElement('tr');
-        tr.className = 'ghost-row pointer-events-none select-none';
-        tr.innerHTML = `
-            <td style="border-left:3px solid transparent;"></td>
-            ${'<td></td>'.repeat(columns - 1)}
-        `;
+        tr.className = 'ghost-row pointer-events-none select-none opacity-20';
+        tr.innerHTML = `<td></td>`.repeat(columns);
         tbody.appendChild(tr);
     }
 }
@@ -181,27 +171,24 @@ function renderPagination() {
     
     const rowsPerPage = getPageLength();
     const totalPages = Math.ceil(filteredRequests.length / rowsPerPage);
-    const start = filteredRequests.length ? (currentPage - 1) * rowsPerPage + 1 : 0;
-    const end = Math.min(filteredRequests.length, currentPage * rowsPerPage);
+    const startCount = filteredRequests.length ? (currentPage - 1) * rowsPerPage + 1 : 0;
+    const endCount = Math.min(filteredRequests.length, currentPage * rowsPerPage);
 
     container.innerHTML = `
-        <div class="dt-layout-row" style="display: flex !important; align-items: center; justify-content: space-between; height: 52px !important; padding: 0 1.25rem !important; border-top: 1px solid rgb(var(--color-panel-border) / 0.4) !important;">
-            <div class="dt-layout-cell dt-layout-start">
-                <div class="dt-info" style="font-size: 13px !important; font-weight: 800 !important; color: rgb(var(--color-text-body)) !important; text-transform: none !important; letter-spacing: normal !important;">
-                    Mostrando ${start}-${end} de ${filteredRequests.length} registros
-                </div>
+        <div class="request-pagination-layout">
+            <div class="request-pagination-summary">
+                Mostrando <strong>${startCount}-${endCount}</strong> de <strong>${filteredRequests.length}</strong> registros
             </div>
-            <div class="dt-layout-cell dt-layout-end">
-                <div class="dt-paging paging_simple">
-                    <button class="dt-paging-button previous ${currentPage === 1 ? 'disabled' : ''}" 
-                        onclick="changePage(-1)" ${currentPage === 1 ? 'disabled' : ''}>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
-                    </button>
-                    <button class="dt-paging-button next ${currentPage >= totalPages ? 'disabled' : ''}" 
-                        onclick="changePage(1)" ${currentPage >= totalPages ? 'disabled' : ''}>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
-                    </button>
+            <div class="request-pagination-controls">
+                <button type="button" onclick="changePage(-1)" ${currentPage === 1 ? 'disabled' : ''} class="page-btn-modern">
+                    <i class="fas fa-chevron-left text-[10px]"></i> Anterior
+                </button>
+                <div class="request-pagination-pill">
+                    Página <strong class="current">${currentPage}</strong> de <strong>${totalPages || 1}</strong>
                 </div>
+                <button type="button" onclick="changePage(1)" ${currentPage >= totalPages ? 'disabled' : ''} class="page-btn-modern">
+                    Siguiente <i class="fas fa-chevron-right text-[10px]"></i>
+                </button>
             </div>
         </div>
     `;
