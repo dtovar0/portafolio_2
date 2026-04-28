@@ -1,5 +1,5 @@
 /* Módulo de Solicitudes - Nexus Premium Analytics */
-/* Legacy Parity Styles (1:1 Portafolio) */
+/* Legacy Parity Styles (1:1 Portafolio) - TABLE ONLY */
 
 .crud-bar {
     display: flex; align-items: center; justify-content: space-between; gap: 1rem;
@@ -114,21 +114,5 @@
 .request-pagination-pill .current { color: var(--primary); }
 
 .drill-down-view { flex-direction: column; }
-
-/* --- Stats Grid 1:1 --- */
-.request-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 2rem; }
-.request-card-stat {
-    background: var(--bg-card); border: 1px solid var(--panel-border); border-radius: 20px;
-    padding: 1.5rem; display: flex; align-items: center; gap: 1.25rem; cursor: pointer; transition: 0.2s;
-}
-.request-card-stat:hover { transform: translateY(-3px); border-color: var(--primary); shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-.stat-icon { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
-.stat-info { flex: 1; }
-.stat-label { font-size: 0.75rem; font-weight: 800; color: var(--label-color); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem; opacity: 0.6; }
-.stat-value { font-size: 1.75rem; font-weight: 900; color: var(--body-text); line-height: 1; }
-.stat-subtitle { font-size: 0.7rem; color: var(--label-color); font-weight: 700; opacity: 0.5; margin-top: 4px; text-transform: uppercase; }
-
-.stat-icon.pending { background: #f59e0b15; color: #f59e0b; }
-.stat-icon.approved { background: #10b98115; color: #10b981; }
-.stat-icon.rejected { background: #ef444415; color: #ef4444; }
-.stat-icon.history { background: rgba(var(--primary-rgb), 0.1); color: var(--primary); }
+.back-btn { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--label-color); opacity: 0.4; cursor: pointer; font-weight: 800; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; transition: 0.2s; }
+.back-btn:hover { color: var(--primary); opacity: 1; transform: translateX(-4px); }

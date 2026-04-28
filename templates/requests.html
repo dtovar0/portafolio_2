@@ -28,52 +28,53 @@
     <!-- DASHBOARD VIEW -->
     <div id="dashboardView" class="flex flex-col gap-8 animate-in fade-in duration-500">
         <!-- Stats Summary Row -->
-        <div class="request-stats-grid">
+        <!-- Stats Summary Row -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <!-- Pendientes -->
-            <div class="request-card-stat" onclick="filterByStatus('Pendiente')">
-                <div class="stat-icon pending">
-                    <i class="fas fa-clock"></i>
+            <div class="bg-surface-container border border-surface-container-border rounded-2xl p-6 flex items-center gap-5 group cursor-pointer hover:border-amber-500 transition-all shadow-sm" onclick="filterByStatus('Pendiente')">
+                <div class="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-clock text-xl"></i>
                 </div>
-                <div class="stat-info">
-                    <p class="stat-label">Pendientes</p>
-                    <h3 class="stat-value">{{ counts.pending }}</h3>
-                    <p class="stat-subtitle">Acción Requerida</p>
+                <div class="flex-1">
+                    <p class="text-[10px] font-black text-label/40 uppercase tracking-widest mb-0.5">Pendientes</p>
+                    <h3 class="text-2xl font-black text-amber-500 tabular-nums leading-none">{{ counts.pending }}</h3>
+                    <p class="text-[9px] font-bold text-label/20 uppercase tracking-tighter mt-1">Acción Requerida</p>
                 </div>
             </div>
 
             <!-- Aprobadas -->
-            <div class="request-card-stat" onclick="filterByStatus('Aprobado')">
-                <div class="stat-icon approved">
-                    <i class="fas fa-check-circle"></i>
+            <div class="bg-surface-container border border-surface-container-border rounded-2xl p-6 flex items-center gap-5 group cursor-pointer hover:border-emerald-500 transition-all shadow-sm" onclick="filterByStatus('Aprobado')">
+                <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-check-circle text-xl"></i>
                 </div>
-                <div class="stat-info">
-                    <p class="stat-label">Aprobadas</p>
-                    <h3 class="stat-value">{{ counts.approved }}</h3>
-                    <p class="stat-subtitle">Historial Éxito</p>
+                <div class="flex-1">
+                    <p class="text-[10px] font-black text-label/40 uppercase tracking-widest mb-0.5">Aprobadas</p>
+                    <h3 class="text-2xl font-black text-emerald-500 tabular-nums leading-none">{{ counts.approved }}</h3>
+                    <p class="text-[9px] font-bold text-label/20 uppercase tracking-tighter mt-1">Historial Éxito</p>
                 </div>
             </div>
 
             <!-- Denegadas -->
-            <div class="request-card-stat" onclick="filterByStatus('rejected')">
-                <div class="stat-icon rejected">
-                    <i class="fas fa-times-circle"></i>
+            <div class="bg-surface-container border border-surface-container-border rounded-2xl p-6 flex items-center gap-5 group cursor-pointer hover:border-rose-500 transition-all shadow-sm" onclick="filterByStatus('rejected')">
+                <div class="w-14 h-14 rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-500 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-times-circle text-xl"></i>
                 </div>
-                <div class="stat-info">
-                    <p class="stat-label">Denegadas</p>
-                    <h3 class="stat-value">{{ counts.rejected }}</h3>
-                    <p class="stat-subtitle">Historial Crítico</p>
+                <div class="flex-1">
+                    <p class="text-[10px] font-black text-label/40 uppercase tracking-widest mb-0.5">Denegadas</p>
+                    <h3 class="text-2xl font-black text-rose-500 tabular-nums leading-none">{{ counts.rejected }}</h3>
+                    <p class="text-[9px] font-bold text-label/20 uppercase tracking-tighter mt-1">Historial Crítico</p>
                 </div>
             </div>
 
             <!-- Historial -->
-            <div class="request-card-stat" onclick="filterByStatus('all')">
-                <div class="stat-icon history">
-                    <i class="fas fa-history"></i>
+            <div class="bg-surface-container border border-surface-container-border rounded-2xl p-6 flex items-center gap-5 group cursor-pointer hover:border-primary transition-all shadow-sm" onclick="filterByStatus('all')">
+                <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                    <i class="fas fa-history text-xl"></i>
                 </div>
-                <div class="stat-info">
-                    <p class="stat-label">Historial</p>
-                    <h3 class="stat-value">{{ counts.total }}</h3>
-                    <p class="stat-subtitle">Auditoría Total</p>
+                <div class="flex-1">
+                    <p class="text-[10px] font-black text-label/40 uppercase tracking-widest mb-0.5">Historial</p>
+                    <h3 class="text-2xl font-black text-primary tabular-nums leading-none">{{ counts.total }}</h3>
+                    <p class="text-[9px] font-bold text-label/20 uppercase tracking-tighter mt-1">Auditoría Total</p>
                 </div>
             </div>
         </div>
