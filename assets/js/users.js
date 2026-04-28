@@ -179,7 +179,7 @@ function renderUsersTable() {
         const title = isSearch ? 'Sin resultados' : 'Sin Usuarios';
         const text = isSearch ? 'No pudimos encontrar usuarios vinculados.' : 'No hay usuarios registrados.';
 
-        tbody.innerHTML = `<tr><td colspan="7">${createPremiumEmptyState(title, text, icon)}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8">${createPremiumEmptyState(title, text, icon)}</td></tr>`;
         renderPagination();
         return;
     }
@@ -203,50 +203,66 @@ function renderUsersTable() {
                 </div>
             </td>
             <td>
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary font-black text-[10px]">
-                        ${(user.name || 'U').charAt(0).toUpperCase()}
-                    </div>
-                    <span class="text-[13px] font-black text-label uppercase italic tracking-tighter truncate">${user.name}</span>
-                </div>
+                <span class="text-[13px] font-black text-label uppercase italic tracking-tighter truncate">${user.name}</span>
             </td>
             <td>
                 <span class="text-[11px] font-bold text-label/60 uppercase tracking-widest truncate">${user.email}</span>
             </td>
             <td class="text-center">
-                <span class="nx-badge ${statusCls}">${user.status.toUpperCase()}</span>
+                <div class="flex justify-center">
+                    <span class="nx-badge ${roleCls} flex items-center gap-2 px-3 py-1 rounded-full whitespace-nowrap text-[9px] font-black tracking-widest border border-current/10 shadow-sm">
+                        <i class="fas ${roleIcon} text-[8px] opacity-70"></i> 
+                        ${user.role.toUpperCase()}
+                    </span>
+                </div>
             </td>
             <td class="text-center">
-                ${user.platforms_count > 0 ? `<span class="nx-badge nx-badge-cyan">${user.platforms_count} ACC</span>` : '<span class="opacity-10">—</span>'}
+                <span class="nx-badge ${user.source === 'local' ? 'nx-badge-success' : (user.source === 'ldap' ? 'nx-badge-primary' : 'nx-badge-violet')}">
+                    ${(user.source || 'LOCAL').toUpperCase()}
+                </span>
+            </td>
+            <td class="text-center">
+                ${user.platforms_count > 0 ? `<span class="nx-badge nx-badge-cyan inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black tracking-widest border border-cyan-500/10 shadow-sm">${user.platforms_count} <i class="fas fa-eye text-[9px] opacity-70"></i></span>` : '<span class="opacity-10 text-[10px] font-black uppercase tracking-widest">—</span>'}
             </td>
             <td>
                 <div class="flex items-center -space-x-2 overflow-hidden">
                     ${(user.areas || []).slice(0, 5).map(a => `
-                        <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white border-2 border-panel-fill shadow-md hover:-translate-y-1 transition-transform flex-shrink-0" style="background: ${getAreaColor(a.name || a)}" title="${a.name || a}">
-                             <i class="fas fa-box text-[10px]"></i>
+                        <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white border-2 border-panel-fill shadow-md hover:-translate-y-1 transition-transform flex-shrink-0" 
+                             style="background: ${a.color || getAreaColor(a.name || a)}" 
+                             title="${a.name || a}">
+                             <i class="fas fa-${a.icon || 'box'} text-[10px]"></i>
                         </div>
                     `).join('')}
-                    ${user.areas && user.areas.length > 5 ? `<div class="w-8 h-8 rounded-lg bg-surface-container border-2 border-panel-fill flex items-center justify-center text-[10px] font-black text-label/40">+${user.areas.length - 5}</div>` : ''}
+                    ${user.areas && user.areas.length > 5 ? `<div class="w-8 h-8 rounded-lg bg-surface-container border-2 border-panel-fill flex items-center justify-center text-[10px] font-black text-label/40">+${user.areas.length - 5}</div>` : (user.areas && user.areas.length === 0 ? '<span class="opacity-10 text-[10px] uppercase font-black tracking-widest">—</span>' : '')}
                 </div>
             </td>
-            <td>
-                <span class="nx-badge ${roleCls} flex items-center gap-2">
-                    <i class="fas ${roleIcon} text-[9px]"></i> ${user.role.toUpperCase()}
-                </span>
+            <td class="text-center">
+                <span class="nx-badge ${statusCls}">${user.status.toUpperCase()}</span>
             </td>
         `;
         
         tr.addEventListener('click', (e) => {
-            if (e.target.type === 'checkbox' || e.target.closest('button')) return;
+            // Ignore if clicking directly on checkbox
+            if (e.target.type === 'checkbox') return;
+            
+            // Clear other selections for single-edit clarity
+            document.querySelectorAll('.user-checkbox').forEach(c => c.checked = false);
+            
             const cb = tr.querySelector('.user-checkbox');
-            cb.checked = !cb.checked;
-            updateActionButtons();
+            if (cb) {
+                cb.checked = true;
+                updateActionButtons();
+                
+                // Trigger the edit modal
+                const editBtn = document.querySelector('[data-action="users-edit-selected"]');
+                if (editBtn) editBtn.click();
+            }
         });
 
         tbody.appendChild(tr);
     });
 
-    renderGhostRows(7); // 7 columns
+    renderGhostRows(8); // 8 columns
     renderPagination();
     updateActionButtons();
 }
@@ -309,14 +325,18 @@ function renderPagination() {
 function updateActionButtons() {
     const rows = document.querySelectorAll('#usersTableBody tr:not(.ghost-row)');
     let checkedCount = 0;
+    let totalCheckboxes = 0;
 
     rows.forEach(tr => {
         const cb = tr.querySelector('.user-checkbox');
-        if (cb && cb.checked) {
-            tr.classList.add('nx-row-selected');
-            checkedCount++;
-        } else {
-            tr.classList.remove('nx-row-selected');
+        if (cb) {
+            totalCheckboxes++;
+            if (cb.checked) {
+                tr.classList.add('nx-row-selected');
+                checkedCount++;
+            } else {
+                tr.classList.remove('nx-row-selected');
+            }
         }
     });
 
@@ -329,10 +349,10 @@ function updateActionButtons() {
     if (btnDelete) btnDelete.disabled = (checkedCount === 0);
     
     // Header Select All sync
-    const totalVisible = document.querySelectorAll('.user-checkbox').length;
     const selectAll = document.getElementById('selectAllUsers');
     if (selectAll) {
-        selectAll.checked = (checkedCount > 0 && checkedCount === totalVisible);
+        selectAll.checked = (totalCheckboxes > 0 && checkedCount === totalCheckboxes);
+        selectAll.indeterminate = (checkedCount > 0 && checkedCount < totalCheckboxes);
     }
 }
 
@@ -351,6 +371,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Checkbox Change Delegation
+    document.getElementById('usersTableBody')?.addEventListener('change', (e) => {
+        if (e.target.classList.contains('user-checkbox')) {
+            updateActionButtons();
+        }
+    });
+
+    // Static Control Listeners
     document.addEventListener('click', (event) => {
         const trigger = event.target.closest('[data-action]');
         if (!trigger) return;
@@ -379,15 +407,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (action === 'users-open-local-flow') {
             closeModal('userTypeModal');
             
-            // Reset form and ensure status is active
-            const form = document.querySelector('#addUserModal form');
-            if (form) {
-                form.reset();
-                const statusToggle = form.querySelector('#addUserStatusToggle');
-                if (statusToggle) statusToggle.checked = true;
-                // Trigger change event to update the "Activo" text
-                statusToggle.dispatchEvent(new Event('change', { bubbles: true }));
-            }
+            // Reset form and ensure status is active with a micro-delay
+            setTimeout(() => {
+                const form = document.querySelector('#addUserModal form');
+                if (form) {
+                    form.reset();
+                    const statusToggle = form.querySelector('#addUserStatusToggle');
+                    if (statusToggle) {
+                        $(statusToggle).prop('checked', true).trigger('change');
+                    }
+                }
+            }, 50);
+            
+            const sourceInput = document.getElementById('addUserAuthSource');
+            if (sourceInput) sourceInput.value = 'local';
             
             // Show password row for local users
             const passRow = document.getElementById('addUserPassword')?.closest('.grid');
@@ -425,7 +458,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (action === 'users-select-all') {
             const checkboxes = document.querySelectorAll('.user-checkbox');
-            checkboxes.forEach(cb => cb.checked = trigger.checked);
+            checkboxes.forEach(cb => cb.checked = event.target.checked);
             updateActionButtons();
         }
     });
@@ -535,18 +568,32 @@ async function editSelectedUser() {
 
     document.getElementById('editUserNameHidden').value = user.id;
     document.getElementById('editUserNameDisplay').innerText = user.name + ' (' + user.email + ')';
-    document.getElementById('editUserRole').value = user.role;
-    
-    // Status
-    const stEl = document.getElementById('editUserStatusToggle');
-    if (stEl) {
-        stEl.checked = (user.status === 'Activo');
-        document.getElementById('editUserStatusText').textContent = stEl.checked ? 'Activo' : 'Inactivo';
-    }
+    // Use setTimeout to ensure the modal is ready and no other resets are pending
+    setTimeout(() => {
+        const stEl = document.getElementById('editUserStatusToggle');
+        if (stEl) {
+            const isActive = (user.status || '').toLowerCase() === 'activo';
+            $(stEl).prop('checked', isActive).trigger('change');
+            
+            const statusText = document.getElementById('editUserStatusText');
+            if (statusText) statusText.textContent = isActive ? 'Activo' : 'Inactivo';
+        }
 
-    // Refresh Select Engine (if any)
-    const select = document.getElementById('editUserRole');
-    select.dispatchEvent(new Event('sync'));
+        // Map other fields inside timeout for safety
+        document.getElementById('editUserRole').value = user.role;
+        
+        // Password visibility for local users
+        const passSection = document.getElementById('editUserPasswordSection');
+        if (passSection) {
+            if (user.source === 'local') {
+                passSection.classList.remove('hidden');
+                document.getElementById('editUserPassword').value = '';
+                document.getElementById('editUserPasswordConfirm').value = '';
+            } else {
+                passSection.classList.add('hidden');
+            }
+        }
+    }, 50);
 
     await refreshPicklistAreas('editUser', user.areas || []);
     openModal('editUserModal');
@@ -560,6 +607,19 @@ async function saveUserChanges() {
     const areas = document.getElementById('editSelectedUserAreasInput').value;
     fd.set('areas', areas);
     fd.set('status', document.getElementById('editUserStatusToggle').checked ? 'Activo' : 'Inactivo');
+
+    // Password Validation
+    const pass = document.getElementById('editUserPassword').value;
+    const confirm = document.getElementById('editUserPasswordConfirm').value;
+    
+    if (pass) {
+        if (pass !== confirm) {
+            return showToast('Las contraseñas no coinciden', 'error');
+        }
+        if (pass.length < 6) {
+            return showToast('La contraseña es demasiado corta (mín. 6 car.)', 'error');
+        }
+    }
 
     try {
         const res = await fetch(`/admin/edit-user/${userId}`, { 
@@ -793,6 +853,9 @@ async function searchLDAP() {
 
 window.importLDAPUser = function(username, name, email) {
     closeModal('ldapUserModal');
+    
+    const sourceInput = document.getElementById('addUserAuthSource');
+    if (sourceInput) sourceInput.value = 'ldap';
     
     // Hide password row for LDAP users
     const passRow = document.getElementById('addUserPassword')?.closest('.grid');

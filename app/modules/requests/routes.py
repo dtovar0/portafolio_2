@@ -33,6 +33,7 @@ def requests_list():
             'user_name': user.nombre if user else r.user_email,
             'user_email': r.user_email,
             'platform_name': r.platform.name if r.platform else 'N/A',
+            'area_name': r.platform.area.name if r.platform and r.platform.area else 'N/A',
             'status': r.status,
             'created_at': r.created_at.strftime('%Y-%m-%d %H:%M'),
             'processed_at': r.processed_at.strftime('%Y-%m-%d %H:%M') if r.processed_at else '-'

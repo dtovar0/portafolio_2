@@ -46,8 +46,7 @@ def migrate_db():
                 ("pref_notifications", "TINYINT(1) DEFAULT 1"),
                 ("pref_refresh_interval", "INT DEFAULT 60"),
                 ("pref_tour_enabled", "TINYINT(1) DEFAULT 1"),
-                ("pref_email_notifications", "TINYINT(1) DEFAULT 1"),
-                ("pref_status_colors", "TEXT DEFAULT NULL")
+                ("pref_email_notifications", "TINYINT(1) DEFAULT 1")
             ]
 
             for col_name, col_type in pref_columns:

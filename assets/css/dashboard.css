@@ -1,3 +1,17 @@
+:root {
+    --primary-color: rgb(var(--color-primary));
+    --border-color: rgb(var(--color-panel-border));
+    --bg-card: rgb(var(--color-panel-fill));
+    --text-primary: var(--color-body-text);
+    --text-muted: rgb(var(--color-secondary));
+    --bg-input: rgb(var(--color-input-bg));
+    --status-approved: rgb(var(--color-success));
+    --status-pending: rgb(var(--color-accent-peach));
+    --status-info: rgb(var(--color-accent-sky));
+    --dash-accent-soft: rgba(var(--color-primary), 0.1);
+    --accent-indigo-bg: rgba(var(--color-brand), 0.1);
+}
+
 /* Dashboard Page Styles */
 .welcome-banner {
     background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 24px;

@@ -57,16 +57,42 @@ function initAuditDataTable() {
                 render: (data) => {
                     const action = String(data).toLowerCase();
                     let cls = 'nx-badge-primary';
+                    let icon = 'fa-info-circle';
                     let label = String(data).toUpperCase();
 
-                    if (action.includes('login')) cls = 'nx-badge-cyan';
-                    else if (action.includes('logout')) cls = 'nx-badge-slate';
-                    else if (action.includes('creada')) cls = 'nx-badge-success';
-                    else if (action.includes('terminada') || action.includes('completada')) cls = 'nx-badge-violet';
-                    else if (action.includes('iniciada')) cls = 'nx-badge-primary';
-                    else if (action.includes('identity')) cls = 'nx-badge-warning';
+                    if (action.includes('login') || action.includes('auth')) {
+                        cls = 'nx-badge-cyan';
+                        icon = 'fa-key';
+                    } else if (action.includes('logout')) {
+                        cls = 'nx-badge-slate';
+                        icon = 'fa-sign-out-alt';
+                    } else if (action.includes('creada') || action.includes('nueva') || action.includes('registro')) {
+                        cls = 'nx-badge-success';
+                        icon = 'fa-plus-circle';
+                    } else if (action.includes('eliminada') || action.includes('borrada') || action.includes('baja')) {
+                        cls = 'nx-badge-error';
+                        icon = 'fa-trash-alt';
+                    } else if (action.includes('actualizada') || action.includes('modificada') || action.includes('cambio') || action.includes('edición')) {
+                        cls = 'nx-badge-primary';
+                        icon = 'fa-edit';
+                    } else if (action.includes('terminada') || action.includes('completada')) {
+                        cls = 'nx-badge-violet';
+                        icon = 'fa-check-double';
+                    } else if (action.includes('iniciada')) {
+                        cls = 'nx-badge-primary';
+                        icon = 'fa-play-circle';
+                    } else if (action.includes('identity') || action.includes('acceso') || action.includes('petición')) {
+                        cls = 'nx-badge-warning';
+                        icon = 'fa-shield-alt';
+                    }
 
-                    return `<div class="flex items-center h-full"><span class="nx-badge ${cls}">${label}</span></div>`;
+                    return `
+                        <div class="flex items-center h-full">
+                            <span class="nx-badge ${cls} flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-black tracking-widest border border-current/10 shadow-sm">
+                                <i class="fas ${icon} text-[8px] opacity-70"></i>
+                                ${label}
+                            </span>
+                        </div>`;
                 }
             },
             { 

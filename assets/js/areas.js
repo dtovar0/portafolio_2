@@ -42,13 +42,15 @@ const iconsMap = {
     'heart': '<i class="fas fa-heart"></i>',
     'briefcase': '<i class="fas fa-briefcase"></i>',
     'award': '<i class="fas fa-award"></i>',
-    'book': '<i class="fas fa-book"></i>'
+    'book': '<i class="fas fa-book"></i>',
+    'rocket': '<i class="fas fa-rocket"></i>'
 };
 
 const colorsPalette = [
     '#6366f1', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6',
     '#ec4899', '#14b8a6', '#f97316', '#475569', '#065f46', '#7c2d12',
-    '#1e3a8a', '#581c87', '#991b1b', '#166534', '#115e59'
+    '#1e3a8a', '#581c87', '#991b1b', '#166534', '#115e59', '#4c1d95',
+    '#134e4a', '#0f172a'
 ];
 
 function getPageLength() {
@@ -371,9 +373,26 @@ function changeStep(step) {
     const btnPrev = document.getElementById('btnPrevStep');
     const btnNext = document.getElementById('btnNextStep');
     const btnSave = document.getElementById('btnSaveArea');
-    if (step === 1) { btnPrev.classList.add('opacity-0', 'pointer-events-none'); btnNext.classList.remove('hidden'); btnSave.classList.add('hidden'); }
-    else if (step === 3) { btnPrev.classList.remove('opacity-0', 'pointer-events-none'); btnNext.classList.add('hidden'); btnSave.classList.remove('hidden'); }
-    else { btnPrev.classList.remove('opacity-0', 'pointer-events-none'); btnNext.classList.remove('hidden'); btnSave.classList.add('hidden'); }
+    const btnCancel = document.getElementById('btnCancelArea');
+
+    if (step === 1) { 
+        btnCancel.classList.remove('hidden');
+        btnPrev.classList.add('hidden'); 
+        btnNext.classList.remove('hidden'); 
+        btnSave.classList.add('hidden'); 
+    }
+    else if (step === 3) { 
+        btnCancel.classList.add('hidden');
+        btnPrev.classList.remove('hidden'); 
+        btnNext.classList.add('hidden'); 
+        btnSave.classList.remove('hidden'); 
+    }
+    else { 
+        btnCancel.classList.add('hidden');
+        btnPrev.classList.remove('hidden'); 
+        btnNext.classList.remove('hidden'); 
+        btnSave.classList.add('hidden'); 
+    }
 }
 
 /**
@@ -415,9 +434,26 @@ function changeEditStep(step) {
     const btnPrev = document.getElementById('btnEditPrevStep');
     const btnNext = document.getElementById('btnEditNextStep');
     const btnSave = document.getElementById('btnSaveEditedArea');
-    if (step === 1) { btnPrev.classList.add('opacity-0', 'pointer-events-none'); btnNext.classList.remove('hidden'); btnSave.classList.add('hidden'); }
-    else if (step === 3) { btnPrev.classList.remove('opacity-0', 'pointer-events-none'); btnNext.classList.add('hidden'); btnSave.classList.remove('hidden'); }
-    else { btnPrev.classList.remove('opacity-0', 'pointer-events-none'); btnNext.classList.remove('hidden'); btnSave.classList.add('hidden'); }
+    const btnCancel = document.getElementById('btnCancelEditArea');
+
+    if (step === 1) { 
+        btnCancel.classList.remove('hidden');
+        btnPrev.classList.add('hidden'); 
+        btnNext.classList.remove('hidden'); 
+        btnSave.classList.add('hidden'); 
+    }
+    else if (step === 3) { 
+        btnCancel.classList.add('hidden');
+        btnPrev.classList.remove('hidden'); 
+        btnNext.classList.add('hidden'); 
+        btnSave.classList.remove('hidden'); 
+    }
+    else { 
+        btnCancel.classList.add('hidden');
+        btnPrev.classList.remove('hidden'); 
+        btnNext.classList.remove('hidden'); 
+        btnSave.classList.add('hidden'); 
+    }
 }
 
 /**
@@ -439,14 +475,19 @@ function renderPickers() {
         iconGrid.innerHTML = ''; colorGrid.innerHTML = '';
         Object.entries(iconsMap).forEach(([key, svg]) => {
             const b = document.createElement('button'); b.type='button';
-            b.className = `w-12 h-12 flex items-center justify-center rounded-xl border-2 transition-all ${currentIcon === key ? 'border-primary bg-primary/10 text-primary shadow-lg shadow-primary/10' : 'border-panel-border bg-surface-container/20 text-label/40 hover:border-primary/40'}`;
+            b.className = `w-full aspect-square flex items-center justify-center border-r border-b border-panel-border/30 transition-all ${currentIcon === key ? 'bg-primary text-white z-10' : 'bg-transparent text-label/40 hover:bg-primary/5 hover:text-primary'}`;
             b.innerHTML = svg; b.onclick = () => { document.getElementById('areaIcon').value = key; renderPickers(); };
             iconGrid.appendChild(b);
         });
         colorsPalette.forEach(color => {
             const b = document.createElement('button'); b.type='button';
-            b.className = `w-10 h-10 rounded-full border-4 transition-all ${currentColor === color ? 'border-white ring-4 ring-primary/40 shadow-xl scale-110' : 'border-transparent opacity-60 hover:opacity-100 hover:scale-105'}`;
-            b.style.background = color; b.onclick = () => { document.getElementById('areaColor').value = color; renderPickers(); };
+            b.className = `w-full aspect-square border-r border-b border-panel-border/30 transition-all flex items-center justify-center ${currentColor === color ? 'z-10' : 'opacity-80 hover:opacity-100 hover:scale-[0.95]'}`;
+            b.style.background = color;
+            if (currentColor === color) {
+                b.innerHTML = '<i class="fas fa-check text-white text-xs drop-shadow-md"></i>';
+                b.style.boxShadow = 'inset 0 0 0 3px rgba(255,255,255,0.4)';
+            }
+            b.onclick = () => { document.getElementById('areaColor').value = color; renderPickers(); };
             colorGrid.appendChild(b);
         });
     }
@@ -456,14 +497,19 @@ function renderPickers() {
         editIconGrid.innerHTML = ''; editColorGrid.innerHTML = '';
         Object.entries(iconsMap).forEach(([key, svg]) => {
             const b = document.createElement('button'); b.type='button';
-            b.className = `w-12 h-12 flex items-center justify-center rounded-xl border-2 transition-all ${currentEditIcon === key ? 'border-primary bg-primary/10 text-primary shadow-lg shadow-primary/10' : 'border-panel-border bg-surface-container/20 text-label/40 hover:border-primary/40'}`;
+            b.className = `w-full aspect-square flex items-center justify-center border-r border-b border-panel-border/30 transition-all ${currentEditIcon === key ? 'bg-primary text-white z-10' : 'bg-transparent text-label/40 hover:bg-primary/5 hover:text-primary'}`;
             b.innerHTML = svg; b.onclick = () => { document.getElementById('editAreaIcon').value = key; renderPickers(); };
             editIconGrid.appendChild(b);
         });
         colorsPalette.forEach(color => {
             const b = document.createElement('button'); b.type='button';
-            b.className = `w-10 h-10 rounded-full border-4 transition-all ${currentEditColor === color ? 'border-white ring-4 ring-primary/40 shadow-xl scale-110' : 'border-transparent opacity-60 hover:opacity-100 hover:scale-105'}`;
-            b.style.background = color; b.onclick = () => { document.getElementById('editAreaColor').value = color; renderPickers(); };
+            b.className = `w-full aspect-square border-r border-b border-panel-border/30 transition-all flex items-center justify-center ${currentEditColor === color ? 'z-10' : 'opacity-80 hover:opacity-100 hover:scale-[0.95]'}`;
+            b.style.background = color;
+            if (currentEditColor === color) {
+                b.innerHTML = '<i class="fas fa-check text-white text-xs drop-shadow-md"></i>';
+                b.style.boxShadow = 'inset 0 0 0 3px rgba(255,255,255,0.4)';
+            }
+            b.onclick = () => { document.getElementById('editAreaColor').value = color; renderPickers(); };
             editColorGrid.appendChild(b);
         });
     }

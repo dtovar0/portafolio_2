@@ -24,17 +24,62 @@ def users_list():
     # Adapt to model names: name -> nombre, status -> is_active
     users_data = []
     for u in users:
-        # Get count of approved access requests for this user email
-        platforms_count = AccessRequest.query.filter_by(user_email=u.email, status='Aprobado').count()
+        # Get platforms via approved requests
+        approved_requests = AccessRequest.query.filter_by(user_email=u.email, status='Aprobado').all()
+        user_platforms = []
+        for req in approved_requests:
+            p = Platform.query.get(req.platform_id)
+            if p:
+                user_platforms.append({
+                    'id': p.id,
+                    'name': p.name,
+                    'icon': 'layer-group', # Default icon for platforms
+                    'color': p.bg_color or '#334155',
+                    'area_name': p.area.name if p.area else 'General'
+                })
         
+        # Create a unique set of areas (assigned manually + derived from platform access)
+        areas_map = {a.id: {'id': a.id, 'name': a.name, 'icon': a.icon, 'color': a.color} for a in u.areas}
+        
+        for p_info in user_platforms:
+            # We need the area object to get the full info if not already in map
+            if p_info.get('area_id') and p_info['area_id'] not in areas_map:
+                # This requires getting the area info from the platform's area relationship
+                # Since we already have the area_name in p_info, we can use that if we don't want more queries,
+                # but for consistency with icons/colors, we should ensure the data is there.
+                pass # The logic below handles enriching p_info
+        
+        # Merge area info from platforms into the final areas list
+        # For simplicity and performance, we'll collect all area IDs from platforms first
+        for p_info in user_platforms:
+            # Add unique areas from platforms
+            area_found = False
+            for aid in areas_map:
+                if areas_map[aid]['name'] == p_info['area_name']:
+                    area_found = True
+                    break
+            if not area_found:
+                # If the area from a platform isn't in the manual list, add it
+                # We'll use a temporary ID or find the real one
+                target_area = Area.query.filter_by(name=p_info['area_name']).first()
+                if target_area:
+                    areas_map[target_area.id] = {
+                        'id': target_area.id,
+                        'name': target_area.name,
+                        'icon': target_area.icon,
+                        'color': target_area.color
+                    }
+
         users_data.append({
             'id': u.id,
             'name': u.nombre or u.email,
             'email': u.email,
             'role': u.role,
             'status': 'Activo' if u.is_active else 'Inactivo',
-            'platforms_count': platforms_count,
-            'areas': [{'id': a.id, 'name': a.name, 'icon': a.icon, 'color': a.color} for a in u.areas] if hasattr(u, 'areas') else []
+            'platforms': user_platforms,
+            'platforms_count': len(user_platforms),
+            'areas': list(areas_map.values()),
+            'source': u.auth_source or 'local'
         })
         
     areas_data = [a.to_dict() for a in areas]
@@ -62,6 +107,7 @@ def add_user():
         password = request.form.get('password', 'nexus123') # Default if not provided
         status_str = request.form.get('status', 'Activo')
         areas_json = request.form.get('areas', '[]')
+        auth_source = request.form.get('auth_source', 'local')
         
         if User.query.filter_by(email=email).first():
             return jsonify({"success": False, "error": "El correo ya está registrado."}), 409
@@ -71,7 +117,7 @@ def add_user():
             email=email,
             role=role,
             is_active=(status_str == 'Activo'),
-            auth_source='local'
+            auth_source=auth_source
         )
         new_user.set_password(password)
         
@@ -106,6 +152,12 @@ def edit_user(user_id):
         if role: user.role = role
         if status_str: user.is_active = (status_str == 'Activo')
         
+        # Update Password if provided
+        new_password = request.form.get('password')
+        if new_password and user.auth_source == 'local':
+            user.set_password(new_password)
+            add_audit_log(f"CAMBIO PASSWORD: {user.email}", status="warning", detail=f"Contraseña de usuario local actualizada por administrador")
+
         # Update Areas
         area_names = json.loads(areas_json)
         selected_areas = Area.query.filter(Area.name.in_(area_names)).all()
@@ -152,7 +204,9 @@ def user_access(user_id):
         if not user:
             return jsonify({"success": False, "error": "Usuario no encontrado"}), 404
             
-        platforms = Platform.query.all()
+        # NEW: Only show platforms belonging to the areas assigned to the user
+        user_area_ids = [a.id for a in user.areas]
+        platforms = Platform.query.filter(Platform.area_id.in_(user_area_ids)).all() if user_area_ids else []
         # In current models, AccessRequest is linked via user_email
         user_requests = AccessRequest.query.filter_by(user_email=user.email, status='Aprobado').all()
         approved_platform_ids = [r.platform_id for r in user_requests]
@@ -184,17 +238,25 @@ def update_user_access(user_id):
         data = request.get_json()
         new_platform_ids = data.get('platform_ids', [])
         
+        # Security validation: Ensure all requested platforms belong to the user's areas
+        user_area_ids = [a.id for a in user.areas]
+        valid_platforms = Platform.query.filter(Platform.area_id.in_(user_area_ids)).all()
+        valid_ids = [p.id for p in valid_platforms]
+        
+        # Filter out any ID that shouldn't be there
+        final_platform_ids = [pid for pid in new_platform_ids if pid in valid_ids]
+        
         # Get current approved platforms for this user
         current_reqs = AccessRequest.query.filter_by(user_email=user.email, status='Aprobado').all()
         current_ids = [r.platform_id for r in current_reqs]
         
         # Remove ones not in new list
         for r in current_reqs:
-            if r.platform_id not in new_platform_ids:
+            if r.platform_id not in final_platform_ids:
                 db.session.delete(r)
         
         # Add new ones
-        for pid in new_platform_ids:
+        for pid in final_platform_ids:
             if pid not in current_ids:
                 new_req = AccessRequest(
                     platform_id=pid,

@@ -123,6 +123,25 @@
     #sidebar { display: none !important; }
     .main-content-wrapper { padding-left: 0 !important; }
     
+    /* Ultra-Minimalist Portal: Hide everything in Top except Theme Toggle */
+    #sidebarToggle, 
+    #locationBar, 
+    header .hidden.sm\:flex, 
+    #notificationBtn, 
+    #settingsBtn { 
+        display: none !important; 
+    }
+
+    /* Adjust header layout for single button */
+    header {
+        justify-content: flex-end !important;
+    }
+
+    /* Hide Portal Page Header (Title, Search, Filters) */
+    .max-w-7xl.mx-auto.w-full.mb-12 {
+        display: none !important;
+    }
+
     .glass-panel {
         background: rgba(var(--bg-card-rgb), 0.7);
         backdrop-filter: blur(20px);

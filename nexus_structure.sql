@@ -163,7 +163,6 @@ CREATE TABLE `users` (
   `pref_refresh_interval` int DEFAULT '60',
   `pref_tour_enabled` tinyint(1) DEFAULT '1',
   `pref_email_notifications` tinyint(1) DEFAULT '1',
-  `pref_status_colors` text,
 
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),

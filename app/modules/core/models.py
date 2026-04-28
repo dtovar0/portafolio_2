@@ -29,6 +29,9 @@ class Platform(db.Model):
     area_id = db.Column(db.Integer, db.ForeignKey('areas.id'), nullable=False)
     direct_link = db.Column(db.String(255))
     icon = db.Column(db.String(50), default='box')
+    logo_url = db.Column(db.String(255), nullable=True)
+    bg_color = db.Column(db.String(20), default='#6366f1')
+    text_color = db.Column(db.String(20), default='#ffffff')
     status = db.Column(db.String(20), default='Activo')
     visits = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=db.func.now())
@@ -44,7 +47,11 @@ class Platform(db.Model):
             'area_id': self.area_id,
             'icon': self.icon,
             'direct_link': self.direct_link,
-            'status': self.status
+            'logo_url': self.logo_url,
+            'bg_color': self.bg_color,
+            'text_color': self.text_color,
+            'status': self.status,
+            'user_ids': [u.id for u in self.users]
         }
 
 class AccessRequest(db.Model):

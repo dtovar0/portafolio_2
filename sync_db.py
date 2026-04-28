@@ -17,21 +17,38 @@ def sync_schema():
             db.session.rollback()
             print("ℹ️ Columna 'visits' ya existe o no pudo ser creada en 'platforms'")
 
-        # 2. Tabla Audit Logs (Nuevos campos premium)
-        cols_audit = [
-            ("module", "VARCHAR(50)"),
-            ("target", "VARCHAR(100)"),
-            ("description", "TEXT")
+        # Platform Branding and Identity
+        cols_plat = [
+            ("logo_url", "VARCHAR(255)"),
+            ("bg_color", "VARCHAR(20) DEFAULT '#6366f1'"),
+            ("text_color", "VARCHAR(20) DEFAULT '#ffffff'")
         ]
         
-        for col, col_type in cols_audit:
+        for col, col_type in cols_plat:
             try:
-                db.session.execute(text(f"ALTER TABLE audit_logs ADD COLUMN {col} {col_type}"))
+                db.session.execute(text(f"ALTER TABLE platforms ADD COLUMN {col} {col_type}"))
                 db.session.commit()
-                print(f"✅ Columna '{col}' añadida a 'audit_logs'")
+                print(f"✅ Columna '{col}' añadida a 'platforms'")
             except Exception:
                 db.session.rollback()
-                print(f"ℹ️ Columna '{col}' ya existe en 'audit_logs'")
+                print(f"ℹ️ Columna '{col}' ya existe en 'platforms'")
+
+        # Relationship Table: user_platforms (ensure it exists)
+        try:
+            db.session.execute(text("""
+                CREATE TABLE IF NOT EXISTS user_platforms (
+                    user_id INTEGER NOT NULL,
+                    platform_id INTEGER NOT NULL,
+                    PRIMARY KEY (user_id, platform_id),
+                    FOREIGN KEY(user_id) REFERENCES users(id),
+                    FOREIGN KEY(platform_id) REFERENCES platforms(id)
+                )
+            """))
+            db.session.commit()
+            print("✅ Tabla 'user_platforms' verificada")
+        except Exception as e:
+            db.session.rollback()
+            print(f"❌ Error al verificar tabla 'user_platforms': {e}")
 
         # 3. Marcar tabla de Solicitudes (Asegurar user_email)
         try:
