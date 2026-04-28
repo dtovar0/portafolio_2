@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block breadcrumbs %}
+<span class="text-secondary">Nexus Portal</span>
+<svg class="w-4 h-4 text-label/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+<span class="text-primary">Ecosistema Digital</span>
+{% endblock %}
+
+{% block wrapper_class %}no-sidebar{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-surface flex flex-col p-8 animate-fade-in">
+    <!-- Immersive Header -->
+    <div class="max-w-7xl mx-auto w-full mb-12 flex flex-col md:flex-row items-end justify-between gap-6">
+        <div class="flex flex-col">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white shadow-2xl shadow-primary/40">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                </div>
+                <h2 class="text-2xl font-black text-body-text tracking-tighter uppercase italic">Nexus Service Catalog</h2>
+            </div>
+            <h1 class="text-5xl font-black text-body-text tracking-tighter uppercase leading-[0.9]">Tus <span class="text-primary">Herramientas</span><br>Digitales</h1>
+            <p class="text-xs font-bold text-label/40 uppercase tracking-[0.5em] mt-6">Explora, solicita y accede a las plataformas de la organización</p>
+        </div>
+
+        <div class="flex flex-col items-end gap-4">
+            <div class="relative w-80 group">
+                <input type="text" id="portalSearch" placeholder="BUSCAR APLICACIÓN..." 
+                       class="w-full bg-surface-container border border-panel-border rounded-2xl px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] outline-none focus:border-primary/50 transition-all shadow-xl group-hover:shadow-primary/5">
+                <svg class="w-4 h-4 absolute right-5 top-1/2 -translate-y-1/2 text-label/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+            <div class="flex gap-2">
+                <button class="px-4 py-2 bg-primary/10 text-primary border border-primary/20 rounded-xl text-[9px] font-black uppercase tracking-widest active:scale-95 transition-all">Todos</button>
+                {% for area in areas %}
+                <button class="px-4 py-2 bg-surface-container text-label/40 border border-panel-border hover:border-primary/30 hover:text-primary rounded-xl text-[9px] font-black uppercase tracking-widest transition-all">{{ area.name }}</button>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Marketplace Grid -->
+    <div class="max-w-7xl mx-auto w-full flex-grow">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 pb-20">
+            {% for p in platforms %}
+            <div class="glass-panel group border border-panel-border hover:border-primary/40 transition-all duration-700 shadow-2xl hover:shadow-primary/10 overflow-hidden flex flex-col h-[340px]">
+                <!-- Card Header with Gradient/Color -->
+                <div class="h-24 w-full relative overflow-hidden flex-shrink-0" style="background: linear-gradient(135deg, {{ p.area.color or '#6366f1' }}22 0%, {{ p.area.color or '#6366f1' }}05 100%);">
+                    <div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,1),transparent)]"></div>
+                    <div class="absolute bottom-4 left-6 flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-label group-hover:text-primary group-hover:scale-110 transition-all duration-500">
+                            <i class="fas fa-{{ p.icon or 'box' }} text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="absolute top-4 right-6">
+                        <span class="text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full bg-white/5 border border-white/10 text-label/60">
+                            {{ p.area.name if p.area else 'SISTEMA' }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Card Body -->
+                <div class="p-6 flex flex-col flex-grow">
+                    <h3 class="text-xl font-black text-body-text tracking-tighter uppercase mb-2 group-hover:text-primary transition-colors">{{ p.name }}</h3>
+                    <p class="text-[11px] text-label/40 font-medium leading-relaxed line-clamp-3 mb-6">
+                        {{ p.description or 'Herramienta fundamental para los flujos de trabajo optimizados de la organización.' }}
+                    </p>
+
+                    <div class="mt-auto">
+                        {% if p.direct_link %}
+                        <a href="{{ p.direct_link }}" target="_blank" class="w-full bg-primary hover:bg-primary-hover text-white rounded-xl py-3.5 text-[10px] font-black uppercase tracking-[0.3em] shadow-xl shadow-primary/20 transition-all active:scale-[0.98] flex items-center justify-center gap-3">
+                            Entrar a Plataforma
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </a>
+                        {% else %}
+                        <button onclick="requestAccess({{ p.id }}, '{{ p.name }}')" class="w-full bg-peach/10 hover:bg-peach text-peach hover:text-white border border-peach/30 rounded-xl py-3.5 text-[10px] font-black uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-3">
+                            Solicitar Acceso
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Footer Credit -->
+    <div class="max-w-7xl mx-auto w-full py-8 border-t border-panel-border/30 flex items-center justify-between opacity-40">
+        <span class="text-[10px] font-black uppercase tracking-widest">© 2026 Nexus Master Toolkit</span>
+        <div class="flex gap-6">
+            <span class="text-[10px] font-black uppercase tracking-widest">Estado: Operativo</span>
+            <span class="text-[10px] font-black uppercase tracking-widest">V 2.5.0</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function requestAccess(platformId, platformName) {
+        if (!confirm(`¿Deseas solicitar acceso a ${platformName}?`)) return;
+        
+        try {
+            const res = await fetch('/admin/requests/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ platform_id: platformId })
+            });
+            const data = await res.json();
+            
+            if (data.status === 'success') {
+                showToast(data.message, 'success');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showToast(data.message, 'error');
+            }
+        } catch (e) {
+            showToast('Error al enviar la solicitud', 'error');
+        }
+    }
+</script>
+
+<style>
+    /* Force hide sidebar when this page is active */
+    #sidebar { display: none !important; }
+    .main-content-wrapper { padding-left: 0 !important; }
+    
+    .glass-panel {
+        background: rgba(var(--bg-card-rgb), 0.7);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+    }
+</style>
+{% endblock %}

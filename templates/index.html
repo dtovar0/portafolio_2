@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}Catálogo de Plataformas | {{ portal_settings.portal_name or 'Portal TI' }}{% endblock %}
+
+{% block breadcrumbs %}
+<span class="breadcrumb-item">Inicio</span>
+<span>/</span>
+<span class="breadcrumb-item active">Dashboard</span>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<style>
+    :root {
+        --dash-accent: {{ portal_settings.portal_logo_bg or '#6366f1' }};
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="kpi-row-5 mb-15">
+    <!-- Areas -->
+    <div class="status-card-dash">
+        <div class="card-icon-dash" style="background: rgba(16, 185, 129, 0.1); color: var(--status-approved);">
+            <i class="fas fa-network-wired"></i>
+        </div>
+        <div class="kpi-text-col">
+            <div class="kpi-value-new">Áreas</div>
+            <div class="kpi-label-new">{{ areas_count_num or 0 }}</div>
+        </div>
+    </div>
+
+    <!-- Plataformas -->
+    <div class="status-card-dash">
+        <div class="card-icon-dash" style="background: var(--accent-indigo-bg); color: var(--primary-color);">
+            <i class="fas fa-layer-group"></i>
+        </div>
+        <div class="kpi-text-col">
+            <div class="kpi-value-new">Plataformas</div>
+            <div class="kpi-label-new">{{ total or 0 }}</div>
+        </div>
+    </div>
+
+    <!-- Usuarios -->
+    <div class="status-card-dash">
+        <div class="card-icon-dash" style="background: var(--accent-indigo-bg); color: #8b5cf6;">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="kpi-text-col">
+            <div class="kpi-value-new">Usuarios</div>
+            <div class="kpi-label-new">{{ total_users or 0 }}</div>
+        </div>
+    </div>
+
+    <!-- Solicitudes Pendientes -->
+    <div class="status-card-dash">
+        <div class="card-icon-dash" style="background: rgba(217, 119, 6, 0.1); color: var(--status-pending);">
+            <i class="fas fa-clock"></i>
+        </div>
+        <div class="kpi-text-col">
+            <div class="kpi-value-new">Pendientes</div>
+            <div class="kpi-label-new">{{ pending or 0 }}</div>
+        </div>
+    </div>
+
+    <!-- Visitas -->
+    <div class="status-card-dash">
+        <div class="card-icon-dash" style="background: rgba(59, 130, 246, 0.1); color: var(--status-info);">
+            <i class="fas fa-eye"></i>
+        </div>
+        <div class="kpi-text-col">
+            <div class="kpi-value-new">Visitas</div>
+            <div class="kpi-label-new">{{ visits_total or 0 }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Row 2: Main Content (2x1 Layout) -->
+<div class="dashboard-main-columns" style="gap: 1.25rem;">
+    <!-- Left Column: 2x2 Grid of 4 Items -->
+    <div class="grid-2x2" style="gap: 1.25rem;">
+        <!-- 1. Usuarios por Plataforma -->
+        <div class="stat-card modern" style="padding: 1.25rem; height: 100%;">
+            <div class="card-header border-none d-flex justify-between items-center mb-075">
+                <h2 class="font-outfit fw-600" style="font-size: 0.8rem; margin: 0; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">Usuarios por Plataforma</h2>
+                <button class="btn-view-more" data-action="navigate" data-url="{{ url_for('platforms_module.platforms_list') }}" data-tooltip="Más detalle">
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+            <div class="pos-relative" style="height: 220px;">
+                <canvas id="usersPlatformChart" class="js-chart-canvas"></canvas>
+            </div>
+        </div>
+
+        <!-- 2. Usuarios por Área (Bar Chart) -->
+        <div class="stat-card modern" style="padding: 1.25rem; height: 100%;">
+            <div class="card-header border-none d-flex justify-between items-center mb-075">
+                <h2 class="font-outfit fw-600" style="font-size: 0.8rem; margin: 0; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">Usuarios por Área</h2>
+                <button class="btn-view-more" data-action="navigate" data-url="{{ url_for('areas_module.areas_list') }}" data-tooltip="Más detalle">
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+            <div class="pos-relative" style="height: 220px;">
+                <canvas id="usersAreaBarChart" class="js-chart-canvas"></canvas>
+            </div>
+        </div>
+
+        <!-- 3. Solicitudes (Bar Chart) -->
+        <div class="stat-card modern" style="padding: 1.25rem; height: 100%;">
+            <div class="card-header border-none d-flex justify-between items-center mb-075">
+                <h2 class="font-outfit fw-600" style="font-size: 0.8rem; margin: 0; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">Solicitudes Pendientes</h2>
+                <button class="btn-view-more" data-action="navigate" data-url="{{ url_for('requests_module.requests_list') }}" data-tooltip="Más detalle">
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+            <div class="pos-relative" style="height: 220px;">
+                <canvas id="pendingRequestsChart" class="js-chart-canvas"></canvas>
+            </div>
+        </div>
+
+        <!-- 4. Más visitadas (Now a Chart) -->
+        <div class="stat-card modern" style="padding: 1.25rem; height: 100%;">
+            <div class="card-header border-none d-flex justify-between items-center mb-075">
+                <h2 class="font-outfit fw-600" style="font-size: 0.8rem; margin: 0; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">Plataformas Más Visitadas</h2>
+                <button class="btn-view-more" data-action="navigate" data-url="{{ url_for('platforms_module.platforms_list') }}" data-tooltip="Más detalle">
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+            <div class="pos-relative" style="height: 220px;">
+                <canvas id="mostVisitedChart" class="js-chart-canvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: System Log -->
+    <div class="stat-card modern log-card" style="display: flex; flex-direction: column; padding: 1rem;">
+        <div class="card-header border-bottom-subtle d-flex justify-between items-center mb-10" style="padding-bottom: 0.75rem; flex-shrink: 0;">
+            <div class="d-flex items-center gap-05">
+                <i class="fas fa-satellite-dish text-primary" style="font-size: 0.9rem; opacity: 0.8;"></i>
+                <h2 class="font-outfit fw-600" style="font-size: 0.8rem; margin: 0; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">Monitoreo de Actividad</h2>
+            </div>
+            <button class="btn-view-more" data-action="navigate" data-url="{{ url_for('audit.index') }}" data-tooltip="Ver Auditoría">
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+            <div class="log-list-v2" style="max-height: 540px; overflow-y: auto;">
+                {% for r in log_list %}
+                <div class="log-item-new">
+                    <div class="log-dot-indicator" style="background: {{ '#10b981' if r.action in ['Alta', 'Aprobado', 'Activación'] else '#f59e0b' if r.action in ['Modificación'] else '#ef4444' }};"></div>
+                    <div class="log-body-content">
+                        <div class="log-user-name">{{ r.user_name if r.user_name else 'Sistema' }}</div>
+                        <div class="log-action-descr">
+                            {% set verb = 'Creó' if r.action == 'Alta' else 'Eliminó' if r.action == 'Baja' else 'Modificó' if r.action == 'Modificación' else 'Activó' if r.action == 'Activación' else 'Deshabilitó' if r.action == 'Deshabilitación' else 'Acceso aprobado' if r.action == 'Aprobado' else 'Acceso denegado' if r.action == 'Rechazado' else r.action %}
+                            {{ verb }} <span class="fw-700">{{ r.entity_name }}</span>
+                        </div>
+                    </div>
+                    <div class="log-time-stamp">{{ r.created_at.strftime('%H:%M') }}</div>
+                </div>
+                {% else %}
+                <div class="premium-log-empty">
+                    <div class="log-empty-visual">
+                        <div class="log-empty-radar"></div>
+                        <div class="log-empty-icon">
+                            <i class="fas fa-wave-square"></i>
+                        </div>
+                    </div>
+                    <p class="chart-empty-title">Sin actividad reciente</p>
+                    <p class="chart-empty-text">El sistema está monitoreando eventos en tiempo real.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script nonce="{{ csp_nonce() }}" src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script nonce="{{ csp_nonce() }}">
+    window.__datos = {
+        charts: {
+            usersPlatform: {
+                labels: {{ users_platform_labels|tojson }},
+                values: {{ users_platform_values|tojson }}
+            },
+            usersArea: {
+                labels: {{ users_area_labels|tojson }},
+                values: {{ users_area_values|tojson }},
+                colors: {{ users_area_colors|tojson }}
+            },
+            pendingRequests: {
+                labels: {{ pending_platform_labels|tojson }},
+                values: {{ pending_platform_values|tojson }}
+            },
+            mostVisited: {
+                labels: {{ most_visited|map(attribute='name')|list|tojson }},
+                values: {{ most_visited|map(attribute='visits')|list|tojson }}
+            },
+            accentColor: '{{ portal_settings.portal_logo_bg or "#6366f1" }}'
+        },
+        urls: {
+            home: "{{ url_for('core.index') }}"
+        }
+    };
+</script>
+<script nonce="{{ csp_nonce() }}" src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
