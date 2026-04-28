@@ -26,6 +26,7 @@
     <link rel="stylesheet" href="{{ url_for('core.serve_assets', filename='css/global.css') }}?v={{ range(1000, 9999) | random }}">
     <link rel="stylesheet" href="{{ url_for('core.serve_assets', filename='css/main.css') }}?v={{ range(1000, 9999) | random }}">
     <link rel="stylesheet" href="{{ url_for('core.serve_assets', filename='css/components.css') }}?v={{ range(1000, 9999) | random }}">
+    {% block extra_css %}{% endblock %}
     
     <!-- jQuery & DataTables -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
