@@ -3,7 +3,7 @@
 {% block title %}Gestión de Solicitudes | Nexus Premium{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('core.serve_assets', filename='css/requests.css') }}">
+<link rel="stylesheet" href="{{ url_for('core.serve_assets', filename='css/requests.css') }}?v={{ range(1000, 9999) | random }}">
 {% endblock %}
 
 {% block content %}
