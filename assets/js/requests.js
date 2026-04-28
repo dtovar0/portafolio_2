@@ -102,7 +102,7 @@ function renderRequestsTable() {
         }[r.status] || 'bg-label/10 text-label/40';
 
         tbody.innerHTML += `
-            <tr class="group hover:bg-primary/5 transition-all cursor-pointer border-b border-panel-border/30 last:border-none">
+            <tr class="group hover:bg-primary/5 transition-all border-b border-panel-border/30 last:border-none h-16">
                 <td class="text-center" style="border-left:3px solid transparent;padding-left:0.5rem;">
                     <div class="flex items-center justify-center">
                         <input type="checkbox" data-id="${r.id}" class="request-cb w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary ${!isPending ? 'opacity-0 pointer-events-none' : ''}" 
@@ -113,32 +113,46 @@ function renderRequestsTable() {
                 </td>
                 <td>
                     <div class="flex flex-col justify-center">
-                        <p class="text-xs font-black text-label uppercase tracking-tight">${r.user_name}</p>
-                        <p class="text-[10px] font-bold text-label/30 italic">${r.user_email}</p>
+                        <p class="text-xs font-black text-label uppercase tracking-tight leading-none">${r.user_name}</p>
+                        <p class="text-[10px] font-bold text-label/30 italic mt-1 leading-none">${r.user_email}</p>
                     </div>
                 </td>
+                <td class="text-center">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-tighter bg-surface-container border border-panel-border text-label/40">Regular</span>
+                </td>
                 <td>
-                    <span class="text-[11px] font-black text-label/60 uppercase tracking-widest">${r.platform_name}</span>
+                    <span class="text-[11px] font-black text-primary uppercase tracking-tight">${r.platform_name}</span>
                 </td>
                 <td class="text-center">
-                     <p class="text-[11px] font-bold text-label/40 tabular-nums">${r.created_at}</p>
+                     <p class="text-[10px] font-bold text-label/40 tabular-nums uppercase leading-none">${r.created_at}</p>
+                </td>
+                <td class="text-center">
+                     <p class="text-[10px] font-bold text-label/20 tabular-nums uppercase leading-none">${r.processed_at}</p>
                 </td>
                 <td class="text-center">
                     <div class="flex items-center justify-center">
                         <span class="nx-badge ${statusBadge}">${r.status.toUpperCase()}</span>
                     </div>
                 </td>
-                <td class="text-right">
-                    <div class="flex flex-col items-end justify-center pr-4">
-                        ${r.processed_at !== '-' ? `<span class="text-[9px] font-bold text-label/20 uppercase tracking-tighter tabular-nums mb-1 shrink-0">Proc: ${r.processed_at}</span>` : ''}
-                        ${isPending ? `<span class="text-[10px] font-black text-amber-500/50 uppercase italic">Requiere Acción</span>` : `<span class="text-[10px] font-black text-label/20 uppercase italic">Procesada</span>`}
+                <td class="text-right pr-5">
+                    <div class="flex items-center justify-end gap-2 pr-2">
+                        ${isPending ? `
+                        <button onclick="quickAction(${r.id}, 'approve')" class="w-8 h-8 flex items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500 hover:text-white transition-all shadow-sm" title="Aprobar Solicitud">
+                            <i class="fas fa-check text-[10px]"></i>
+                        </button>
+                        <button onclick="quickAction(${r.id}, 'reject')" class="w-8 h-8 flex items-center justify-center rounded-lg bg-rose-500/10 text-rose-500 border border-rose-500/20 hover:bg-rose-500 hover:text-white transition-all shadow-sm" title="Denegar Solicitud">
+                            <i class="fas fa-times text-[10px]"></i>
+                        </button>
+                        ` : `
+                        <span class="text-[10px] font-black text-label/10 uppercase italic tracking-widest">---</span>
+                        `}
                     </div>
                 </td>
             </tr>
         `;
     });
 
-    renderGhostRows(6);
+    renderGhostRows(8);
     renderPagination();
 }
 

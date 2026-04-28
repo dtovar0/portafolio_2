@@ -8,11 +8,10 @@
 
 {% block content %}
 <div class="flex flex-col h-full overflow-y-auto custom-scrollbar p-6 lg:p-8 animate-in fade-in duration-500">
-    <!-- Header Section -->
     <div class="flex items-center justify-between mb-8">
         <div>
-            <h1 class="text-2xl font-black text-label tracking-tight uppercase">Centro de Solicitudes</h1>
-            <p class="text-[12px] font-bold text-label/40 uppercase tracking-widest mt-1">Autorización y auditoría de accesos a plataformas</p>
+            <h1 class="text-2xl font-black text-primary tracking-tighter uppercase italic leading-none">Centro de Solicitudes</h1>
+            <p class="text-[10px] font-black text-label/40 uppercase tracking-[0.2em] mt-1">Autorización y auditoría de accesos / Registro Global</p>
         </div>
         <div id="bulkActions" class="hidden items-center gap-2 animate-in slide-in-from-right-4 duration-300">
             <button onclick="processSelected('approve')" class="flex items-center gap-2 bg-emerald-500 text-white px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-emerald-500/20">
@@ -29,52 +28,80 @@
     <!-- DASHBOARD VIEW -->
     <div id="dashboardView" class="flex flex-col gap-8 animate-in fade-in duration-500">
         <!-- Stats Summary Row -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div class="bg-surface-container border border-surface-container-border rounded-2xl p-6 relative overflow-hidden group cursor-pointer hover:border-primary transition-all" onclick="filterByStatus('all')">
-                <div class="relative z-10">
-                    <p class="text-[10px] font-black text-label/40 uppercase tracking-[0.2em] mb-1">Total</p>
-                    <h3 class="text-3xl font-black text-label tabular-nums">{{ counts.total }}</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- Pendientes -->
+            <div class="bg-surface-container border border-surface-container-border rounded-2xl p-6 flex items-center gap-5 group cursor-pointer hover:border-amber-500 transition-all shadow-sm" onclick="filterByStatus('Pendiente')">
+                <div class="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                 </div>
-                <svg class="w-20 h-20 absolute -right-4 -bottom-4 text-label/5 group-hover:text-primary/10 transition-colors" fill="currentColor" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                <div class="flex-1">
+                    <p class="text-[10px] font-black text-label/40 uppercase tracking-widest mb-0.5">Pendientes</p>
+                    <h3 class="text-2xl font-black text-amber-500 tabular-nums leading-none">{{ counts.pending }}</h3>
+                    <p class="text-[9px] font-bold text-label/20 uppercase tracking-tighter mt-1">Acción Requerida</p>
+                </div>
             </div>
-            <div class="bg-surface-container border border-surface-container-border rounded-2xl p-6 relative overflow-hidden group cursor-pointer hover:border-amber-500 transition-all border-l-4 border-l-amber-500" onclick="filterByStatus('Pendiente')">
-                <div class="relative z-10">
-                    <p class="text-[10px] font-black text-amber-500/60 uppercase tracking-[0.2em] mb-1">Pendientes</p>
-                    <h3 class="text-3xl font-black text-amber-500 tabular-nums">{{ counts.pending }}</h3>
+
+            <!-- Aprobadas -->
+            <div class="bg-surface-container border border-surface-container-border rounded-2xl p-6 flex items-center gap-5 group cursor-pointer hover:border-emerald-500 transition-all shadow-sm" onclick="filterByStatus('Aprobado')">
+                <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 group-hover:scale-110 transition-transform">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
                 </div>
-                <svg class="w-20 h-20 absolute -right-4 -bottom-4 text-amber-500/5 group-hover:text-amber-500/10 transition-colors" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div class="flex-1">
+                    <p class="text-[10px] font-black text-label/40 uppercase tracking-widest mb-0.5">Aprobadas</p>
+                    <h3 class="text-2xl font-black text-emerald-500 tabular-nums leading-none">{{ counts.approved }}</h3>
+                    <p class="text-[9px] font-bold text-label/20 uppercase tracking-tighter mt-1">Historial Éxito</p>
+                </div>
             </div>
-            <div class="bg-surface-container border border-surface-container-border rounded-2xl p-6 relative overflow-hidden group cursor-pointer hover:border-emerald-500 transition-all border-l-4 border-l-emerald-500" onclick="filterByStatus('Aprobado')">
-                <div class="relative z-10">
-                    <p class="text-[10px] font-black text-emerald-500/60 uppercase tracking-[0.2em] mb-1">Aprobadas</p>
-                    <h3 class="text-3xl font-black text-emerald-500 tabular-nums">{{ counts.approved }}</h3>
+
+            <!-- Denegadas -->
+            <div class="bg-surface-container border border-surface-container-border rounded-2xl p-6 flex items-center gap-5 group cursor-pointer hover:border-rose-500 transition-all shadow-sm" onclick="filterByStatus('rejected')">
+                <div class="w-14 h-14 rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-500 group-hover:scale-110 transition-transform">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </div>
-                <svg class="w-20 h-20 absolute -right-4 -bottom-4 text-emerald-500/5 group-hover:text-emerald-500/10 transition-colors" fill="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div class="flex-1">
+                    <p class="text-[10px] font-black text-label/40 uppercase tracking-widest mb-0.5">Denegadas</p>
+                    <h3 class="text-2xl font-black text-rose-500 tabular-nums leading-none">{{ counts.rejected }}</h3>
+                    <p class="text-[9px] font-bold text-label/20 uppercase tracking-tighter mt-1">Historial Crítico</p>
+                </div>
             </div>
-            <div class="bg-surface-container border border-surface-container-border rounded-2xl p-6 relative overflow-hidden group cursor-pointer hover:border-red-500 transition-all border-l-4 border-l-red-500" onclick="filterByStatus('rejected')">
-                <div class="relative z-10">
-                    <p class="text-[10px] font-black text-red-500/60 uppercase tracking-[0.2em] mb-1">Rechazadas</p>
-                    <h3 class="text-3xl font-black text-red-500 tabular-nums">{{ counts.rejected }}</h3>
+
+            <!-- Historial -->
+            <div class="bg-surface-container border border-surface-container-border rounded-2xl p-6 flex items-center gap-5 group cursor-pointer hover:border-primary transition-all shadow-sm" onclick="filterByStatus('all')">
+                <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                 </div>
-                <svg class="w-20 h-20 absolute -right-4 -bottom-4 text-red-500/5 group-hover:text-red-500/10 transition-colors" fill="currentColor" viewBox="0 0 24 24"><path d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+                <div class="flex-1">
+                    <p class="text-[10px] font-black text-label/40 uppercase tracking-widest mb-0.5">Historial</p>
+                    <h3 class="text-2xl font-black text-primary tabular-nums leading-none">{{ counts.total }}</h3>
+                    <p class="text-[9px] font-bold text-label/20 uppercase tracking-tighter mt-1">Auditoría Total</p>
+                </div>
             </div>
         </div>
 
         <!-- Analytics Summary -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2 bg-surface-container border border-surface-container-border rounded-3xl p-8 shadow-xl">
+        <h2 class="text-lg font-black text-primary uppercase tracking-tighter italic mb-4 flex items-center gap-3">
+            <i class="fas fa-chart-line text-sm opacity-50"></i>
+            Análisis de Operaciones
+        </h2>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 bg-surface-container border border-surface-container-border rounded-2xl p-6 shadow-sm">
                 <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-sm font-black text-label uppercase tracking-widest">Ranking de Plataformas</h3>
-                    <p class="text-[10px] font-bold text-label/20 uppercase tracking-widest italic">Top 5 más solicitadas</p>
+                    <div>
+                        <h3 class="text-[11px] font-black text-label uppercase tracking-widest">Ranking de Plataformas</h3>
+                        <p class="text-[9px] font-bold text-label/30 uppercase tracking-tighter mt-1">Herramientas digitales hoy</p>
+                    </div>
                 </div>
                 <div class="h-64 relative">
                     <div id="platformChart" class="w-full h-full"></div>
                 </div>
             </div>
-            <div class="bg-surface-container border border-surface-container-border rounded-3xl p-8 shadow-xl flex flex-col">
+            <div class="bg-surface-container border border-surface-container-border rounded-2xl p-6 shadow-sm flex flex-col">
                 <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-sm font-black text-label uppercase tracking-widest">Distribución</h3>
-                    <p class="text-[10px] font-bold text-label/20 uppercase tracking-widest italic">Estado actual</p>
+                    <div>
+                        <h3 class="text-[11px] font-black text-label uppercase tracking-widest">Distribución</h3>
+                        <p class="text-[9px] font-bold text-label/30 uppercase tracking-tighter mt-1">Estado de solicitudes</p>
+                    </div>
                 </div>
                 <div class="flex-grow flex items-center justify-center relative">
                     <div id="statusChart" class="w-full h-full flex items-center justify-center"></div>
@@ -121,11 +148,13 @@
                                 <th class="w-[5%] text-center" style="border-left:3px solid transparent;padding:0 0.5rem;">
                                     <input type="checkbox" id="selectAll" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary flex-shrink-0">
                                 </th>
-                                <th class="w-[25%]">Solicitante</th>
-                                <th class="w-[25%]">Servicio Digital</th>
-                                <th class="w-[15%] text-center">Fecha Solicitud</th>
-                                <th class="w-[15%] text-center">Estado</th>
-                                <th class="w-[15%] text-right" style="padding-right: 1.25rem;">Procesamiento</th>
+                                <th class="w-[18%]">Solicitante</th>
+                                <th class="w-[12%] text-center">Tipo</th>
+                                <th class="w-[18%]">Plataforma</th>
+                                <th class="w-[12%] text-center">Fecha Solicitud</th>
+                                <th class="w-[12%] text-center">Fecha Proceso</th>
+                                <th class="w-[13%] text-center">Estado</th>
+                                <th class="w-[10%] text-right" style="padding-right: 1.25rem;">Acción</th>
                             </tr>
                         </thead>
                         <tbody id="requestsTableBody">
