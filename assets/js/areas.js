@@ -4,9 +4,13 @@ let filteredAreas = [...AREAS_DATA];
 let selectedAreas = [];
 let currentPage = 1;
 
-// Wizard State
+// Wizard State (Create)
 let currentStep = 1;
 let selectedUserIdList = [];
+
+// Wizard State (Edit)
+let currentEditStep = 1;
+let selectedEditUserIdList = [];
 
 // Configuration
 const iconsMap = {
@@ -177,22 +181,23 @@ function renderAreasTable() {
     pageData.forEach((area, index) => {
         const isSelected = selectedAreas.includes(area.id);
         const isActive = area.status === 'Activo' || area.status === 'activo' || area.status === true;
+        const areaIconHtml = iconsMap[area.icon] || iconsMap['box'];
         
         tbody.innerHTML += `
-            <tr class="group hover:bg-primary/5 transition-all cursor-pointer border-b border-panel-border/30 last:border-none ${isSelected ? 'bg-primary/5' : ''}">
-                <td class="text-center" style="border-left:3px solid ${isSelected ? 'rgb(var(--color-primary))' : 'transparent'};padding:0 0.5rem;">
+            <tr class="group hover:bg-primary/5 transition-all cursor-pointer border-b border-panel-border/30 last:border-none ${isSelected ? 'bg-primary/5' : ''}" onclick="editArea(${area.id}); event.stopPropagation();">
+                <td class="text-center" style="border-left:3px solid ${isSelected ? 'rgb(var(--color-primary))' : 'transparent'};padding:0 0.5rem;" onclick="event.stopPropagation()">
                     <div class="flex items-center justify-center">
-                        <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" 
+                        <input type="checkbox" class="area-checkbox w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" 
                             ${isSelected ? 'checked' : ''} onchange="toggleAreaSelection(${area.id}, this.checked)">
                     </div>
                 </td>
                 <td class="text-center">
-                    <div class="flex items-center justify-center h-full text-primary/60 font-black">
-                        #${area.id.toString().padStart(3, '0')}
+                    <div class="w-9 h-9 mx-auto rounded-xl flex items-center justify-center text-white shadow-lg ring-1 ring-white/10" style="background: ${area.color || '#6366f1'}">
+                        <div class="text-base">${areaIconHtml}</div>
                     </div>
                 </td>
                 <td>
-                    <span class="text-xs font-black text-label uppercase tracking-tight">${area.name}</span>
+                    <span class="text-xs font-black text-primary uppercase tracking-tight">${area.name}</span>
                 </td>
                 <td>
                     <div class="text-[11px] font-bold text-label/50 truncate italic line-clamp-1 max-w-[280px]" title="${area.description || ''}">
@@ -200,34 +205,30 @@ function renderAreasTable() {
                     </div>
                 </td>
                 <td class="text-center">
-                    <div class="flex items-center justify-center gap-1">
-                         <span class="text-[11px] font-black text-label/80">${area.users_count || 0}</span>
-                         <i class="fas fa-users text-[10px] text-label/20"></i>
-                    </div>
-                </td>
-                <td class="text-center">
-                    <div class="flex items-center justify-center gap-1">
-                        <span class="text-[11px] font-black text-label/80">${area.platforms_count || 0}</span>
-                        <i class="fas fa-layer-group text-[10px] text-label/20"></i>
-                    </div>
-                </td>
-                <td class="text-center">
                     <div class="flex items-center justify-center">
-                        <span class="nx-badge ${isActive ? 'nx-badge-success' : 'nx-badge-error'}">${isActive ? 'ACTIVO' : 'INACTIVO'}</span>
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${isActive ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-500 border border-rose-500/20'}">
+                            <span class="w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-rose-500'}"></span>
+                            ${isActive ? 'ACTIVO' : 'INACTIVO'}
+                        </div>
                     </div>
                 </td>
-                <td class="text-right" style="padding-right: 1.25rem;">
-                    <div class="flex items-center justify-end gap-2 pr-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onclick="editArea(${area.id}); event.stopPropagation();" class="w-8 h-8 flex items-center justify-center rounded-lg bg-label/5 hover:bg-primary/20 text-label/40 hover:text-primary transition-all shadow-sm" title="Edición Rápida">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                        </button>
+                <td class="text-center">
+                    <div class="flex items-center justify-center gap-2 text-label/60 font-black text-[11px]">
+                         <i class="fas fa-users opacity-30 text-[10px]"></i>
+                         ${area.users_count || 0}
+                    </div>
+                </td>
+                <td class="text-right pr-6">
+                    <div class="inline-flex items-center gap-2 bg-surface-container/30 px-4 py-1.5 rounded-xl border border-panel-border transition-all group-hover:border-primary/30 group-hover:bg-primary/5">
+                        <span class="text-[11px] font-black text-primary italic leading-none">${area.platforms_count || 0}</span>
+                        <i class="fas fa-layer-group text-[10px] text-label/20 group-hover:text-primary transition-colors"></i>
                     </div>
                 </td>
             </tr>
         `;
     });
 
-    renderGhostRows(8);
+    renderGhostRows(7);
     renderPagination();
     updateActionButtonsAreas();
 }
@@ -327,33 +328,24 @@ function openAreaModal() {
     renderUserPicklist();
 }
 
-function closeAreaModal() {
-    closeModal('areaModal');
+function closeEditAreaModal() {
+    closeModal('editAreaModal');
 }
 
 /**
- * STEP NAVIGATION
+ * STEP NAVIGATION (CREATE)
  */
 function changeStep(step) {
     if (step < 1 || step > 3) return;
     
-    // Validation for Step 1
     if (step > currentStep && currentStep === 1) {
         const name = document.getElementById('areaName').value.trim();
-        if (!name) {
-            showToast('El nombre es obligatorio', 'error');
-            return;
-        }
+        if (!name) return showToast('El nombre es obligatorio', 'error');
     }
 
     currentStep = step;
+    document.querySelectorAll('.step-section').forEach((s, idx) => s.classList.toggle('hidden', idx !== (step - 1)));
     
-    // Update sections
-    document.querySelectorAll('.step-section').forEach((s, idx) => {
-        s.classList.toggle('hidden', idx !== (step - 1));
-    });
-
-    // Update Pills & Progress
     const progress = document.getElementById('stepProgress');
     if (progress) progress.style.width = `${(step - 1) * 50}%`;
 
@@ -361,43 +353,71 @@ function changeStep(step) {
         const itemStep = idx + 1;
         const icon = item.querySelector('div');
         const label = item.querySelector('span');
-        
         if (itemStep < step) {
-            // Completed
             icon.className = "w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center font-black text-sm shadow-lg shadow-emerald-500/20 ring-4 ring-panel-fill transition-all";
             icon.innerHTML = '<i class="fas fa-check"></i>';
             label.className = "text-[9px] font-black uppercase tracking-widest text-emerald-500";
         } else if (itemStep === step) {
-            // Active
             icon.className = "w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-black text-sm shadow-lg shadow-primary/20 ring-4 ring-panel-fill transition-all";
-            icon.innerText = itemStep;
+            icon.innerHTML = itemStep;
             label.className = "text-[9px] font-black uppercase tracking-widest text-primary";
         } else {
-            // Pending
             icon.className = "w-10 h-10 rounded-full bg-panel-border text-label/40 flex items-center justify-center font-black text-sm ring-4 ring-panel-fill transition-all";
-            icon.innerText = itemStep;
+            icon.innerHTML = itemStep;
             label.className = "text-[9px] font-black uppercase tracking-widest text-label/40";
         }
     });
 
-    // Update Buttons
     const btnPrev = document.getElementById('btnPrevStep');
     const btnNext = document.getElementById('btnNextStep');
     const btnSave = document.getElementById('btnSaveArea');
+    if (step === 1) { btnPrev.classList.add('opacity-0', 'pointer-events-none'); btnNext.classList.remove('hidden'); btnSave.classList.add('hidden'); }
+    else if (step === 3) { btnPrev.classList.remove('opacity-0', 'pointer-events-none'); btnNext.classList.add('hidden'); btnSave.classList.remove('hidden'); }
+    else { btnPrev.classList.remove('opacity-0', 'pointer-events-none'); btnNext.classList.remove('hidden'); btnSave.classList.add('hidden'); }
+}
 
-    if (step === 1) {
-        btnPrev.classList.add('opacity-0', 'pointer-events-none');
-        btnNext.classList.remove('hidden');
-        btnSave.classList.add('hidden');
-    } else if (step === 3) {
-        btnPrev.classList.remove('opacity-0', 'pointer-events-none');
-        btnNext.classList.add('hidden');
-        btnSave.classList.remove('hidden');
-    } else {
-        btnPrev.classList.remove('opacity-0', 'pointer-events-none');
-        btnNext.classList.remove('hidden');
-        btnSave.classList.add('hidden');
+/**
+ * STEP NAVIGATION (EDIT)
+ */
+function changeEditStep(step) {
+    if (step < 1 || step > 3) return;
+    
+    if (step > currentEditStep && currentEditStep === 1) {
+        const name = document.getElementById('editAreaName').value.trim();
+        if (!name) return showToast('El nombre es obligatorio', 'error');
     }
+
+    currentEditStep = step;
+    document.querySelectorAll('.edit-step-section').forEach((s, idx) => s.classList.toggle('hidden', idx !== (step - 1)));
+    
+    const progress = document.getElementById('editStepProgress');
+    if (progress) progress.style.width = `${(step - 1) * 50}%`;
+
+    document.querySelectorAll('.edit-step-item').forEach((item, idx) => {
+        const itemStep = idx + 1;
+        const icon = item.querySelector('div');
+        const label = item.querySelector('span');
+        if (itemStep < step) {
+            icon.className = "w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center font-black text-sm shadow-lg shadow-emerald-500/20 ring-4 ring-panel-fill transition-all";
+            icon.innerHTML = '<i class="fas fa-check"></i>';
+            label.className = "text-[9px] font-black uppercase tracking-widest text-emerald-500";
+        } else if (itemStep === step) {
+            icon.className = "w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-black text-sm shadow-lg shadow-primary/20 ring-4 ring-panel-fill transition-all";
+            icon.innerHTML = itemStep;
+            label.className = "text-[9px] font-black uppercase tracking-widest text-primary";
+        } else {
+            icon.className = "w-10 h-10 rounded-full bg-panel-border text-label/40 flex items-center justify-center font-black text-sm ring-4 ring-panel-fill transition-all";
+            icon.innerHTML = itemStep;
+            label.className = "text-[9px] font-black uppercase tracking-widest text-label/40";
+        }
+    });
+
+    const btnPrev = document.getElementById('btnEditPrevStep');
+    const btnNext = document.getElementById('btnEditNextStep');
+    const btnSave = document.getElementById('btnSaveEditedArea');
+    if (step === 1) { btnPrev.classList.add('opacity-0', 'pointer-events-none'); btnNext.classList.remove('hidden'); btnSave.classList.add('hidden'); }
+    else if (step === 3) { btnPrev.classList.remove('opacity-0', 'pointer-events-none'); btnNext.classList.add('hidden'); btnSave.classList.remove('hidden'); }
+    else { btnPrev.classList.remove('opacity-0', 'pointer-events-none'); btnNext.classList.remove('hidden'); btnSave.classList.add('hidden'); }
 }
 
 /**
@@ -406,134 +426,137 @@ function changeStep(step) {
 function renderPickers() {
     const iconGrid = document.getElementById('iconGrid');
     const colorGrid = document.getElementById('colorGrid');
-    if (!iconGrid || !colorGrid) return;
+    const editIconGrid = document.getElementById('editIconGrid');
+    const editColorGrid = document.getElementById('editColorGrid');
 
     const currentIcon = document.getElementById('areaIcon').value;
     const currentColor = document.getElementById('areaColor').value;
+    const currentEditIcon = document.getElementById('editAreaIcon').value;
+    const currentEditColor = document.getElementById('editAreaColor').value;
 
-    // Icons
-    iconGrid.innerHTML = '';
-    Object.entries(iconsMap).forEach(([key, svg]) => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = `w-12 h-12 flex items-center justify-center rounded-xl border-2 transition-all ${currentIcon === key ? 'border-primary bg-primary/10 text-primary shadow-lg shadow-primary/10' : 'border-panel-border bg-surface-container/20 text-label/40 hover:border-primary/40'}`;
-        btn.innerHTML = svg;
-        btn.onclick = () => {
-            document.getElementById('areaIcon').value = key;
-            renderPickers();
-        };
-        iconGrid.appendChild(btn);
-    });
+    // Create Pickers
+    if (iconGrid && colorGrid) {
+        iconGrid.innerHTML = ''; colorGrid.innerHTML = '';
+        Object.entries(iconsMap).forEach(([key, svg]) => {
+            const b = document.createElement('button'); b.type='button';
+            b.className = `w-12 h-12 flex items-center justify-center rounded-xl border-2 transition-all ${currentIcon === key ? 'border-primary bg-primary/10 text-primary shadow-lg shadow-primary/10' : 'border-panel-border bg-surface-container/20 text-label/40 hover:border-primary/40'}`;
+            b.innerHTML = svg; b.onclick = () => { document.getElementById('areaIcon').value = key; renderPickers(); };
+            iconGrid.appendChild(b);
+        });
+        colorsPalette.forEach(color => {
+            const b = document.createElement('button'); b.type='button';
+            b.className = `w-10 h-10 rounded-full border-4 transition-all ${currentColor === color ? 'border-white ring-4 ring-primary/40 shadow-xl scale-110' : 'border-transparent opacity-60 hover:opacity-100 hover:scale-105'}`;
+            b.style.background = color; b.onclick = () => { document.getElementById('areaColor').value = color; renderPickers(); };
+            colorGrid.appendChild(b);
+        });
+    }
 
-    // Colors
-    colorGrid.innerHTML = '';
-    colorsPalette.forEach(color => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = `w-10 h-10 rounded-full border-4 transition-all ${currentColor === color ? 'border-white ring-4 ring-primary/40 shadow-xl scale-110' : 'border-transparent opacity-60 hover:opacity-100 hover:scale-105'}`;
-        btn.style.background = color;
-        btn.onclick = () => {
-            document.getElementById('areaColor').value = color;
-            renderPickers();
-        };
-        colorGrid.appendChild(btn);
-    });
+    // Edit Pickers
+    if (editIconGrid && editColorGrid) {
+        editIconGrid.innerHTML = ''; editColorGrid.innerHTML = '';
+        Object.entries(iconsMap).forEach(([key, svg]) => {
+            const b = document.createElement('button'); b.type='button';
+            b.className = `w-12 h-12 flex items-center justify-center rounded-xl border-2 transition-all ${currentEditIcon === key ? 'border-primary bg-primary/10 text-primary shadow-lg shadow-primary/10' : 'border-panel-border bg-surface-container/20 text-label/40 hover:border-primary/40'}`;
+            b.innerHTML = svg; b.onclick = () => { document.getElementById('editAreaIcon').value = key; renderPickers(); };
+            editIconGrid.appendChild(b);
+        });
+        colorsPalette.forEach(color => {
+            const b = document.createElement('button'); b.type='button';
+            b.className = `w-10 h-10 rounded-full border-4 transition-all ${currentEditColor === color ? 'border-white ring-4 ring-primary/40 shadow-xl scale-110' : 'border-transparent opacity-60 hover:opacity-100 hover:scale-105'}`;
+            b.style.background = color; b.onclick = () => { document.getElementById('editAreaColor').value = color; renderPickers(); };
+            editColorGrid.appendChild(b);
+        });
+    }
 }
 
 /**
  * USER PICKLIST
  */
-function renderUserPicklist() {
-    const availableList = document.getElementById('availableUsersList');
-    const selectedList = document.getElementById('selectedUsersList');
-    if (!availableList || !selectedList) return;
+function renderUserPicklist(isEdit = false) {
+    const availList = document.getElementById(isEdit ? 'editAvailableUsersList' : 'availableUsersList');
+    const selList = document.getElementById(isEdit ? 'editSelectedUsersList' : 'selectedUsersList');
+    if (!availList || !selList) return;
 
-    availableList.innerHTML = '';
-    selectedList.innerHTML = '';
+    availList.innerHTML = ''; selList.innerHTML = '';
+    const currentList = isEdit ? selectedEditUserIdList : selectedUserIdList;
 
     ALL_USERS.forEach(user => {
-        const isSelected = selectedUserIdList.includes(user.id);
-        const item = document.createElement('button');
-        item.type = 'button';
+        const isSelected = currentList.includes(user.id);
+        const item = document.createElement('button'); item.type = 'button';
         item.className = "w-full flex items-center justify-between p-3 rounded-xl transition-all group " + (isSelected ? "bg-primary/10 hover:bg-primary/20" : "bg-panel-fill/40 hover:bg-surface-container/60");
-        
         item.innerHTML = `
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-lg ${isSelected ? 'bg-primary text-white' : 'bg-label/10 text-label/60'} flex items-center justify-center text-xs">
                     <i class="fas fa-user"></i>
                 </div>
-                <div class="text-left">
-                    <div class="text-[11px] font-black uppercase text-label leading-none mb-1">${user.name}</div>
-                    <div class="text-[9px] font-bold text-label/40 uppercase tracking-tighter">${user.email}</div>
+                <div class="text-left font-black uppercase text-label leading-none">
+                    <div class="text-[11px] mb-1">${user.name}</div>
+                    <div class="text-[9px] text-label/40 tracking-tighter">${user.email}</div>
                 </div>
             </div>
             <i class="fas ${isSelected ? 'fa-minus-circle text-primary' : 'fa-plus-circle text-label/20 group-hover:text-primary'} text-sm transition-colors"></i>
         `;
-
-        item.onclick = () => toggleUserSelection(user.id);
-
-        if (isSelected) selectedList.appendChild(item);
-        else availableList.appendChild(item);
+        item.onclick = () => toggleUserSelection(user.id, isEdit);
+        if (isSelected) selList.appendChild(item); else availList.appendChild(item);
     });
 }
 
-function toggleUserSelection(userId) {
-    const idx = selectedUserIdList.indexOf(userId);
-    if (idx === -1) selectedUserIdList.push(userId);
-    else selectedUserIdList.splice(idx, 1);
-    renderUserPicklist();
+function toggleUserSelection(userId, isEdit = false) {
+    const list = isEdit ? selectedEditUserIdList : selectedUserIdList;
+    const idx = list.indexOf(userId);
+    if (idx === -1) list.push(userId); else list.splice(idx, 1);
+    renderUserPicklist(isEdit);
 }
 
 function editArea(id) {
     const area = currentAreas.find(a => a.id === id);
     if (!area) return;
 
-    openModal('areaModal');
+    openModal('editAreaModal');
     
-    document.getElementById('areaId').value = area.id;
-    document.getElementById('areaName').value = area.name;
-    document.getElementById('areaDescription').value = area.description || '';
+    document.getElementById('editAreaId').value = area.id;
+    document.getElementById('editAreaName').value = area.name;
+    document.getElementById('editAreaDescription').value = area.description || '';
     
-    const isActive = area.status === 'Activo' || area.status === 'activo' || area.status === true;
-    document.getElementById('areaStatus').checked = isActive;
-    document.getElementById('areaStatusLabel').textContent = isActive ? 'ACTIVO' : 'INACTIVO';
+    const isActive = area.status === 'Activo' || area.status === 'activo';
+    document.getElementById('editAreaStatus').checked = isActive;
+    document.getElementById('editAreaStatusLabel').textContent = isActive ? 'ACTIVO' : 'INACTIVO';
     
-    // Image Identity
-    document.getElementById('areaIcon').value = area.icon || 'box';
-    document.getElementById('areaColor').value = area.color || '#6366f1';
+    document.getElementById('editAreaIcon').value = area.icon || 'box';
+    document.getElementById('editAreaColor').value = area.color || '#6366f1';
 
-    // Fetch Linked Users for this area
-    selectedUserIdList = [];
+    selectedEditUserIdList = [];
     fetch(`/admin/areas/users/${id}`)
         .then(res => res.json())
         .then(data => {
             if (data.status === 'success') {
-                selectedUserIdList = data.selected_ids || [];
-                renderUserPicklist();
+                selectedEditUserIdList = data.selected_ids || [];
+                renderUserPicklist(true);
             }
         });
 
-    document.getElementById('modalTitle').textContent = 'Modificar Área';
-    changeStep(1);
+    changeEditStep(1);
     renderPickers();
 }
 
 async function saveArea() {
-    const id = document.getElementById('areaId').value;
-    const name = document.getElementById('areaName').value.trim();
-    const description = document.getElementById('areaDescription').value.trim();
-    const status = document.getElementById('areaStatus').checked ? 'Activo' : 'Inactivo';
+    const editId = document.getElementById('editAreaId')?.value;
+    const createId = document.getElementById('areaId')?.value;
+    const id = editId || createId || ""; // If editId exists, we are editing
 
-    if (!name) {
-        showToast('El nombre es obligatorio', 'error');
-        return;
-    }
+    const prefix = editId ? 'editArea' : 'area';
+    const name = document.getElementById(`${prefix}Name`).value.trim();
+    const description = document.getElementById(`${prefix}Description`).value.trim();
+    const status = document.getElementById(`${prefix}Status`).checked ? 'Activo' : 'Inactivo';
     
-    const url = id ? `/admin/areas/edit/${id}` : '/admin/areas/add';
-    const method = 'POST'; // Backend supports POST for both add and edit/int:id
+    if (!name) return showToast('El nombre es obligatorio', 'error');
 
-    const icon = document.getElementById('areaIcon').value;
-    const color = document.getElementById('areaColor').value;
+    const url = editId ? `/admin/areas/edit/${editId}` : '/admin/areas/add';
+    const method = 'POST'; 
+
+    const icon = document.getElementById(`${prefix}Icon`).value;
+    const color = document.getElementById(`${prefix}Color`).value;
+    const user_ids = editId ? selectedEditUserIdList : selectedUserIdList;
 
     showToast('Guardando...', 'info');
 
@@ -541,7 +564,7 @@ async function saveArea() {
         const response = await fetch(url, {
             method: method,
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, description, status, icon, color, user_ids: selectedUserIdList })
+            body: JSON.stringify({ name, description, status, icon, color, user_ids })
         });
         const data = await response.json();
         
@@ -554,5 +577,6 @@ async function saveArea() {
     } catch (error) {
         showToast('Error de conexión con el servidor', 'error');
     }
-    closeAreaModal();
+    
+    if (editId) closeEditAreaModal(); else closeAreaModal();
 }
