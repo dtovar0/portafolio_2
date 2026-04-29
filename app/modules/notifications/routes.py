@@ -15,7 +15,7 @@ def index():
     config = SMTPConfig.query.first()
     
     # Ensuring default templates exist
-    default_slugs = ['test', 'inicio', 'error', 'guardado', 'terminado']
+    default_slugs = ['test', 'inicio', 'error', 'guardado', 'terminado', 'usuario_creado']
     existing_slugs = [t.slug for t in NotificationTemplate.query.filter(NotificationTemplate.slug.in_(default_slugs)).all()]
     
     defaults = {
@@ -23,7 +23,13 @@ def index():
         'inicio': {'name': 'Inicio', 'subject': '🚀 NEXUS: ARRANQUE_INICIAL_{usuario}', 'body': '🚀 ARRANQUE NEXUS\nOperación: INICIALIZANDO\nUsuario: {usuario}\nHora: {hora}\nBienvenido de vuelta.', 'is_html': False},
         'error': {'name': 'Error', 'subject': '🛑 NEXUS: ALERTA_SEGURIDAD_CRÍTICA', 'body': '🛑 NEXUS CRÍTICO\nError: ACCESO_DENEGADO\nUsuario: {usuario}\nIP: {ip}\nAcción: BLOQUEO_SEGURIDAD', 'is_html': False},
         'guardado': {'name': 'Guardado', 'subject': '💾 NEXUS: SINCRONIZACIÓN_DATOS', 'body': '💾 SINCRONIZACIÓN NEXUS\nDestino: BASE_DATOS_CORE\nEstado: DATOS_GUARDADOS\nUsuario: {usuario}', 'is_html': False},
-        'terminado': {'name': 'Terminado', 'subject': '✅ NEXUS: PROCESO_FINALIZADO', 'body': '✅ NEXUS COMPLETADO\nProceso: ACCIÓN_FINALIZADA\nEjecutor: {usuario}\nEstado: DATOS_SINCRONIZADOS', 'is_html': False}
+        'terminado': {'name': 'Terminado', 'subject': '✅ NEXUS: PROCESO_FINALIZADO', 'body': '✅ NEXUS COMPLETADO\nProceso: ACCIÓN_FINALIZADA\nEjecutor: {usuario}\nEstado: DATOS_SINCRONIZADOS', 'is_html': False},
+        'usuario_creado': {
+            'name': 'Bienvenida', 
+            'subject': '🎉 Bienvenido a NEXUS: {nombre}', 
+            'body': '<h2>👋 Hola {nombre},</h2><p>Tu cuenta ha sido habilitada exitosamente en <b>NEXUS Portal</b>.</p><p><b>Usuario:</b> {usuario}</p><p>Ya puedes acceder a tu catálogo de herramientas desde el siguiente enlace:</p><a href=\"{url}\" style=\"display:inline-block;padding:12px 24px;background:#6366f1;color:white;text-decoration:none;border-radius:8px;font-weight:bold;\">Acceder al Portal</a><br><br><p>Si no solicitaste este acceso, por favor contacta al equipo de TI.</p>', 
+            'is_html': True
+        }
     }
     
     for slug in default_slugs:
