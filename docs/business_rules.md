@@ -36,3 +36,15 @@ El módulo de Áreas utiliza `dt-layout-row` para su footer de paginación, logr
 
 ### Impacto
 Módulos de Usuarios, Áreas y Plataformas.
+---
+
+## Gestión de Ciclo de Vida del Sistema
+
+### Regla: Desacoplamiento de Componentes Legados
+Queda terminantemente prohibida la reintroducción de módulos relacionados con PSX5K, Worker Daemons o APIs tácticas v1. El sistema debe operar exclusivamente bajo la arquitectura de portal de gestión de identidades y accesos.
+
+### Ejemplo
+Cualquier intento de crear una ruta `/api/v1` o de importar servicios de ejecución de comandos remotos (SSH/Task Engines) será rechazado en la revisión arquitectónica.
+
+### Impacto
+Arquitectura Global, Documentación Técnica, Estructura de Base de Datos.
