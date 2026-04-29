@@ -81,3 +81,29 @@ Para mantener la consistencia, todos los modales deben seguir esta jerarquía de
 Cualquier sistema de notificación (modales de éxito, error o advertencia) debe reutilizar el mismo diseño:
 - **Reutilización Obligatoria**: Si se define un estilo para una alerta de "Guardado Exitoso", ese mismo diseño (iconografía, colores, animaciones) debe replicarse en todo el sistema.
 - **SweetAlert2 Config**: Usar el tema de Nexus (Glassmorphism, Dark Mode, Tipografía Inter/Black) configurado globalmente.
+
+## 📐 Paridad de Altura (Toolbar Standards)
+
+- **Alineación Táctica**: Todos los elementos de la toolbar (inputs de búsqueda, selectores y botones) deben compartir exactamente la misma altura.
+- **Altura Estándar**: Se establece **3rem (48px)** como la altura oficial para todos los controles interactivos de la toolbar.
+- **Inputs**: Deben usar la misma altura que los botones `nexus-btn` para que la línea visual sea perfecta y profesional.
+
+## ⚖️ Alineación de Columnas de Selección
+
+- **Simetría Vertical**: En cualquier tabla con columnas de selección (checkboxes), tanto el encabezado (`<th>`) como las celdas (`<td>`) deben compartir la misma alineación.
+- **Centrado Obligatorio**: Por estándar, las columnas de selección deben estar **centradas horizontalmente** (`text-center` + `justify-center`) para mantener el equilibrio visual de la tabla.
+
+## 📐 Estándares de Orientación y Dimensionado (DataTables)
+
+Para garantizar una lectura fluida y una estética equilibrada en las tablas, se deben seguir estos lineamientos de alineación y tamaño de columnas:
+
+### 1. Orientación de Textos (Alignment)
+- **Identidades y Nombres**: Siempre alineados a la **Izquierda** (`text-left`). Es la forma natural de lectura para nombres de usuario, correos y títulos de servicios.
+- **Badges y Etiquetas de Estado**: Siempre **Centrados** (`text-center`). Los badges (Activo, Inactivo, Roles) deben flotar en el centro de su celda para evitar que la tabla se vea cargada hacia un lado.
+- **Acciones y Selectores**: Siempre **Centrados** (`text-center`).
+- **Datos Numéricos o Contadores**: Siempre **Centrados** (`text-center`) con tipografía `font-black` para resaltar el dato sobre el texto.
+
+### 2. Dimensionado de Columnas (Sizing)
+- **Columnas Tácticas (Checkbox, Icono, Estado)**: Usar anchos fijos en píxeles (ej: `w-[40px]` o `w-[100px]`) para evitar que el motor de DataTables las deforme al redimensionar.
+- **Columnas de Datos (Nombre, Email, Descripción)**: Usar porcentajes (ej: `w-[20%]` o `w-[25%]`) para permitir que la tabla se adapte al ancho del contenedor manteniendo la jerarquía de información.
+- **Truncado Inteligente**: Las columnas de texto largo deben usar `truncate` y `line-clamp` para evitar saltos de línea que rompan la simetría de las filas Zebra.

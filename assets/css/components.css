@@ -1497,7 +1497,7 @@ input[name="db_engine"]:checked + label .w-5.h-5 .bg-primary {
 
 /* 1. SYMMETRIC BUTTON SYSTEM */
 .nexus-btn {
-    height: 3.5rem !important; /* Estandarizado a 14px como el footer */
+    height: 3rem !important; /* Ajustado a 3rem */
     min-width: 140px !important; /* Simetría Obligatoria */
     padding: 0 1.5rem !important;
     border-radius: 1rem !important;
@@ -1666,4 +1666,14 @@ select {
 
 select::-ms-expand {
     display: none !important;
+}
+
+/* --- TOOLBAR INPUT PARITY (REVERTED) --- */
+#userSearch,
+#platformSearchSub,
+input[id*="Search"],
+.js-standard-input {
+    height: 3rem !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
 }

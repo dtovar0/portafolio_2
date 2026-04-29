@@ -283,7 +283,8 @@ function renderGhostRows(columns) {
         const tr = document.createElement('tr');
         tr.className = "ghost-row pointer-events-none select-none border-b border-panel-border/10";
         tr.style.height = "var(--row-h, 60px)";
-        tr.innerHTML = `<td><div></div></td>${Array(columns - 1).fill('<td><div></div></td>').join('')}`;
+        // First column (checkbox) must be centered to match orientation rule
+        tr.innerHTML = `<td class="text-center"><div></div></td>${Array(columns - 1).fill('<td><div></div></td>').join('')}`;
         tbody.appendChild(tr);
     }
 }

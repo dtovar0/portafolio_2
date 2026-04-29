@@ -411,8 +411,13 @@ function validateNexusForm(containerId) {
         const value = input.value ? input.value.trim() : '';
         let inputError = false;
 
-        // check empty
-        if (value === '') {
+        // skip empty and optional
+        if (value === '' && !input.required) {
+            return;
+        }
+
+        // check empty required
+        if (value === '' && input.required) {
             inputError = true;
         } 
         
@@ -636,6 +641,9 @@ document.addEventListener('input', (e) => {
         } else if (type === 'port' && val.length > 0) {
             const portNum = parseInt(val, 10);
             isValid = /^\d+$/.test(val) && portNum > 0 && portNum <= 65535;
+        } else if (type === 'text' && val.length > 0) {
+            // Basic text requirement: min 3 chars
+            isValid = val.length >= 3;
         } else if (type === 'match' && val.length > 0) {
             const targetId = input.dataset.matchTarget;
             const targetEl = document.getElementById(targetId);

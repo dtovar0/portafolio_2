@@ -227,7 +227,9 @@
                             <label class="text-[11px] font-black text-label/60 uppercase tracking-widest ml-1">Nombre Completo</label>
                             <div class="relative group">
                                 <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-label/30 group-focus-within:text-primary transition-colors"></i>
-                                <input type="text" id="addUserName" name="name" class="w-full h-12 bg-panel-fill/60 border-2 border-panel-border rounded-xl pl-11 pr-4 text-sm font-bold focus:border-primary outline-none transition-all" required placeholder="Ej: Juan Pérez">
+                                <input type="text" id="addUserName" name="name" 
+                                    class="w-full h-12 bg-panel-fill/60 border-2 border-panel-border rounded-xl pl-11 pr-4 text-sm font-bold focus:border-primary outline-none transition-all premium-validate" 
+                                    required data-validation-type="text" placeholder="Ej: Juan Pérez">
                             </div>
                         </div>
                         <div class="space-y-2">
@@ -473,14 +475,18 @@
                         <label class="text-[11px] font-black text-label/60 uppercase tracking-widest ml-1 text-primary">Nueva Contraseña</label>
                         <div class="relative group">
                             <i class="fas fa-key absolute left-4 top-1/2 -translate-y-1/2 text-label/30 group-focus-within:text-primary transition-colors"></i>
-                            <input type="password" id="editUserPassword" name="password" class="w-full h-12 bg-panel-fill/60 border-2 border-panel-border rounded-xl pl-11 pr-4 text-sm font-bold focus:border-primary outline-none transition-all" placeholder="••••••••">
+                            <input type="password" id="editUserPassword" name="password" 
+                                class="w-full h-12 bg-panel-fill/60 border-2 border-panel-border rounded-xl pl-11 pr-4 text-sm font-bold focus:border-primary outline-none transition-all premium-validate" 
+                                data-validation-type="password" placeholder="••••••••">
                         </div>
                     </div>
                     <div class="space-y-2">
                         <label class="text-[11px] font-black text-label/60 uppercase tracking-widest ml-1 text-primary">Confirmar Contraseña</label>
                         <div class="relative group">
                             <i class="fas fa-check-double absolute left-4 top-1/2 -translate-y-1/2 text-label/30 group-focus-within:text-primary transition-colors"></i>
-                            <input type="password" id="editUserPasswordConfirm" class="w-full h-12 bg-panel-fill/60 border-2 border-panel-border rounded-xl pl-11 pr-4 text-sm font-bold focus:border-primary outline-none transition-all" placeholder="••••••••">
+                            <input type="password" id="editUserPasswordConfirm" 
+                                class="w-full h-12 bg-panel-fill/60 border-2 border-panel-border rounded-xl pl-11 pr-4 text-sm font-bold focus:border-primary outline-none transition-all premium-validate" 
+                                data-validation-type="match" data-match-target="editUserPassword" placeholder="••••••••">
                         </div>
                     </div>
                 </div>

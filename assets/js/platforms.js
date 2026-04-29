@@ -384,7 +384,8 @@
             
             ghostHtml += `
                 <tr class="ghost-row pointer-events-none select-none ${bgClass}">
-                    ${Array(columns).fill(0).map(() => `<td class="py-5"><div></div></td>`).join('')}
+                    <td class="py-5 text-center"><div></div></td>
+                    ${Array(columns - 1).fill(0).map(() => `<td class="py-5"><div></div></td>`).join('')}
                 </tr>`;
         }
         tbody.append(ghostHtml);
