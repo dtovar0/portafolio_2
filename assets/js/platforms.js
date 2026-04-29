@@ -8,7 +8,7 @@
     let currentStep = 1;
     let selectedUserIds = [];
     let areaPage = 1;
-    const areasPerPage = 16;
+    const areasPerPage = 8;
 
     const iconsMap = {
         'server': '<i class="fas fa-server"></i>',
@@ -63,126 +63,173 @@
         'laptop': '<i class="fas fa-laptop"></i>'
     };
 
-    function renderAreaGrid() {
-        const grid = document.getElementById('areaGrid');
+    let currentFilterArea = 'all';
+    let searchQuery = '';
+
+    window.initHeader = function() {
+        const totalCountEl = document.getElementById('totalPlatformsCount');
+        const totalItemsCountEl = document.getElementById('totalItemsCount');
+        if (totalCountEl && window.__areaData) {
+            totalCountEl.textContent = window.__areaData.length;
+        }
+        if (totalItemsCountEl && window.__areaData) {
+            totalItemsCountEl.textContent = window.__areaData.length;
+        }
+
+        const searchInp = document.getElementById('platformSearch');
+        if (searchInp) {
+            searchInp.oninput = (e) => {
+                searchQuery = e.target.value.toLowerCase();
+                areaPage = 1; // Reset to first page on search
+                renderPlatformGrid();
+            };
+        }
+
+        // Pagination Listeners
+        const prevBtn = document.getElementById('prevPageBtn');
+        const nextBtn = document.getElementById('nextPageBtn');
+        if (prevBtn) prevBtn.onclick = () => { if (areaPage > 1) { areaPage--; renderPlatformGrid(); } };
+        if (nextBtn) nextBtn.onclick = () => { 
+            const areas = window.__areaData || [];
+            const totalPages = Math.ceil(areas.length / areasPerPage);
+            if (areaPage < totalPages) { areaPage++; renderPlatformGrid(); } 
+        };
+
+        const areaSelect = document.getElementById('modalAreaSelect');
+        if (areaSelect && window.__areaData) {
+            const currentVal = areaSelect.value;
+            areaSelect.innerHTML = '<option value="" disabled selected>Seleccione un área...</option>';
+            window.__areaData.forEach(area => {
+                areaSelect.innerHTML += `<option value="${area.id}">${area.name.toUpperCase()}</option>`;
+            });
+            if (currentVal) areaSelect.value = currentVal;
+        }
+    }
+
+    window.renderPlatformGrid = function() {
+        const grid = document.getElementById('platformGrid');
+        const emptyState = document.getElementById('emptyState');
         if (!grid) return;
         grid.innerHTML = '';
 
+        // Data Source
+        const areas = window.__areaData || [];
+        
+        // Filter Areas by search
+        let filtered = areas.filter(a => {
+            return !searchQuery || 
+                   a.name.toLowerCase().includes(searchQuery) || 
+                   (a.description && a.description.toLowerCase().includes(searchQuery));
+        });
+
+        // Pagination Logic
+        const totalItems = filtered.length;
+        const totalPages = Math.max(1, Math.ceil(totalItems / areasPerPage));
+        if (areaPage > totalPages) areaPage = totalPages;
+
         const start = (areaPage - 1) * areasPerPage;
         const end = start + areasPerPage;
-        const pageData = window.__areaData.slice(start, end);
+        const paginatedAreas = filtered.slice(start, end);
 
-        if (window.__areaData.length === 0) {
-            grid.innerHTML = `
-                <div class="col-span-full flex flex-col items-center justify-center py-32 bg-surface-container/5 rounded-[4rem] border-2 border-dashed border-panel-border/30 animate-in fade-in zoom-in duration-700">
-                    <div class="relative mb-10">
-                        <div class="absolute inset-0 bg-primary/20 blur-3xl rounded-full animate-pulse"></div>
-                        <div class="relative w-24 h-24 bg-gradient-to-br from-primary to-primary-focus rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-primary/20 rotate-3 hover:rotate-0 transition-transform duration-500">
-                            <i class="fas fa-layer-group text-4xl"></i>
-                        </div>
-                    </div>
-                    <div class="text-center space-y-3 px-8 max-w-md">
-                        <h3 class="text-2xl font-black text-primary uppercase tracking-tighter italic">Ecosistema Vacío</h3>
-                        <p class="text-xs font-bold text-label/40 uppercase tracking-widest leading-relaxed">
-                            Aún no se han configurado áreas operativas. Comience por definir sus departamentos para desplegar el catálogo de plataformas.
-                        </p>
-                    </div>
-                    <a href="/admin/areas" class="mt-10 h-14 px-10 rounded-2xl bg-primary text-white font-black text-[12px] uppercase tracking-[0.2em] shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-4">
-                        <span>Configurar Áreas</span>
-                        <i class="fas fa-arrow-right text-[10px]"></i>
-                    </a>
-                </div>
-            `;
+        // Update Footer
+        const itemsShownEl = document.getElementById('itemsShown');
+        const totalItemsCountEl = document.getElementById('totalItemsCount');
+        const currentPageNumEl = document.getElementById('currentPageNum');
+        const totalPagesNumEl = document.getElementById('totalPagesNum');
+        const prevBtn = document.getElementById('prevPageBtn');
+        const nextBtn = document.getElementById('nextPageBtn');
+
+        if (itemsShownEl) itemsShownEl.textContent = paginatedAreas.length;
+        if (totalItemsCountEl) totalItemsCountEl.textContent = totalItems;
+        if (currentPageNumEl) currentPageNumEl.textContent = areaPage;
+        if (totalPagesNumEl) totalPagesNumEl.textContent = totalPages;
+        
+        if (prevBtn) prevBtn.disabled = (areaPage === 1);
+        if (nextBtn) nextBtn.disabled = (areaPage === totalPages);
+
+        if (totalItems === 0) {
+            if (emptyState) emptyState.classList.remove('hidden');
             return;
         }
-
-        pageData.forEach(area => {
+        if (emptyState) emptyState.classList.add('hidden');
+        paginatedAreas.forEach((area, idx) => {
             const card = document.createElement('div');
-            // Using Tailwind for the card transition but keeping the internal structure
-            card.className = "group relative bg-panel-fill border border-panel-border rounded-[2rem] p-8 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 cursor-pointer overflow-hidden";
+            const areaColor = area.color || '#6366f1';
+            const areaPlatforms = window.__platformData[area.id] || [];
+            const platCount = areaPlatforms.length;
+            const userCount = areaPlatforms.reduce((acc, p) => acc + (p.users_count || 0), 0);
+            const status = area.status || 'Activo';
+            const statusColor = status === 'Activo' ? 'emerald' : 'rose';
+            const areaIcon = iconsMap[area.icon] || '<i class="fas fa-folder"></i>';
+            
+            card.className = "group relative flex flex-col h-full bg-panel-fill border border-panel-border rounded-2xl overflow-hidden transition-all duration-300 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 p-5";
+            
             card.innerHTML = `
-                <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-primary/10 transition-colors"></div>
-                <div class="relative z-10">
-                    <div class="flex items-center gap-5 mb-8">
-                        <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl shadow-lg transition-transform group-hover:scale-110 duration-500" 
-                             style="background: ${hexToRGBA(area.color, 0.15)}; color: ${area.color}">
-                            ${iconsMap[area.icon] || iconsMap['box']}
+                <!-- Sobrio Top Border -->
+                <div class="absolute top-0 left-0 w-full h-0.5 bg-panel-border/30">
+                    <div class="h-full bg-primary/40 opacity-0 group-hover:opacity-100 transition-all duration-500" style="width: 100%"></div>
+                </div>
+
+                <div class="relative z-10 flex items-center gap-4 mb-5">
+                    <!-- Icon with Subtle Area Accent -->
+                    <div class="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center text-lg transition-all duration-500 group-hover:scale-110 shadow-sm" 
+                         style="background: ${areaColor}10; color: ${areaColor}; border: 1px solid ${areaColor}20">
+                        ${areaIcon}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-sm font-black text-label uppercase tracking-tighter group-hover:text-primary transition-colors leading-tight truncate">
+                            ${area.name}
+                        </h3>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-${statusColor}-500"></span>
+                            <span class="text-[8px] font-black uppercase tracking-widest text-label/40">${status}</span>
                         </div>
-                        <div>
-                            <h3 class="text-xl font-black text-primary uppercase tracking-tighter italic leading-none">${area.name}</h3>
-                            <p class="text-[10px] text-label/40 font-black uppercase mt-1 tracking-widest">${(window.__platformData && window.__platformData[area.id] || []).length} PLATAFORMAS</p>
+                    </div>
+                </div>
+
+                <div class="relative z-10 flex-1 space-y-4">
+                    <!-- Metrics Badges (Sobrios) -->
+                    <div class="flex items-center gap-2">
+                        <div class="px-2 py-1 rounded-lg bg-surface-container/50 border border-panel-border flex items-center gap-2">
+                            <i class="fas fa-layer-group text-[9px] text-primary/40"></i>
+                            <span class="text-[9px] font-bold uppercase tracking-widest text-label/50">${platCount} <span class="opacity-40">Plataformas</span></span>
+                        </div>
+                        <div class="px-2 py-1 rounded-lg bg-surface-container/50 border border-panel-border flex items-center gap-2">
+                            <i class="fas fa-users text-[9px] text-primary/40"></i>
+                            <span class="text-[9px] font-bold uppercase tracking-widest text-label/50">${userCount} <span class="opacity-40">Usuarios</span></span>
                         </div>
                     </div>
                     
-                    <div class="space-y-4">
-                        <div class="h-1.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                            <div class="h-full rounded-full transition-all duration-1000" 
-                                 style="width: 100%; background: ${area.status === 'Activo' || area.status === 'activo' ? '#3b82f6' : '#ef4444'}"></div>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-[10px] font-black uppercase tracking-widest" 
-                                  style="color: ${area.status === 'Activo' || area.status === 'activo' ? '#3b82f6' : '#ef4444'}">
-                                ${area.status || 'ACTIVO'}
-                            </span>
-                            <span class="text-[10px] text-label/40 font-black uppercase tracking-widest group-hover:text-primary transition-colors flex items-center gap-2">
-                                GESTIONAR <i class="fas fa-chevron-right text-[8px]"></i>
-                            </span>
-                        </div>
-                    </div>
+                    <p class="text-[10px] text-label/40 leading-relaxed font-medium line-clamp-2 italic border-l-2 border-panel-border/30 pl-3">
+                        ${area.description || 'Gestión centralizada de servicios digitales.'}
+                    </p>
+                </div>
+
+                <div class="relative z-10 mt-5 pt-4 border-t border-panel-border/30">
+                    <button class="w-full h-10 rounded-xl flex items-center justify-center gap-3 text-[9px] font-black uppercase tracking-[0.2em] bg-surface-container/40 border border-panel-border text-label/40 hover:bg-primary hover:text-white hover:border-primary hover:shadow-lg hover:shadow-primary/20 transition-all duration-300" 
+                            onclick="drillDown('${area.name}', ${area.id})">
+                        <span>Gestionar Área</span>
+                        <i class="fas fa-chevron-right text-[8px] opacity-30 group-hover:translate-x-1 transition-transform"></i>
+                    </button>
                 </div>
             `;
-            card.onclick = () => drillDown(area.name, area.id);
             grid.appendChild(card);
         });
-
-        renderAreaPagination();
     }
 
-    function renderAreaPagination() {
-        const container = document.getElementById('areaPagination');
-        if (!container) return;
-
-        const totalPages = Math.ceil(window.__areaData.length / areasPerPage);
-        if (totalPages <= 1) {
-            container.classList.add('hidden');
-            return;
-        }
-
-        container.classList.remove('hidden');
-        container.className = "flex items-center justify-between mt-12 bg-surface-container/20 p-4 rounded-3xl border border-panel-border";
-        
-        container.innerHTML = `
-            <div class="text-xs font-black text-label/40 uppercase tracking-widest ml-4">
-                Página ${areaPage} de ${totalPages}
-            </div>
-            <div class="flex gap-2">
-                <button onclick="changeAreaPage(${areaPage - 1})" 
-                    ${areaPage === 1 ? 'disabled' : ''} 
-                    class="w-10 h-10 rounded-xl bg-panel-fill border border-panel-border flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all disabled:opacity-30 disabled:pointer-events-none active:scale-90">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <button onclick="changeAreaPage(${areaPage + 1})" 
-                    ${areaPage === totalPages ? 'disabled' : ''} 
-                    class="w-10 h-10 rounded-xl bg-panel-fill border border-panel-border flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all disabled:opacity-30 disabled:pointer-events-none active:scale-90">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-            </div>
-        `;
+    function hexToRGB(hex) {
+        hex = hex.replace('#', '');
+        if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        return `${r}, ${g}, ${b}`;
     }
 
-    window.changeAreaPage = function(page) {
-        const totalPages = Math.ceil(window.__areaData.length / areasPerPage);
-        if (page < 1 || page > totalPages) return;
-        areaPage = page;
-        renderAreaGrid();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    function drillDown(areaName, areaId) {
+    window.drillDown = function(areaName, areaId) {
         currentArea = areaName;
         currentAreaId = areaId;
 
-        // Safe data lookup with null-check for window.__platformData
         const platforms = (window.__platformData && (window.__platformData[areaId] || window.__platformData[String(areaId)])) || [];
 
         const gridView = document.getElementById('gridView');
@@ -191,21 +238,15 @@
         if (gridView) gridView.classList.add('hidden');
         if (drillDownView) {
             drillDownView.classList.remove('hidden');
-            drillDownView.style.display = 'flex'; // Force flex to enable flex-1 on children
+            drillDownView.style.display = 'flex';
         }
         
-        // Breadcrumb Sync
         const breadcrumb = document.getElementById('breadcrumbDrilldown');
         const breadcrumbArea = document.getElementById('breadcrumbArea');
         if (breadcrumb) breadcrumb.classList.remove('hidden');
         if (breadcrumbArea) breadcrumbArea.textContent = areaName;
 
         renderPlatformsTable(platforms);
-        
-        // Modal Pre-sync
-        const previewAreaTag = document.getElementById('previewAreaTag');
-        if (previewAreaTag) previewAreaTag.textContent = areaName.toUpperCase();
-        
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -213,8 +254,11 @@
         document.getElementById('gridView').classList.remove('hidden');
         document.getElementById('drillDownView').classList.add('hidden');
         document.getElementById('breadcrumbDrilldown').classList.add('hidden');
-        renderAreaGrid();
+        initHeader();
+        renderPlatformGrid();
     };
+
+
 
     let platformsDataTable;
 
@@ -725,7 +769,8 @@
 
     // Init
     document.addEventListener('DOMContentLoaded', () => {
-        renderAreaGrid();
+        initHeader();
+        renderPlatformGrid();
 
         // Search Integration
         $('#platformSearchSub').on('input', function() {
@@ -759,10 +804,9 @@
             form.dataset.mode = 'create';
             document.getElementById('platformModalTitle').textContent = "Registrar Nueva Plataforma";
             
-            const areaInp = document.getElementById('modalAreaHidden');
-            if (areaInp) {
-                areaInp.value = currentAreaId;
-                console.log("Setting area_id to:", currentAreaId);
+            const areaSelect = document.getElementById('modalAreaSelect');
+            if (areaSelect) {
+                areaSelect.value = currentAreaId || "";
             }
             
             selectedUserIds = [];
