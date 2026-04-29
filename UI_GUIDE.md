@@ -104,6 +104,9 @@ Para garantizar una lectura fluida y una estética equilibrada en las tablas, se
 - **Datos Numéricos o Contadores**: Siempre **Centrados** (`text-center`) con tipografía `font-black` para resaltar el dato sobre el texto.
 
 ### 2. Dimensionado de Columnas (Sizing)
-- **Columnas Tácticas (Checkbox, Icono, Estado)**: Usar anchos fijos en píxeles (ej: `w-[40px]` o `w-[100px]`) para evitar que el motor de DataTables las deforme al redimensionar.
-- **Columnas de Datos (Nombre, Email, Descripción)**: Usar porcentajes (ej: `w-[20%]` o `w-[25%]`) para permitir que la tabla se adapte al ancho del contenedor manteniendo la jerarquía de información.
+- **Columnas Tácticas (Checkbox, Icono, Estado)**: Usar anchos fijos o mínimos en píxeles (ej: `w-[40px]` o `w-[100px]`) para evitar que el motor de DataTables las deforme.
+- **Columnas de Iconos y Badges**: Estas columnas no deben ser excesivamente grandes; su ancho debe estar ajustado al contenido y este debe estar estrictamente **centrado**.
+- **Columnas de Datos (Nombre, Email, Descripción)**: Usar porcentajes para adaptabilidad. 
+  - Las columnas de **Nombre/Descripción** deben tener una longitud mayor para acomodar la información.
+  - Generalmente, la columna de **Descripción** debe ser más ancha que la de **Nombre** debido a la densidad de texto.
 - **Truncado Inteligente**: Las columnas de texto largo deben usar `truncate` y `line-clamp` para evitar saltos de línea que rompan la simetría de las filas Zebra.
