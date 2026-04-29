@@ -5,6 +5,8 @@ from app.decorators import admin_required
 from app.modules.core.models import AccessRequest, Platform
 from app.modules.auth.models import User
 from app.modules.audit.models import AuditLog
+from app.modules.notifications.services import send_notification_by_slug
+import os
 from datetime import datetime
 
 requests_bp = Blueprint('requests_module', __name__, url_prefix='/admin/requests')
@@ -129,6 +131,30 @@ def submit_request():
         db.session.add(log)
         
         db.session.commit()
+        
+        # --- NOTIFICACIONES AUTOMÁTICAS ---
+        try:
+            base_url = os.getenv('BASE_URL', request.host_url.rstrip('/'))
+            
+            # 1. Notificar al Usuario (Confirmación)
+            send_notification_by_slug('solicitud_usuario', current_user.email, context={
+                'nombre': current_user.nombre or current_user.email,
+                'plataforma': platform.name if platform else 'Sistema'
+            })
+            
+            # 2. Notificar a los Administradores
+            admins = User.query.filter_by(role='administrador', is_active=True).all()
+            for admin in admins:
+                send_notification_by_slug('solicitud_admin', admin.email, context={
+                    'usuario': current_user.email,
+                    'plataforma': platform.name if platform else 'Sistema',
+                    'area': platform.area.name if platform and platform.area else 'N/A',
+                    'fecha': datetime.now().strftime('%Y-%m-%d %H:%M'),
+                    'url': f"{base_url}/admin/requests"
+                })
+        except Exception as e:
+            current_app.logger.error(f"Error enviando notificaciones de solicitud: {e}")
+
         return jsonify({'status': 'success', 'message': 'Solicitud enviada correctamente'})
     except Exception as e:
         db.session.rollback()

@@ -15,7 +15,7 @@ def index():
     config = SMTPConfig.query.first()
     
     # Ensuring default templates exist
-    default_slugs = ['test', 'inicio', 'error', 'guardado', 'terminado', 'usuario_creado']
+    default_slugs = ['test', 'inicio', 'error', 'guardado', 'terminado', 'usuario_creado', 'solicitud_admin', 'solicitud_usuario']
     existing_slugs = [t.slug for t in NotificationTemplate.query.filter(NotificationTemplate.slug.in_(default_slugs)).all()]
     
     defaults = {
@@ -28,6 +28,18 @@ def index():
             'name': 'Bienvenida', 
             'subject': '🎉 Bienvenido a NEXUS: {nombre}', 
             'body': '<h2>👋 Hola {nombre},</h2><p>Tu cuenta ha sido habilitada exitosamente en <b>NEXUS Portal</b>.</p><p><b>Usuario:</b> {usuario}</p><p>Ya puedes acceder a tu catálogo de herramientas desde el siguiente enlace:</p><a href=\"{url}\" style=\"display:inline-block;padding:12px 24px;background:#6366f1;color:white;text-decoration:none;border-radius:8px;font-weight:bold;\">Acceder al Portal</a><br><br><p>Si no solicitaste este acceso, por favor contacta al equipo de TI.</p>', 
+            'is_html': True
+        },
+        'solicitud_admin': {
+            'name': 'Nueva Solicitud (Admin)',
+            'subject': '🔔 NUEVA SOLICITUD: Acceso a {plataforma}',
+            'body': '<h3>⚠️ Nueva Solicitud Pendiente</h3><p>El usuario <b>{usuario}</b> ha solicitado acceso a la plataforma <b>{plataforma}</b>.</p><p><b>Detalles:</b><br>Área: {area}<br>Fecha: {fecha}</p><p>Puedes revisar y procesar esta solicitud en el panel de gestión:</p><a href=\"{url}\" style=\"display:inline-block;padding:10px 20px;background:#ef4444;color:white;text-decoration:none;border-radius:6px;\">Ver Solicitudes</a>',
+            'is_html': True
+        },
+        'solicitud_usuario': {
+            'name': 'Confirmación Solicitud',
+            'subject': '📩 Recibimos tu solicitud: {plataforma}',
+            'body': '<h3>✅ Solicitud Recibida</h3><p>Hola <b>{nombre}</b>, hemos registrado tu solicitud de acceso para la plataforma <b>{plataforma}</b>.</p><p>Un administrador revisará tu petición a la brevedad. Te notificaremos por este medio en cuanto sea procesada.</p><p>Gracias por usar NEXUS Portal.</p>',
             'is_html': True
         }
     }
