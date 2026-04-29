@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+
+{% block title %}Nexus Drive | Gestión de Activos Premium{% endblock %}
+
+{% block breadcrumbs %}
+<span class="text-secondary">Nexus</span>
+<svg class="w-4 h-4 text-label/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+</svg>
+<span class="text-primary">Drive</span>
+{% endblock %}
+
+{% block content %}
+<div id="driveWrapper" class="w-full h-full flex flex-col animate-fade-in relative p-6 overflow-hidden">
+    
+    <!-- Top Stats Bar (High Density) -->
+    <div class="grid grid-cols-4 gap-6 mb-6">
+        <!-- Áreas KPI -->
+        <div class="bg-surface-container/30 backdrop-blur-md border border-panel-border p-6 rounded-2xl flex items-center gap-5 group hover:border-primary/40 transition-all">
+            <div class="w-14 h-14 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center text-2xl shadow-lg shadow-emerald-500/5 group-hover:scale-110 transition-transform">
+                <i class="fas fa-sitemap"></i>
+            </div>
+            <div>
+                <p class="text-[10px] font-black text-label/40 uppercase tracking-[0.2em]">Áreas</p>
+                <p id="kpi-areas" class="text-2xl font-black text-label leading-tight">{{ all_areas|length }}</p>
+            </div>
+        </div>
+
+        <!-- Plataformas KPI -->
+        <div class="bg-surface-container/30 backdrop-blur-md border border-panel-border p-6 rounded-2xl flex items-center gap-5 group hover:border-primary/40 transition-all">
+            <div class="w-14 h-14 rounded-xl bg-primary/10 text-primary flex items-center justify-center text-2xl shadow-lg shadow-primary/5 group-hover:scale-110 transition-transform">
+                <i class="fas fa-layer-group"></i>
+            </div>
+            <div>
+                <p class="text-[10px] font-black text-label/40 uppercase tracking-[0.2em]">Plataformas</p>
+                <p id="kpi-platforms" class="text-2xl font-black text-label leading-tight">{{ approved_platforms|length }}</p>
+            </div>
+        </div>
+
+        <!-- Downloads KPI -->
+        <div class="bg-surface-container/30 backdrop-blur-md border border-panel-border p-6 rounded-2xl flex items-center gap-5 group hover:border-primary/40 transition-all">
+            <div class="w-14 h-14 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center text-2xl shadow-lg shadow-amber-500/5 group-hover:scale-110 transition-transform">
+                <i class="fas fa-download"></i>
+            </div>
+            <div>
+                <p class="text-[10px] font-black text-label/40 uppercase tracking-[0.2em]">Descargas</p>
+                <p id="kpi-downloads" class="text-2xl font-black text-label leading-tight">0</p>
+            </div>
+        </div>
+
+        <!-- Uploads KPI -->
+        <div class="bg-surface-container/30 backdrop-blur-md border border-panel-border p-6 rounded-2xl flex items-center gap-5 group hover:border-primary/40 transition-all">
+            <div class="w-14 h-14 rounded-xl bg-sky-500/10 text-sky-500 flex items-center justify-center text-2xl shadow-lg shadow-sky-500/5 group-hover:scale-110 transition-transform">
+                <i class="fas fa-upload"></i>
+            </div>
+            <div>
+                <p class="text-[10px] font-black text-label/40 uppercase tracking-[0.2em]">Subidas</p>
+                <p id="kpi-uploads" class="text-2xl font-black text-label leading-tight">0</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Workspace -->
+    <div class="flex-1 grid grid-cols-12 gap-6 min-h-0">
+        
+        <!-- Left: Explorer Area -->
+        <div class="col-span-8 flex flex-col min-h-0">
+            <div class="bg-surface-container/30 backdrop-blur-md border border-panel-border rounded-3xl flex-1 flex flex-col min-h-0 overflow-hidden">
+                <!-- Toolbar -->
+                <div class="p-6 border-b border-panel-border flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <button id="btn-view-back" class="w-10 h-10 rounded-xl bg-label/5 text-label/60 hover:bg-primary/10 hover:text-primary transition-all hidden">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <h2 id="view-title" class="text-lg font-black text-label uppercase tracking-widest">Explorador de Áreas</h2>
+                    </div>
+                    
+                    <div class="flex items-center gap-3">
+                        <div class="relative">
+                            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-label/30"></i>
+                            <input type="text" id="file-search" class="h-11 w-64 pl-11 pr-4 bg-label/5 border border-panel-border rounded-xl text-sm text-label placeholder:text-label/30 focus:border-primary/40 focus:ring-0 transition-all" placeholder="Buscar en Drive...">
+                        </div>
+                        <button id="btn-sync-drive" class="h-11 px-6 bg-label/5 text-label/60 border border-panel-border rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-primary/40 hover:text-primary transition-all active:scale-95">
+                            <i class="fas fa-sync-alt mr-2"></i> Sincronizar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Content Zone -->
+                <div id="drive-content" class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+                    <!-- Area Selector (Default View) -->
+                    <div id="view-areas" class="grid grid-cols-4 gap-6 animate-fade-in">
+                        {% for area in all_areas %}
+                        <div onclick="openArea('{{ area.name }}')" class="bg-label/5 border border-panel-border p-8 rounded-2xl cursor-pointer hover:border-primary/40 hover:bg-primary/5 group transition-all text-center">
+                            <div class="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl transition-all group-hover:scale-110" 
+                                 style="background: {{ area.color }}20; color: {{ area.color }}; box-shadow: 0 10px 20px -5px {{ area.color }}30;">
+                                <i class="fas {{ area.icon or 'fa-folder' }} text-3xl"></i>
+                            </div>
+                            <h4 class="text-sm font-black text-label uppercase tracking-widest">{{ area.name }}</h4>
+                            <p class="text-[10px] text-label/40 mt-2 font-bold">{{ area.platforms|length }} Plataformas Disponibles</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Platform Grid (Dynamic View) -->
+                    <div id="view-platforms" class="hidden grid grid-cols-4 gap-6 animate-fade-in"></div>
+
+                    <!-- File Explorer (Dynamic View) -->
+                    <div id="view-files" class="hidden animate-fade-in">
+                        <div id="explorer-container" class="min-h-[400px]"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Monitor & Details -->
+        <div class="col-span-4 flex flex-col gap-6 min-h-0">
+            <!-- System Monitor -->
+            <div class="bg-surface-container/30 backdrop-blur-md border border-panel-border rounded-3xl flex-1 flex flex-col min-h-0 overflow-hidden">
+                <div class="p-6 border-b border-panel-border flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
+                        <h2 class="text-xs font-black text-label/40 uppercase tracking-[0.2em]">Monitor Nexus</h2>
+                    </div>
+                    <button class="text-[10px] font-black text-primary uppercase tracking-widest hover:underline">Ver Historial</button>
+                </div>
+                
+                <div id="activity-log-monitor" class="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
+                    <!-- Logs injected by drive.js -->
+                </div>
+            </div>
+
+            <!-- Details Sidebar -->
+            <div class="bg-surface-container/30 backdrop-blur-md border border-panel-border rounded-3xl h-80 flex flex-col overflow-hidden">
+                <div id="details-empty" class="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-4">
+                    <div class="w-20 h-20 bg-label/5 rounded-3xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <i class="fas fa-fingerprint text-3xl text-label/20"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-black text-label uppercase tracking-widest">Análisis Drive</h3>
+                        <p class="text-[10px] text-label/40 font-bold mt-1">Selecciona un activo para escanear metadatos.</p>
+                    </div>
+                </div>
+                <div id="details-content" class="hidden p-6 h-full overflow-y-auto">
+                    <!-- Injected by drive.js -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals Section (v8 Symmetrical Standards) -->
+<div id="modal-folder" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300 hidden">
+    <div class="bg-surface-container border border-panel-border rounded-[32px] w-[500px] shadow-2xl overflow-hidden translate-y-12 transition-transform duration-500">
+        <div class="p-8 border-b border-panel-border">
+            <h3 class="text-2xl font-black text-label uppercase tracking-widest italic">Nueva Carpeta</h3>
+            <p class="text-sm text-label/40 font-bold mt-1">Crea un nuevo directorio en el nodo actual.</p>
+        </div>
+        <div class="p-8">
+            <input type="text" id="newFolderName" class="w-full h-14 bg-label/5 border border-panel-border rounded-2xl px-6 text-label font-bold focus:border-primary/40 focus:ring-0 transition-all" placeholder="Nombre de la carpeta...">
+        </div>
+        <div class="p-8 bg-black/20 flex items-center gap-4">
+            <button onclick="closeModal('modal-folder')" class="h-12 flex-1 rounded-2xl bg-label/5 text-label/60 font-black text-[12px] uppercase tracking-widest hover:bg-label/10 active:scale-95 transition-all">Cancelar</button>
+            <button id="confirm-new-folder" class="h-12 flex-1 rounded-2xl bg-primary text-white font-black text-[12px] uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all">Crear Carpeta</button>
+        </div>
+    </div>
+</div>
+
+<!-- Context Menu -->
+<div id="drive-context-menu" class="fixed z-[200] bg-surface-container/90 backdrop-blur-xl border border-panel-border rounded-2xl shadow-2xl py-2 min-w-[220px] hidden animate-in fade-in zoom-in duration-200">
+    <div id="ctx-download" class="flex items-center gap-4 px-5 py-3 text-sm font-bold text-label hover:bg-primary/10 hover:text-primary cursor-pointer transition-all">
+        <i class="fas fa-download text-label/40"></i>
+        <span>Descargar Activo</span>
+    </div>
+    <div id="ctx-info" class="flex items-center gap-4 px-5 py-3 text-sm font-bold text-label hover:bg-primary/10 hover:text-primary cursor-pointer transition-all">
+        <i class="fas fa-info-circle text-label/40"></i>
+        <span>Ver Metadatos</span>
+    </div>
+    <div class="h-px bg-panel-border my-2"></div>
+    <div id="ctx-delete" class="flex items-center gap-4 px-5 py-3 text-sm font-bold text-rose-500 hover:bg-rose-500/10 cursor-pointer transition-all">
+        <i class="fas fa-trash-alt"></i>
+        <span>Eliminar Permanente</span>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Inyectamos datos de plataformas para que drive.js los use
+    const PLATFORMS_DATA = {{ platforms_json|tojson|safe }};
+</script>
+<script src="{{ url_for('core.serve_assets', filename='js/drive.js') }}"></script>
+{% endblock %}

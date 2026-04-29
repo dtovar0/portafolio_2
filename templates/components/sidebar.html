@@ -62,6 +62,12 @@
                 <span class="sidebar-text text-sm font-bold whitespace-nowrap">Solicitudes</span>
             </a>
 
+            <a href="{{ url_for('drive.index') }}" title="Nexus Drive" data-nx-tooltip="Gestión de Archivos"
+               class="nav-item {% if request.endpoint == 'drive.index' %}nav-item-active{% endif %} gap-4 px-4 py-3 text-label hover:text-primary hover:bg-primary/5 transition-all group">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
+                <span class="sidebar-text text-sm font-bold whitespace-nowrap">Nexus Drive</span>
+            </a>
+
             <p class="text-[12px] font-black text-label/40 uppercase tracking-[0.2em] px-3 mb-2 mt-8 sidebar-text">Operaciones</p>
             <hr class="sidebar-divider">
 

@@ -93,6 +93,9 @@ def create_app():
     from app.modules.platforms.routes import platforms_bp
     from app.modules.requests.routes import requests_bp
     from app.modules.portal.routes import portal_bp
+    from app.modules.drive.routes import drive_bp
+
+
 
 
 
@@ -108,6 +111,7 @@ def create_app():
     app.register_blueprint(platforms_bp)
     app.register_blueprint(requests_bp)
     app.register_blueprint(portal_bp)
+    app.register_blueprint(drive_bp)
 
 
 
