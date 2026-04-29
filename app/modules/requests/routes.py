@@ -85,6 +85,21 @@ def process_request():
                     status='success'
                 )
                 db.session.add(log)
+                
+                # --- NOTIFICACIÓN AL USUARIO ---
+                try:
+                    slug = 'solicitud_aprobada' if action == 'approve' else 'solicitud_rechazada'
+                    user_obj = User.query.filter_by(email=req.user_email).first()
+                    base_url = os.getenv('BASE_URL', request.host_url.rstrip('/'))
+                    
+                    send_notification_by_slug(slug, req.user_email, context={
+                        'nombre': user_obj.nombre if user_obj else req.user_email,
+                        'plataforma': req.platform.name if req.platform else 'Sistema',
+                        'url': f"{base_url}/portal"
+                    })
+                except Exception as e:
+                    current_app.logger.error(f"Error enviando notificación de resolución: {e}")
+
                 updated_count += 1
                 
         db.session.commit()

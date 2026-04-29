@@ -15,7 +15,7 @@ def index():
     config = SMTPConfig.query.first()
     
     # Ensuring default templates exist
-    default_slugs = ['test', 'inicio', 'error', 'guardado', 'terminado', 'usuario_creado', 'solicitud_admin', 'solicitud_usuario']
+    default_slugs = ['test', 'inicio', 'error', 'guardado', 'terminado', 'usuario_creado', 'solicitud_admin', 'solicitud_usuario', 'solicitud_aprobada', 'solicitud_rechazada']
     existing_slugs = [t.slug for t in NotificationTemplate.query.filter(NotificationTemplate.slug.in_(default_slugs)).all()]
     
     defaults = {
@@ -40,6 +40,18 @@ def index():
             'name': 'Confirmación Solicitud',
             'subject': '📩 Recibimos tu solicitud: {plataforma}',
             'body': '<h3>✅ Solicitud Recibida</h3><p>Hola <b>{nombre}</b>, hemos registrado tu solicitud de acceso para la plataforma <b>{plataforma}</b>.</p><p>Un administrador revisará tu petición a la brevedad. Te notificaremos por este medio en cuanto sea procesada.</p><p>Gracias por usar NEXUS Portal.</p>',
+            'is_html': True
+        },
+        'solicitud_aprobada': {
+            'name': 'Solicitud Aprobada',
+            'subject': '🟢 ACCESO CONCEDIDO: {plataforma}',
+            'body': '<h3>✨ ¡Buenas noticias!</h3><p>Tu solicitud de acceso para la plataforma <b>{plataforma}</b> ha sido <b>APROBADA</b>.</p><p>Ya puedes ingresar y utilizar la herramienta de forma inmediata:</p><a href=\"{url}\" style=\"display:inline-block;padding:12px 24px;background:#10b981;color:white;text-decoration:none;border-radius:8px;font-weight:bold;\">Ir a la Plataforma</a>',
+            'is_html': True
+        },
+        'solicitud_rechazada': {
+            'name': 'Solicitud Rechazada',
+            'subject': '🔴 Actualización de Solicitud: {plataforma}',
+            'body': '<h3>Información sobre tu solicitud</h3><p>Lamentamos informarte que tu solicitud de acceso para la plataforma <b>{plataforma}</b> ha sido <b>RECHAZADA</b> en este momento.</p><p>Si consideras que esto es un error o requieres más información, por favor contacta a tu supervisor o al equipo de TI.</p>',
             'is_html': True
         }
     }
