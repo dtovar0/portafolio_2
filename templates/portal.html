@@ -1,6 +1,6 @@
 {% extends 'portal_base.html' %}
 
-{% block title %}Catálogo de Servicios | Nexus Portal{% endblock %}
+{% block title %}Portal | Nexus Portal{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('core.serve_assets', filename='css/portal.css') }}?v={{ range(1000, 9999) | random }}">
@@ -15,15 +15,6 @@
         <div class="portal-hero-grid"></div>
 
         <div class="relative z-10 px-8 pt-6 pb-4 flex items-center gap-6">
-            <div class="flex items-center gap-3 flex-shrink-0">
-                <div class="portal-section-icon">
-                    <i class="fas fa-th-large text-base"></i>
-                </div>
-                <div>
-                    <p class="text-[9px] font-black text-primary/70 uppercase tracking-[0.35em]">Catálogo</p>
-                    <h2 class="text-[17px] font-black text-label uppercase tracking-tighter leading-none">Servicios</h2>
-                </div>
-            </div>
 
             <div class="flex-1 max-w-xl relative portal-search-wrap group">
                 <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-[11px] text-label/30 group-focus-within:text-primary transition-colors z-10 pointer-events-none"></i>
