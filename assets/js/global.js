@@ -35,21 +35,21 @@
 
 // 1. Theme Engine — 6-Theme Cycling System
 const NEXUS_THEMES = [
-    { name: 'Sapphire',       class: 'light',              isDark: false },
-    { name: 'Midnight Ocean',  class: 'dark',               isDark: true  },
-    { name: 'Emerald Forest',  class: 'theme-emerald-light', isDark: false },
-    { name: 'Obsidian',        class: 'theme-obsidian-dark', isDark: true  },
-    { name: 'Rose Quartz',     class: 'theme-rose-light',   isDark: false },
-    { name: 'Cyber Violet',    class: 'theme-violet-dark',  isDark: true  }
+    { name: 'Sapphire',       'class': 'light',              isDark: false },
+    { name: 'Midnight Ocean',  'class': 'dark',               isDark: true  },
+    { name: 'Emerald Forest',  'class': 'theme-emerald-light', isDark: false },
+    { name: 'Obsidian',        'class': 'theme-obsidian-dark', isDark: true  },
+    { name: 'Rose Quartz',     'class': 'theme-rose-light',   isDark: false },
+    { name: 'Cyber Violet',    'class': 'theme-violet-dark',  isDark: true  }
 ];
 
 function applyNexusTheme(index) {
     const html = document.documentElement;
-    const allClasses = NEXUS_THEMES.map(t => t.class);
+    const allClasses = NEXUS_THEMES.map(t => t['class']);
     html.classList.remove('dark', 'light', ...allClasses);
 
     const theme = NEXUS_THEMES[index];
-    html.classList.add(theme.class);
+    html.classList.add(theme['class']);
     if (theme.isDark) html.classList.add('dark');
     else html.classList.add('light');
 

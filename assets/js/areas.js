@@ -191,6 +191,7 @@ function updateActionButtonsAreas() {
 
     const selectAllCheckbox = document.getElementById('selectAllAreas');
     if (selectAllCheckbox) {
+        const allOnPage = document.querySelectorAll('.area-checkbox').length;
         selectAllCheckbox.checked = count > 0 && count === filteredAreas.length;
         selectAllCheckbox.indeterminate = count > 0 && count < filteredAreas.length;
     }
@@ -221,7 +222,8 @@ function renderAreasTable() {
         const areaIconHtml = iconsMap[area.icon] || iconsMap['box'];
         
         tbody.innerHTML += `
-            <tr class="group hover:bg-primary/5 transition-all cursor-pointer border-b border-panel-border/30 last:border-none ${isSelected ? 'bg-primary/5' : ''}" onclick="editArea(${area.id}); event.stopPropagation();">
+            <tr class="group hover:bg-primary/5 transition-all cursor-pointer border-b border-panel-border/30 last:border-none ${isSelected ? 'bg-primary/5' : ''}" 
+                onclick="toggleAreaSelection(${area.id}, ${!isSelected})">
                 <td class="text-center" style="border-left:3px solid ${isSelected ? 'rgb(var(--color-primary))' : 'transparent'};padding:0 0.5rem;" onclick="event.stopPropagation()">
                     <div class="flex items-center justify-center">
                         <input type="checkbox" class="area-checkbox w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" 

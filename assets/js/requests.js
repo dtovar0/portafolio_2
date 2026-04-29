@@ -93,6 +93,16 @@ function initRequestsDataTable() {
             { 
                 data: 'created_at',
                 render: (data) => `<div class="text-[11px] font-bold text-label/50 text-center flex items-center justify-center h-full">${data}</div>`
+            },
+            {
+                data: null,
+                orderable: false,
+                render: (data, type, row) => `
+                    <div class="flex items-center justify-end pr-2 h-full">
+                        <button onclick="openEditModal(${JSON.stringify(row).replace(/"/g, '&quot;')}); event.stopPropagation();" class="w-8 h-8 rounded-lg bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all">
+                            <i class="fas fa-eye text-[10px]"></i>
+                        </button>
+                    </div>`
             }
         ],
         autoWidth: false,
@@ -108,7 +118,7 @@ function initRequestsDataTable() {
             }
         },
         drawCallback: function(settings) {
-            renderGhostRows(settings, 5);
+            renderGhostRows(settings, 6);
         }
     });
 

@@ -202,10 +202,10 @@ function renderUsersTable() {
                 </div>
             </td>
             <td>
-                <span class="text-[13px] font-black text-label uppercase italic tracking-tighter truncate">${user.name}</span>
+                <span class="text-[15px] font-black text-label uppercase italic tracking-tighter truncate">${user.name}</span>
             </td>
             <td>
-                <span class="text-[11px] font-bold text-label/60 uppercase tracking-widest truncate">${user.email}</span>
+                <span class="text-[13px] font-bold text-label/60 uppercase tracking-widest truncate">${user.email}</span>
             </td>
             <td class="text-center">
                 <div class="flex justify-center">
@@ -283,8 +283,17 @@ function renderGhostRows(columns) {
         const tr = document.createElement('tr');
         tr.className = "ghost-row pointer-events-none select-none border-b border-panel-border/10";
         tr.style.height = "var(--row-h, 60px)";
-        // First column (checkbox) must be centered to match orientation rule
-        tr.innerHTML = `<td class="text-center"><div></div></td>${Array(columns - 1).fill('<td><div></div></td>').join('')}`;
+        
+        tr.innerHTML = `
+            <td class="text-center"><div></div></td>
+            <td class="text-left"><div></div></td>
+            <td class="text-left"><div></div></td>
+            <td class="text-center"><div></div></td>
+            <td class="text-center"><div></div></td>
+            <td class="text-center"><div></div></td>
+            <td class="text-left"><div></div></td>
+            <td class="text-center"><div></div></td>
+        `;
         tbody.appendChild(tr);
     }
 }

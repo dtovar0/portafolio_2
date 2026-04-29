@@ -227,8 +227,9 @@
             columns: [
                 { 
                     data: 'id', 
-                    width: '40px', 
+                    width: '50px', 
                     orderable: false,
+                    className: 'text-center',
                     render: (data) => `
                         <div class="flex items-center justify-center">
                             <input type="checkbox" class="platform-checkbox w-4 h-4 rounded border-panel-border text-primary focus:ring-primary/20 cursor-pointer" data-id="${data}" onchange="updateActionButtons()">
@@ -236,8 +237,9 @@
                 },
                 { 
                     data: null, 
-                    width: '50px',
+                    width: '80px',
                     orderable: false,
+                    className: 'text-center',
                     render: (data) => {
                         const style = `background: ${data.bg_color || '#6366f1'}; color: ${data.text_color || '#ffffff'}`;
                         return `
@@ -252,7 +254,8 @@
                 },
                 { 
                     data: 'name', 
-                    width: '200px',
+                    width: '20%',
+                    className: 'text-left',
                     render: (data) => `
                         <div class="flex flex-col">
                             <span class="text-sm font-black text-primary uppercase italic leading-none">${data}</span>
@@ -269,7 +272,8 @@
                 },
                 { 
                     data: 'description', 
-                    width: '150px',
+                    width: '35%',
+                    className: 'text-left',
                     render: (data) => `<div class="text-[12px] text-label/60 font-bold line-clamp-2 pr-8">${data || '-'}</div>` 
                 },
                 { 
@@ -385,7 +389,13 @@
             ghostHtml += `
                 <tr class="ghost-row pointer-events-none select-none ${bgClass}">
                     <td class="py-5 text-center"><div></div></td>
-                    ${Array(columns - 1).fill(0).map(() => `<td class="py-5"><div></div></td>`).join('')}
+                    <td class="py-5 text-center"><div></div></td>
+                    <td class="py-5 text-left"><div></div></td>
+                    <td class="py-5 text-left"><div></div></td>
+                    <td class="py-5 text-left"><div></div></td>
+                    <td class="py-5 text-center"><div></div></td>
+                    <td class="py-5 text-center"><div></div></td>
+                    <td class="py-5 text-center"><div></div></td>
                 </tr>`;
         }
         tbody.append(ghostHtml);

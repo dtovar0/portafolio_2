@@ -34,11 +34,11 @@
 
                     <!-- Botones de Acción Globales -->
                     <div class="flex items-center gap-2">
-                        <button id="btnEditArea" class="nexus-btn nexus-btn-secondary" disabled>
+                        <button id="btnEditArea" class="nexus-btn nexus-btn-secondary !text-label !border-panel-border disabled:opacity-30 disabled:pointer-events-none" disabled>
                             <i class="fas fa-edit"></i>
                             <span>Modificar</span>
                         </button>
-                        <button id="btnDeleteArea" class="nexus-btn nexus-btn-error" disabled>
+                        <button id="btnDeleteArea" class="nexus-btn nexus-btn-secondary !text-rose-500 !border-rose-500/20 disabled:opacity-30 disabled:pointer-events-none" disabled>
                             <i class="fas fa-trash-alt"></i>
                             <span>Eliminar</span>
                         </button>
@@ -122,7 +122,8 @@
 
             <div class="p-8 min-h-[480px] overflow-y-auto custom-scrollbar">
                 <!-- STEP 1: BASIC DATA -->
-                <div id="stepSection1" class="step-sect                    <div class="space-y-2 group">
+                <div id="stepSection1" class="step-section space-y-6">
+                    <div class="space-y-2 group">
                         <label class="text-[11px] font-black text-label/40 uppercase tracking-widest ml-1 group-focus-within:text-primary transition-colors">Nombre del Área</label>
                         <input type="text" id="areaName" placeholder="EJ: RECURSOS HUMANOS" 
                                class="w-full h-12 bg-input-bg border-2 border-panel-border rounded-xl px-6 text-sm font-bold text-input outline-none focus:border-primary/40 focus:ring-4 focus:ring-primary/10 transition-all premium-validate" required data-validation-type="text">
@@ -132,7 +133,7 @@
                         <textarea id="areaDescription" placeholder="DESCRIPCIÓN DE RESPONSABILIDADES..." rows="3"
                                class="w-full bg-input-bg border-2 border-panel-border rounded-xl px-6 py-4 text-sm font-bold text-input outline-none focus:border-primary/40 focus:ring-4 focus:ring-primary/10 transition-all resize-none premium-validate" required data-validation-type="text"></textarea>
                     </div>
-            </div>
+
                     <div class="flex items-center px-6 h-14 bg-surface-container/20 border border-panel-border rounded-2xl justify-between">
                         <div class="flex flex-col">
                             <span class="text-[10px] font-black text-label/40 uppercase tracking-widest">Estado Inicial</span>
@@ -277,7 +278,7 @@
                         <textarea id="editAreaDescription" placeholder="DESCRIPCIÓN DE RESPONSABILIDADES..." rows="3"
                                class="w-full bg-input-bg border-2 border-panel-border rounded-xl px-6 py-4 text-sm font-bold text-input outline-none focus:border-primary/40 focus:ring-4 focus:ring-primary/10 transition-all resize-none premium-validate" required data-validation-type="text"></textarea>
                     </div>
-                </div>
+
                     <div class="flex items-center px-6 h-14 bg-surface-container/20 border border-panel-border rounded-2xl justify-between">
                         <div class="flex flex-col">
                             <span class="text-[10px] font-black text-label/40 uppercase tracking-widest">Estado de Operación</span>

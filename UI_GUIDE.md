@@ -110,3 +110,20 @@ Para garantizar una lectura fluida y una estética equilibrada en las tablas, se
   - Las columnas de **Nombre/Descripción** deben tener una longitud mayor para acomodar la información.
   - Generalmente, la columna de **Descripción** debe ser más ancha que la de **Nombre** debido a la densidad de texto.
 - **Truncado Inteligente**: Las columnas de texto largo deben usar `truncate` y `line-clamp` para evitar saltos de línea que rompan la simetría de las filas Zebra.
+
+## 🛠️ Lógica de Interacción Administrativa
+
+Para garantizar una experiencia de control robusta y evitar acciones accidentales, se establecen las siguientes reglas de interacción en tablas de gestión:
+
+### 1. Estado Inicial de Botones
+- **Desactivación por Defecto**: Todos los botones de acción global (Modificar, Eliminar, Suspender, etc.) deben iniciar en estado **deshabilitado**.
+- **Estilo de Desactivación**: Se deben aplicar las clases `opacity-40` y `pointer-events-none` junto con el atributo `disabled` para proporcionar un feedback visual claro de que la acción no está disponible.
+
+### 2. Habilitación Condicional
+- **Acción Única (Modificar/Ver Detalles)**: Se habilita únicamente cuando hay **exactamente 1** registro seleccionado.
+- **Acción Masiva (Eliminar/Exportar)**: Se habilita cuando hay **1 o más** registros seleccionados.
+
+### 3. Patrón de Selección de Filas
+- **Clic para Seleccionar**: Al hacer clic en cualquier parte de una fila de la tabla, el sistema debe conmutar la selección de dicha fila (marcar/desmarcar checkbox y resaltar fondo).
+- **No Clic para Editar**: Se prohíbe que el clic simple en una fila abra directamente un modal de edición. El flujo oficial debe ser: **Seleccionar → Visualizar botón habilitado → Click en botón de acción**.
+- **Retroalimentación Visual**: Las filas seleccionadas deben usar la clase `.bg-primary/5` y mostrar el indicador lateral de color de la marca para confirmar la selección.

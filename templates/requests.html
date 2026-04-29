@@ -158,13 +158,14 @@
                 <table id="requestsDT" class="w-full text-left table-fixed dataTable">
                     <thead class="sticky top-0 z-20">
                         <tr class="text-[11px] font-black text-panel-header-text uppercase tracking-[0.2em]">
-                            <th class="col-check py-4 bg-panel-header text-center" style="border-left:3px solid transparent;">
+                            <th class="w-[50px] py-4 bg-panel-header text-center" style="border-left:3px solid transparent;">
                                 <input type="checkbox" id="selectAll" class="nexus-checkbox mx-auto">
                             </th>
-                            <th class="col-user px-5 py-4 bg-panel-header border-y border-panel-border">Solicitante</th>
-                            <th class="col-platform px-5 py-4 bg-panel-header border-y border-panel-border">Plataforma</th>
-                            <th class="col-status px-5 py-4 bg-panel-header border-y border-panel-border text-center">Estado</th>
-                            <th class="col-date px-5 py-4 bg-panel-header border-y border-panel-border text-center">Fecha</th>
+                            <th class="w-[25%] px-5 py-4 bg-panel-header border-y border-panel-border text-left">Solicitante</th>
+                            <th class="w-[35%] px-5 py-4 bg-panel-header border-y border-panel-border text-left">Plataforma</th>
+                            <th class="w-[150px] px-5 py-4 bg-panel-header border-y border-panel-border text-center">Estado</th>
+                            <th class="w-[180px] px-5 py-4 bg-panel-header border-y border-panel-border text-center">Fecha</th>
+                            <th class="w-[100px] px-5 py-4 bg-panel-header border-y border-panel-border text-right pr-6">Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="requestsTableBody">
@@ -306,6 +307,7 @@
                 },
                 { 
                     data: 'status', 
+                    className: 'text-center',
                     render: (data) => {
                         const status = String(data).toLowerCase();
                         let cls = 'nx-badge-primary';
@@ -317,10 +319,12 @@
                 },
                 { 
                     data: 'created_at',
+                    className: 'text-center',
                     render: (data) => `<div class="text-[11px] font-bold text-label/50 text-center flex items-center justify-center h-full">${data}</div>`
                 },
                 { 
                     data: 'id',
+                    className: 'text-right pr-6',
                     render: (data, type, row) => {
                         if (row.status !== 'Pendiente') return `<div class="flex items-center justify-end pr-5 h-full opacity-10"><i class="fas fa-lock text-[10px]"></i></div>`;
                         return `
@@ -375,7 +379,7 @@
                     <td class="text-left"><div></div></td>
                     <td class="text-center"><div></div></td>
                     <td class="text-center"><div></div></td>
-                    <td class="text-center"><div></div></td>
+                    <td class="text-right pr-6"><div></div></td>
                 </tr>`;
         }
         tbody.append(ghostHtml);
