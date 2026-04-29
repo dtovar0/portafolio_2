@@ -181,7 +181,7 @@ table.dataTable thead th,
     background-color: rgb(var(--color-panel-header-bg)) !important;
     border-bottom: 2px solid rgb(var(--color-primary) / 0.4) !important;
     padding: 0 1.25rem !important;
-    color: white !important;
+    color: rgb(var(--color-panel-header-text)) !important;
     font-size: 11px !important;
     font-weight: 900 !important;
     text-transform: uppercase !important;
@@ -1493,8 +1493,146 @@ input[name="db_engine"]:checked + label .w-5.h-5 .bg-primary {
 }
 
 
+/* === NEXUS PREMIUM UI COMPONENTS — v4.0 === */
+
+/* 1. SYMMETRIC BUTTON SYSTEM */
+.nexus-btn {
+    height: 3rem !important;
+    padding: 0 1.5rem !important;
+    border-radius: 1rem !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.15em !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.75rem !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    border: 1px solid transparent;
+}
+
+.nexus-btn:active {
+    transform: scale(0.96);
+}
+
+.nexus-btn-primary {
+    background: rgb(var(--color-primary)) !important;
+    color: white !important;
+    box-shadow: 0 10px 20px -5px rgb(var(--color-primary) / 0.3) !important;
+}
+
+.nexus-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px -8px rgb(var(--color-primary) / 0.4) !important;
+    filter: brightness(1.1);
+}
+
+.nexus-btn-secondary {
+    background: rgb(var(--color-surface-container-bg)) !important;
+    color: rgb(var(--color-tab-inactive-text)) !important;
+    border: 1px solid rgb(var(--color-panel-border)) !important;
+}
+
+.nexus-btn-secondary:hover {
+    border-color: rgb(var(--color-primary) / 0.4) !important;
+    color: rgb(var(--color-primary)) !important;
+    background: rgb(var(--color-primary) / 0.05) !important;
+}
+
+/* 2. PREMIUM MODAL ARCHITECTURE */
+.nexus-modal {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 100 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 1rem !important;
+    background: rgb(var(--color-slate-950) / 0.6) !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+.nexus-modal.hidden {
+    display: none !important;
+}
+
+.modal-backdrop {
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: -1 !important;
+}
+
+.modal-panel {
+    background: rgb(var(--color-panel-fill)) !important;
+    border: 1px solid rgb(var(--color-panel-border)) !important;
+    border-radius: 2rem !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    animation: nexus-modal-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes nexus-modal-in {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-header {
+    padding: 1.5rem 2rem !important;
+    background: rgb(var(--color-panel-header-bg)) !important;
+    border-bottom: 1px solid rgb(var(--color-panel-border)) !important;
+}
+
+.modal-body {
+    padding: 2rem !important;
+}
+
+.modal-footer {
+    padding: 1.5rem 2rem !important;
+    background: rgb(var(--color-surface-container-bg)) / 0.3 !important;
+    border-top: 1px solid rgb(var(--color-panel-border)) !important;
+    display: flex !important;
+    gap: 1rem !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+}
+
+/* 3. TACTICAL CHECKBOX */
+.nexus-checkbox {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+    border-radius: 0.5rem !important;
+    border: 2px solid rgb(var(--color-panel-border)) !important;
+    background: rgb(var(--color-input-bg)) !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    appearance: none !important;
+    position: relative !important;
+}
+
+.nexus-checkbox:checked {
+    background: rgb(var(--color-primary)) !important;
+    border-color: rgb(var(--color-primary)) !important;
+}
+
+.nexus-checkbox:checked::after {
+    content: '✓' !important;
+    position: absolute !important;
+    inset: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: white !important;
+    font-size: 10px !important;
+    font-weight: 900 !important;
+}
+
 /* --- NUCLEAR SELECT ARROW FIX --- */
-/* Forces elimination of native browser arrows across all environments */
 select {
     -webkit-appearance: none !important;
     -moz-appearance: none !important;

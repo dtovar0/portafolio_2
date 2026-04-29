@@ -484,3 +484,17 @@ html:not(.dark) .modal-footer {
 #templateEditor::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.1);
 }
+
+/* === NEXUS TABLE COLUMN UTILITIES === */
+.col-id { width: 80px !important; }
+.col-user { width: 25% !important; }
+.col-platform { width: 20% !important; }
+.col-status { width: 140px !important; text-align: center !important; }
+.col-date { width: 180px !important; text-align: center !important; }
+.col-actions { width: 120px !important; text-align: right !important; }
+.col-check { width: 48px !important; text-align: center !important; }
+
+/* Ghost row adjustments */
+.ghost-row td {
+    border-top: 1px solid rgb(var(--color-panel-border) / 0.1) !important;
+}

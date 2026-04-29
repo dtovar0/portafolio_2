@@ -15,14 +15,14 @@
         <div class="flex items-center gap-2">
             <!-- Configuration Tab (Active) -->
             <button onclick="switchTab('config')" id="tab-trigger-config" 
-                class="tab-trigger w-60 relative py-3.5 flex items-center justify-center gap-3 rounded-xl text-[12px] font-black uppercase tracking-[0.25em] transition-all duration-300 z-10 text-tab-active-text bg-tab-active shadow-xl shadow-tab-active/20 active:scale-95">
+                class="tab-trigger nexus-btn nexus-btn-primary w-60 !py-6">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
                 <span>SMTP Server</span>
             </button>
 
             <!-- Template Tab (Standby) -->
             <button onclick="switchTab('template')" id="tab-trigger-template" 
-                class="tab-trigger w-60 relative py-3.5 flex items-center justify-center gap-3 rounded-xl text-[12px] font-black uppercase tracking-[0.25em] transition-all duration-300 z-10 text-tab-inactive-text bg-tab-inactive border border-panel-border active:scale-95">
+                class="tab-trigger nexus-btn nexus-btn-secondary w-60 !py-6">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                 <span>Plantilla</span>
             </button>
@@ -152,7 +152,7 @@
 
                         <!-- Test Connection Button -->
                         <div class="mt-8">
-                            <button onclick="if(validateNexusForm('tab-panel-config')) { openModal('modal-test-email'); }" class="w-full h-14 bg-button-bg text-button-text rounded-2xl text-[12px] font-black uppercase tracking-[0.28em] shadow-xl shadow-button-bg/20 hover:opacity-90 transition-all active:scale-95 flex items-center justify-center gap-3">
+                            <button onclick="if(validateNexusForm('tab-panel-config')) { openModal('modal-test-email'); }" class="nexus-btn nexus-btn-primary w-full !h-14">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v10a2 2 0 002 2z"></path></svg>
                                 Enviar Correo de Prueba
                             </button>
@@ -460,12 +460,12 @@ Estado: CRÍTICO</div>
         </div>
 
         <footer class="modal-footer">
-            <button type="button" onclick="closeModal('modal-test-email')" class="flex-1 py-4 bg-label/5 border border-panel-border text-label/60 rounded-2xl text-[12px] font-black uppercase tracking-[0.2em] hover:bg-label/10 hover:text-label transition-all active:scale-95 flex items-center justify-center gap-2">
+            <button type="button" onclick="closeModal('modal-test-email')" class="nexus-btn nexus-btn-secondary flex-1">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
                 Descartar
             </button>
-            <button onclick="if(validateNexusForm('modal-form-area')) { sendTestEmail(); }" class="flex-1 py-4 bg-primary text-white rounded-2xl text-[12px] font-black uppercase tracking-[0.2em] shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all active:scale-95 flex items-center justify-center gap-2">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+            <button onclick="if(validateNexusForm('modal-form-area')) { sendTestEmail(); }" class="nexus-btn nexus-btn-primary flex-1">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v10a2 2 0 002 2z"></path></svg>
                 Confirmar
             </button>
         </footer>

@@ -126,110 +126,78 @@
                         </svg>
                     </button>
                 </div>
-            </header>
-
-            <!-- Settings Modal -->
-            <div id="settingsModal" class="nexus-modal hidden fixed inset-0 z-[100] items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-                <div class="nexus-modal-content w-full max-w-lg bg-panel-fill border border-panel-border rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            </header>            <!-- Settings Modal -->
+            <div id="settingsModal" class="nexus-modal hidden">
+                <div class="modal-backdrop" onclick="closeModal('settingsModal')"></div>
+                <div class="modal-panel max-w-lg">
                     <!-- Header -->
-                    <div class="p-6 border-b border-panel-border flex items-center justify-between bg-surface-container/30">
+                    <header class="modal-header flex items-center justify-between">
                         <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary shadow-lg">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
+                            <div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner border border-primary/10">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
                             </div>
                             <div>
-                                <h3 class="text-base font-black text-primary uppercase leading-none tracking-tighter italic">Configuración de Interfaz</h3>
-                                <p class="text-[12px] text-label/60 font-bold uppercase tracking-widest mt-1">Preferencias y Experiencia de Usuario</p>
+                                <h3 class="text-xs font-black uppercase tracking-widest text-primary italic">Configuración de Interfaz</h3>
+                                <p class="text-[12px] text-label/40 font-bold uppercase tracking-tight">Preferencias y Experiencia de Usuario</p>
                             </div>
                         </div>
-                        <button onclick="closeModal('settingsModal')" class="p-2 hover:bg-surface-container rounded-xl transition-all">
-                            <svg class="w-6 h-6 text-label" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        <button onclick="closeModal('settingsModal')" class="w-8 h-8 rounded-full bg-label/5 text-label/40 hover:text-primary hover:bg-primary/10 transition-all flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
                         </button>
-                    </div>
-
-                    <div class="flex items-center gap-2 bg-panel-header/20 p-2 border-b border-panel-border relative z-10 px-8">
-                        <div class="flex-1 py-3 px-4 rounded-xl text-[12px] font-black uppercase tracking-widest text-primary text-center">
-                            Ajustes Generales de Interfaz
+                    </header>
+ 
+                    <!-- Modal Body -->
+                    <div class="modal-body overflow-y-auto custom-scrollbar max-h-[60vh] space-y-6">
+                        <!-- Notification Toggle (Desktop) -->
+                        <div class="flex items-center justify-between p-5 bg-surface-container/20 rounded-2xl border border-panel-border/40 group">
+                            <div>
+                                <h4 class="text-sm font-black text-label uppercase tracking-tight group-focus-within:text-primary transition-colors">Notificaciones de Escritorio</h4>
+                                <p class="text-[11px] text-label/40 font-bold uppercase tracking-tighter mt-1">Alertas de tareas terminadas</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="settingNotifyToggle" class="sr-only peer" {% if current_user.pref_notifications %}checked{% endif %}>
+                                <div class="w-12 h-6 bg-panel-border rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                            </label>
                         </div>
-                    </div>
 
-                    <!-- TAB CONTENT WRAPPER -->
-                    <div class="flex-grow overflow-y-auto custom-scrollbar">
-                        <!-- Tab: Generales -->
-                        <div id="tabContentGeneral" class="p-8 space-y-6">
-                            <!-- Notification Toggle (Desktop) -->
-                            <div class="flex items-center justify-between p-4 bg-surface-container/20 rounded-2xl border border-panel-border/40">
+                        <!-- Notification Toggle (Email) -->
+                        <div class="flex items-center justify-between p-5 bg-surface-container/20 rounded-2xl border border-panel-border/40 group">
+                            <div>
+                                <h4 class="text-sm font-black text-label uppercase tracking-tight group-focus-within:text-primary transition-colors">Notificaciones por Correo</h4>
+                                <p class="text-[11px] text-label/40 font-bold uppercase tracking-tighter mt-1">Avisos de inicio, fin y errores</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="settingEmailNotifyToggle" class="sr-only peer" {% if current_user.pref_email_notifications %}checked{% endif %}>
+                                <div class="w-12 h-6 bg-panel-border rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                            </label>
+                        </div>
+
+                        <!-- Refresh Interval -->
+                        <div class="p-5 bg-surface-container/20 rounded-2xl border border-panel-border/40 group">
+                            <div class="flex justify-between items-center mb-4">
                                 <div>
-                                    <h4 class="text-sm font-black text-label uppercase tracking-tight">Notificaciones de Escritorio</h4>
-                                    <p class="text-[12px] text-label/60 font-medium leading-none mt-1">Recibir alertas de tareas terminadas</p>
+                                    <h4 class="text-sm font-black text-label uppercase tracking-tight group-focus-within:text-primary transition-colors">Frecuencia de Refresco</h4>
+                                    <p class="text-[11px] text-label/40 font-bold uppercase tracking-tighter mt-1">Actualización automática (segundos)</p>
                                 </div>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" id="settingNotifyToggle" class="sr-only peer" {% if current_user.pref_notifications %}checked{% endif %}>
-                                    <div class="w-12 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                                </label>
+                                <span id="refreshValueDisplay" class="px-3 py-1 bg-primary text-white text-[11px] font-black rounded-lg shadow-lg shadow-primary/20">{{ current_user.pref_refresh_interval or 60 }}s</span>
                             </div>
-
-                            <!-- Notification Toggle (Email) -->
-                            <div class="flex items-center justify-between p-4 bg-surface-container/20 rounded-2xl border border-panel-border/40">
-                                <div>
-                                    <h4 class="text-sm font-black text-label uppercase tracking-tight">Notificaciones por Correo</h4>
-                                    <p class="text-[12px] text-label/60 font-medium leading-none mt-1">Avisos de inicio, fin y errores de tareas</p>
-                                </div>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" id="settingEmailNotifyToggle" class="sr-only peer" {% if current_user.pref_email_notifications %}checked{% endif %}>
-                                    <div class="w-12 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                                </label>
-                            </div>
-
-                            <!-- Refresh Interval -->
-                            <div class="p-4 bg-surface-container/20 rounded-2xl border border-panel-border/40">
-                                <div class="flex justify-between items-center mb-4">
-                                    <div>
-                                        <h4 class="text-sm font-black text-label uppercase tracking-tight">Frecuencia de Refresco</h4>
-                                        <p class="text-[12px] text-label/60 font-medium leading-none mt-1">Actualización automática de tablas</p>
-                                    </div>
-                                    <span id="refreshValueDisplay" class="px-3 py-1 bg-primary/20 text-primary text-[12px] font-black rounded-lg">{{ current_user.pref_refresh_interval or 60 }}s</span>
-                                </div>
-                                <input type="range" id="settingRefreshRange" min="10" max="300" step="10" value="{{ current_user.pref_refresh_interval or 60 }}" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary">
-                                <div class="flex justify-between text-[10px] font-black text-label/40 uppercase tracking-widest mt-2">
-                                    <span>10s (Alta)</span>
-                                    <span>300s (Baja)</span>
-                                </div>
-                            </div>
-
-                            <!-- Guided Tour Toggle -->
-                            <div class="flex items-center justify-between p-4 bg-surface-container/20 rounded-2xl border border-panel-border/40">
-                                <div>
-                                    <h4 class="text-sm font-black text-label uppercase tracking-tight">Tour Guiado Automático</h4>
-                                    <p class="text-[12px] text-label/60 font-medium leading-none mt-1">Mostrar guía al iniciar sesión</p>
-                                </div>
-                                <div class="flex items-center gap-4">
-                                    <button onclick="startPlatformTour()" class="p-2 hover:bg-primary/20 text-primary rounded-xl transition-all" title="Iniciar Tour Ahora">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                    </button>
-                                    <label class="relative inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" id="settingTourToggle" class="sr-only peer" checked>
-                                        <div class="w-12 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                                    </label>
-                                </div>
-                            </div>
+                            <input type="range" id="settingRefreshRange" min="10" max="300" step="10" value="{{ current_user.pref_refresh_interval or 60 }}" class="w-full h-1.5 bg-panel-border rounded-lg appearance-none cursor-pointer accent-primary">
                         </div>
                     </div>
 
                     <!-- Footer Actions -->
-                    <div class="p-8 bg-surface-container/30 border-t border-panel-border flex items-center gap-4">
-                        <button onclick="closeModal('settingsModal')" class="h-12 flex-1 rounded-2xl bg-tab-inactive border border-panel-border text-tab-inactive-text font-black text-[12px] uppercase tracking-widest flex items-center justify-center gap-3 hover:border-primary hover:text-primary transition-all active:scale-95 shadow-lg shadow-black/5">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    <footer class="modal-footer">
+                        <button onclick="closeModal('settingsModal')" class="nexus-btn nexus-btn-secondary flex-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
                             <span>Cancelar</span>
                         </button>
-                        <button id="saveSettingsBtn" class="h-12 flex-1 bg-primary text-white text-[12px] font-black rounded-2xl uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                        <button id="saveSettingsBtn" class="nexus-btn nexus-btn-primary flex-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
                             <span>Guardar</span>
                         </button>
-                    </div>
+                    </footer>
                 </div>
             </div>
-            
             <!-- Main Content Area -->
             <main class="flex-1 overflow-hidden min-h-0 flex flex-col">
                 {% block content %}{% endblock %}

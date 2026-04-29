@@ -144,10 +144,10 @@
                 </div>
                 
                 <div class="flex items-center gap-2">
-                    <button onclick="processSelected('approve')" id="bulkBtnApprove" class="h-12 px-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 font-black text-[10px] uppercase tracking-widest flex items-center gap-3 hover:bg-emerald-500 hover:text-white transition-all disabled:opacity-20 disabled:grayscale disabled:pointer-events-none" disabled>
+                    <button onclick="processSelected('approve')" id="bulkBtnApprove" class="nexus-btn nexus-btn-primary !bg-emerald-500 !shadow-emerald-500/20 disabled:opacity-20 disabled:grayscale disabled:pointer-events-none" disabled>
                         <i class="fas fa-check"></i> Aprobar
                     </button>
-                    <button onclick="processSelected('reject')" id="bulkBtnReject" class="h-12 px-6 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 font-black text-[10px] uppercase tracking-widest flex items-center gap-3 hover:bg-rose-500 hover:text-white transition-all disabled:opacity-20 disabled:grayscale disabled:pointer-events-none" disabled>
+                    <button onclick="processSelected('reject')" id="bulkBtnReject" class="nexus-btn nexus-btn-secondary !text-rose-500 !border-rose-500/20 disabled:opacity-20 disabled:grayscale disabled:pointer-events-none" disabled>
                         <i class="fas fa-times"></i> Denegar
                     </button>
                 </div>
@@ -157,14 +157,14 @@
             <div class="flex-1 min-h-0 flex flex-col">
                 <table id="requestsDT" class="w-full text-left table-fixed dataTable">
                     <thead class="sticky top-0 z-20">
-                        <tr class="text-[11px] font-black text-white/50 uppercase tracking-[0.2em]">
-                            <th class="w-[40px] py-4 bg-slate-900/80 text-center" style="border-left:3px solid transparent;">
-                                <input type="checkbox" id="selectAll" class="w-4 h-4 rounded border-2 border-primary/30 text-primary cursor-pointer transition-all">
+                        <tr class="text-[11px] font-black text-panel-header-text uppercase tracking-[0.2em]">
+                            <th class="col-check py-4 bg-panel-header text-center" style="border-left:3px solid transparent;">
+                                <input type="checkbox" id="selectAll" class="nexus-checkbox mx-auto">
                             </th>
-                            <th class="w-[30%] px-5 py-4 bg-slate-900/80 border-y border-panel-border">Solicitante</th>
-                            <th class="w-[30%] px-5 py-4 bg-slate-900/80 border-y border-panel-border">Plataforma</th>
-                            <th class="w-[15%] px-5 py-4 bg-slate-900/80 border-y border-panel-border text-center">Estado</th>
-                            <th class="w-[25%] px-5 py-4 bg-slate-900/80 border-y border-panel-border text-center">Fecha</th>
+                            <th class="col-user px-5 py-4 bg-panel-header border-y border-panel-border">Solicitante</th>
+                            <th class="col-platform px-5 py-4 bg-panel-header border-y border-panel-border">Plataforma</th>
+                            <th class="col-status px-5 py-4 bg-panel-header border-y border-panel-border text-center">Estado</th>
+                            <th class="col-date px-5 py-4 bg-panel-header border-y border-panel-border text-center">Fecha</th>
                         </tr>
                     </thead>
                     <tbody id="requestsTableBody">
@@ -241,12 +241,12 @@
             </div>
 
             <!-- Modal Footer -->
-            <footer id="modalActionFooter" class="p-8 pt-0 flex gap-4">
+            <footer id="modalActionFooter" class="modal-footer">
                 <!-- Action buttons will be hidden if status is not Pending -->
-                <button id="modalBtnReject" class="flex-1 h-14 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 font-black text-[11px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-rose-500 hover:text-white transition-all shadow-lg shadow-rose-500/5">
+                <button id="modalBtnReject" class="nexus-btn nexus-btn-secondary flex-1 !h-14 !text-rose-500 !border-rose-500/20 shadow-lg shadow-rose-500/5">
                     <i class="fas fa-times"></i> Denegar Solicitud
                 </button>
-                <button id="modalBtnApprove" class="flex-1 h-14 rounded-2xl bg-emerald-500 text-white font-black text-[11px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-emerald-500/20">
+                <button id="modalBtnApprove" class="nexus-btn nexus-btn-primary flex-1 !h-14 !bg-emerald-500 shadow-xl shadow-emerald-500/20">
                     <i class="fas fa-check"></i> Aprobar Acceso
                 </button>
             </footer>

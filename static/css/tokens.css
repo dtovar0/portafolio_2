@@ -106,7 +106,8 @@ table.dataTable tbody tr {
   --badge-sky-bg: 14 165 233 / 0.1;      --badge-sky-text: 3 105 161;
   --badge-slate-bg: 71 85 105 / 0.1;     --badge-slate-text: 51 65 85;
   --badge-cyan-bg: 8 145 178 / 0.1;      --badge-cyan-text: 21 94 117;
-  --color-panel-header-bg: 226 232 240; /* Slate-200: cohesivo con nueva paleta */
+  --color-panel-header-bg: 226 232 240; /* Slate-200 */
+  --color-panel-header-text: 30 58 138; /* Blue-900: Contraste alto sobre Slate-200 */
 
   --color-panel-fill: 255 255 255;
   --color-panel-border: 203 213 225;   /* Slate-300: borde perceptible */
@@ -211,6 +212,7 @@ table.dataTable tbody tr {
     --color-header-bg: #1e3a8a;
     --color-header-text: #e2e8f0;
     --color-panel-header-bg: 37 99 235 / 0.15;
+    --color-panel-header-text: 96 165 250; /* Blue-400: Brillo neón en modo oscuro */
 
     --color-panel-fill: 15 23 42;           /* Slate-900: estándar industry */
     --color-panel-border: 51 65 85;         /* Slate-600: sólido y legible */

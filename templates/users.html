@@ -43,24 +43,24 @@
 
                     <!-- Botones de Acción (A la derecha como en Audit) -->
                     <div class="flex items-center gap-2">
-                        <button id="btnAreasUser" data-action="users-open-areas" class="h-12 min-w-[140px] px-5 rounded-2xl border border-violet-500/30 text-violet-400 font-black text-[12px] uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-violet-500/10 transition-all disabled:opacity-30 disabled:grayscale disabled:pointer-events-none active:scale-95" disabled>
+                        <button id="btnAreasUser" data-action="users-open-areas" class="nexus-btn nexus-btn-secondary !text-violet-400 !border-violet-500/30 disabled:opacity-30 disabled:grayscale disabled:pointer-events-none" disabled>
                             <i class="fas fa-sitemap"></i>
                             <span>Áreas</span>
                         </button>
-                        <button id="btnAccessUser" data-action="users-open-access" class="h-12 min-w-[140px] px-5 rounded-2xl border border-primary/30 text-primary font-black text-[12px] uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-primary/10 transition-all disabled:opacity-30 disabled:grayscale disabled:pointer-events-none active:scale-95" disabled>
+                        <button id="btnAccessUser" data-action="users-open-access" class="nexus-btn nexus-btn-secondary disabled:opacity-30 disabled:grayscale disabled:pointer-events-none" disabled>
                             <i class="fas fa-key"></i>
                             <span>Accesos</span>
                         </button>
-                        <button id="btnEditUser" data-action="users-edit-selected" class="h-12 min-w-[140px] px-5 rounded-2xl bg-surface-container/50 border border-panel-border text-label font-black text-[12px] uppercase tracking-widest flex items-center justify-center gap-3 hover:border-primary hover:text-primary transition-all disabled:opacity-30 disabled:pointer-events-none active:scale-95" disabled>
+                        <button id="btnEditUser" data-action="users-edit-selected" class="nexus-btn nexus-btn-secondary !text-label !border-panel-border disabled:opacity-30 disabled:pointer-events-none" disabled>
                             <i class="fas fa-edit"></i>
                             <span>Modificar</span>
                         </button>
-                        <button id="btnDeleteUser" data-action="users-delete-selected" class="h-12 min-w-[140px] px-5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 font-black text-[12px] uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-rose-500 hover:text-white transition-all disabled:opacity-30 disabled:pointer-events-none active:scale-95" disabled>
+                        <button id="btnDeleteUser" data-action="users-delete-selected" class="nexus-btn nexus-btn-secondary !text-rose-500 !border-rose-500/20 disabled:opacity-30 disabled:pointer-events-none" disabled>
                             <i class="fas fa-trash-alt"></i>
                             <span>Eliminar</span>
                         </button>
                         <div class="w-px h-8 bg-panel-border mx-2"></div>
-                        <button data-action="users-open-type-modal" class="h-12 min-w-[140px] px-5 rounded-2xl bg-primary text-white font-black text-[12px] uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3">
+                        <button data-action="users-open-type-modal" class="nexus-btn nexus-btn-primary">
                             <i class="fas fa-user-plus"></i>
                             <span>Agregar</span>
                         </button>
@@ -76,17 +76,17 @@
                 <div class="dt-layout-cell flex-1 min-h-0 flex flex-col">
                     <table class="w-full text-left table-fixed dataTable">
                         <thead class="sticky top-0 z-20">
-                            <tr class="bg-slate-900/80 backdrop-blur-md">
-                                <th class="w-[5%] text-center" style="border-left:3px solid transparent;padding:0 1.25rem 0 1rem;">
-                                     <input type="checkbox" id="selectAllUsers" data-action="users-select-all" class="w-5 h-5 rounded-md border-2 border-primary/30 text-primary focus:ring-primary/20 cursor-pointer transition-all">
+                            <tr class="text-panel-header-text uppercase tracking-[0.2em] font-black text-[11px]">
+                                <th class="col-check py-4 bg-panel-header text-center" style="border-left:3px solid transparent;">
+                                     <input type="checkbox" id="selectAllUsers" data-action="users-select-all" class="nexus-checkbox mx-auto">
                                 </th>
-                                <th class="w-[18%]">Nombre</th>
-                                <th class="w-[20%]">Correo Electrónico</th>
-                                <th class="w-[10%] text-center">Rol</th>
-                                <th class="w-[10%] text-center">Origen</th>
-                                <th class="w-[8%] text-center">Acceso</th>
-                                <th class="w-[19%]">Áreas de Trabajo</th>
-                                <th class="w-[10%] text-center">Estado</th>
+                                <th class="w-[18%] py-4 bg-panel-header border-y border-panel-border px-5">Nombre</th>
+                                <th class="w-[20%] py-4 bg-panel-header border-y border-panel-border px-5">Correo Electrónico</th>
+                                <th class="col-status py-4 bg-panel-header border-y border-panel-border px-5 text-center">Rol</th>
+                                <th class="w-[10%] py-4 bg-panel-header border-y border-panel-border px-5 text-center">Origen</th>
+                                <th class="w-[8%] py-4 bg-panel-header border-y border-panel-border px-5 text-center">Acceso</th>
+                                <th class="w-[19%] py-4 bg-panel-header border-y border-panel-border px-5">Áreas de Trabajo</th>
+                                <th class="col-status py-4 bg-panel-header border-y border-panel-border px-5 text-center">Estado</th>
                             </tr>
                         </thead>
                         <tbody id="usersTableBody">
@@ -312,32 +312,30 @@
                             </div>
                             <div id="addUserSelectedList" class="flex-grow overflow-y-auto custom-scrollbar p-3 space-y-2 bg-primary/5">
                                 <!-- Selected Cards -->
-                            </div>
-                        </div>
-                    </div>
+                                               </div>
                     <input type="hidden" name="areas" id="selectedUserAreasInput">
                 </div>
             </div>
 
-            <div class="p-8 bg-surface-container/30 border-t border-panel-border flex items-center gap-4">
+            <footer class="modal-footer">
                 <!-- Cancelar a la izquierda -->
-                <button type="button" id="btnAddUserCancel" data-action="users-close-add-modal" class="h-12 flex-1 rounded-2xl bg-tab-inactive border border-panel-border text-tab-inactive-text font-black text-[12px] uppercase tracking-widest hover:border-rose-500 hover:text-rose-500 transition-all active:scale-95 shadow-lg shadow-black/5">
+                <button type="button" id="btnAddUserCancel" data-action="users-close-add-modal" class="nexus-btn nexus-btn-secondary flex-1">
                     Cancelar
                 </button>
                 
                 <!-- Botón Atrás (Solo visible en paso 2) -->
-                <button type="button" id="btnAddUserBack" data-action="users-step-back" class="h-12 px-6 rounded-2xl bg-tab-inactive border border-panel-border text-tab-inactive-text font-black text-[12px] uppercase tracking-widest hidden items-center gap-3 hover:border-primary hover:text-primary transition-all active:scale-95">
+                <button type="button" id="btnAddUserBack" data-action="users-step-back" class="nexus-btn nexus-btn-secondary hidden !flex-none">
                     <i class="fas fa-arrow-left"></i> <span>Atrás</span>
                 </button>
 
                 <!-- Botón Acción Principal -->
-                <button type="button" id="btnAddUserNext" data-action="users-step-next" class="h-12 flex-1 bg-primary text-white text-[12px] font-black rounded-2xl uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3">
+                <button type="button" id="btnAddUserNext" data-action="users-step-next" class="nexus-btn nexus-btn-primary flex-1">
                     <span>Siguiente</span> <i class="fas fa-arrow-right"></i>
                 </button>
-                <button type="submit" id="btnAddUserSubmit" data-action="users-submit-new" class="h-12 flex-1 bg-emerald-500 text-white text-[12px] font-black rounded-2xl uppercase tracking-widest shadow-lg shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-all hidden items-center justify-center gap-3">
+                <button type="submit" id="btnAddUserSubmit" data-action="users-submit-new" class="nexus-btn nexus-btn-primary flex-1 !bg-emerald-500 shadow-emerald-500/20 hidden">
                      <i class="fas fa-check"></i> <span>Finalizar</span>
                 </button>
-            </div>
+            </footer>
         </form>
     </div>
 </div>

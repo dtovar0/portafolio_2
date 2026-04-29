@@ -24,7 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const platforms = Array.from(document.querySelectorAll('.platform-card'));
     filteredPlatforms = platforms;
     updatePagination();
-    updateStats();
 
     // Handle resize to adjust pagination dynamically
     window.addEventListener('resize', () => {
@@ -114,18 +113,6 @@ function initPagination() {
 }
 
 /**
- * Update stat chips in header
- */
-function updateStats() {
-    const platforms = Array.from(document.querySelectorAll('.platform-card'));
-    const favCount = platforms.filter(p => p.getAttribute('data-is-fav') === 'true').length;
-    const totalEl = document.getElementById('totalCount');
-    const favEl = document.getElementById('favCount');
-    if (totalEl) totalEl.textContent = platforms.length;
-    if (favEl) favEl.textContent = favCount;
-}
-
-/**
  * Update UI based on current page and filters
  */
 function updatePagination() {
@@ -170,27 +157,6 @@ function updatePagination() {
     
     if (prevBtn) prevBtn.disabled = (currentPage === 1);
     if (nextBtn) nextBtn.disabled = (currentPage === totalPages || totalItems === 0);
-
-    // Update page number indicator
-    const currentPageNum = document.getElementById('currentPageNum');
-    const totalPagesNum = document.getElementById('totalPagesNum');
-    if (currentPageNum) currentPageNum.textContent = currentPage;
-    if (totalPagesNum) totalPagesNum.textContent = totalPages;
-
-    // Empty state toggle
-    const emptyState = document.getElementById('emptyState');
-    const grid = document.getElementById('platformsGrid');
-    if (emptyState && grid) {
-        if (totalItems === 0) {
-            emptyState.classList.remove('hidden');
-            emptyState.classList.add('flex');
-            grid.style.visibility = 'hidden';
-        } else {
-            emptyState.classList.add('hidden');
-            emptyState.classList.remove('flex');
-            grid.style.visibility = 'visible';
-        }
-    }
 }
 
 /**
@@ -224,8 +190,6 @@ async function toggleFav(event, platformId) {
                 icon.classList.add('text-label/20');
                 icon.classList.remove('text-amber-400', 'drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]');
             }
-
-            updateStats();
 
             // Re-apply filters to handle visibility if in favorites tab
             if (activeTab === 'favorites') {
