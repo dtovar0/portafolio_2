@@ -61,6 +61,18 @@ def process_request():
                 req.status = status
                 req.processed_at = datetime.now()
                 
+                # EFFECTIVE ACCESS GRANT: Link user to platform AND its Area
+                if action == 'approve':
+                    user = User.query.filter_by(email=req.user_email).first()
+                    if user and req.platform:
+                        # 1. Link to the specific platform
+                        if req.platform not in user.platforms:
+                            user.platforms.append(req.platform)
+                        
+                        # 2. Link to the Area (REQUIRED for visibility in Portal)
+                        if req.platform.area and req.platform.area not in user.areas:
+                            user.areas.append(req.platform.area)
+                
                 # Audit Log
                 log = AuditLog(
                     user=current_user.email,

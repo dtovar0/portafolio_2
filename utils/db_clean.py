@@ -42,6 +42,10 @@ def clean_database():
 
             # Tablas operativas a purgar
             tables_to_clean = [
+                'platform_access_requests',
+                'user_platform_favorites',
+                'platforms',
+                'areas',
                 'psx5k_command_logs',
                 'psx5k_history',
                 'psx5k_details',

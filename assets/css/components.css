@@ -178,7 +178,7 @@ table.dataTable,
 table.dataTable thead th,
 .tab-panel-content table thead th {
     height: var(--row-h, 52px) !important;
-    background-color: color-mix(in srgb, rgb(var(--color-surface-container-bg)), black 15%) !important;
+    background-color: rgb(var(--color-panel-header-bg)) !important;
     border-bottom: 2px solid rgb(var(--color-primary) / 0.4) !important;
     padding: 0 1.25rem !important;
     color: white !important;
@@ -209,7 +209,7 @@ table.dataTable tbody td,
     vertical-align: middle !important;
     border-top: 1px solid rgb(var(--color-panel-border) / 0.2) !important;
     border-bottom: none !important;
-    color: rgb(var(--color-text-body) / 0.85);
+    color: var(--color-body-text);
     font-size: 13px;
     height: inherit !important;
     overflow: hidden;
@@ -279,7 +279,7 @@ table.dataTable tbody tr:hover td {
 }
 
 .ghost-row td div {
-    background: rgb(var(--color-label) / 0.1);
+    background: rgb(var(--color-label-text) / 0.1);
     height: 6px;
     width: 60%;
     border-radius: 99px;

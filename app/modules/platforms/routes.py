@@ -79,6 +79,10 @@ def add_platform():
         name = request.form.get('name')
         area_id = request.form.get('area_id')
         description = request.form.get('description')
+        
+        if not area_id or area_id == 'null' or area_id == 'undefined':
+            return jsonify({'success': False, 'error': 'El Área es obligatoria. No puede existir una plataforma sin área asignada.'}), 400
+            
         direct_link = request.form.get('direct_link')
         icon = request.form.get('icon', 'box')
         status = request.form.get('status', 'Activo')
@@ -142,9 +146,13 @@ def edit_platform(platform_id):
     try:
         platform = Platform.query.get_or_404(platform_id)
         
+        area_id = request.form.get('area_id')
+        if not area_id or area_id == 'null' or area_id == 'undefined':
+            return jsonify({'success': False, 'error': 'El Área es obligatoria. No puede dejar la plataforma sin un departamento vinculado.'}), 400
+            
         platform.name = request.form.get('name')
         platform.description = request.form.get('description')
-        platform.area_id = request.form.get('area_id')
+        platform.area_id = area_id
         platform.direct_link = request.form.get('direct_link')
         platform.icon = request.form.get('icon')
         platform.status = request.form.get('status')
@@ -195,6 +203,15 @@ def delete_platform(platform_id):
         platform = Platform.query.get_or_404(platform_id)
         platform_name = platform.name
         
+        # ─── MANUAL CASCADE CLEANUP ───
+        # 1. Remove all access requests for this platform
+        from app.modules.core.models import AccessRequest
+        AccessRequest.query.filter_by(platform_id=platform_id).delete()
+        
+        # 2. Clear user associations (pivot table)
+        platform.users = []
+        
+        # 3. Delete the platform itself
         db.session.delete(platform)
         
         # Audit Log

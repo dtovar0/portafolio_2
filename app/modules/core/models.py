@@ -10,6 +10,20 @@ class Area(db.Model):
     color = db.Column(db.String(100), default='#6366f1')
     status = db.Column(db.String(20), default='Activo')
 
+    @property
+    def color_rgb(self):
+        """Converts hex color to RGB comma-separated string for CSS variables."""
+        hex_color = self.color.lstrip('#')
+        if len(hex_color) == 3:
+            hex_color = ''.join([c*2 for c in hex_color])
+        try:
+            r = int(hex_color[0:2], 16)
+            g = int(hex_color[2:4], 16)
+            b = int(hex_color[4:6], 16)
+            return f"{r}, {g}, {b}"
+        except:
+            return "99, 102, 241" # Default Indigo-500
+
     def to_dict(self):
         return {
             'id': self.id,

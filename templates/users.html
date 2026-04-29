@@ -43,6 +43,10 @@
 
                     <!-- Botones de Acción (A la derecha como en Audit) -->
                     <div class="flex items-center gap-2">
+                        <button id="btnAreasUser" data-action="users-open-areas" class="h-12 min-w-[140px] px-5 rounded-2xl border border-violet-500/30 text-violet-400 font-black text-[12px] uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-violet-500/10 transition-all disabled:opacity-30 disabled:grayscale disabled:pointer-events-none active:scale-95" disabled>
+                            <i class="fas fa-sitemap"></i>
+                            <span>Áreas</span>
+                        </button>
                         <button id="btnAccessUser" data-action="users-open-access" class="h-12 min-w-[140px] px-5 rounded-2xl border border-primary/30 text-primary font-black text-[12px] uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-primary/10 transition-all disabled:opacity-30 disabled:grayscale disabled:pointer-events-none active:scale-95" disabled>
                             <i class="fas fa-key"></i>
                             <span>Accesos</span>
@@ -404,7 +408,7 @@
 <div id="editUserModal" class="nexus-modal hidden fixed inset-0 z-[110] items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
     <div class="nexus-modal-content w-full max-w-2xl bg-panel-fill/95 backdrop-blur-xl border border-white/5 rounded-3xl shadow-2xl overflow-hidden ring-1 ring-white/10 flex flex-col max-h-[90vh]">
         <form id="editUserForm" class="flex flex-col h-full overflow-hidden">
-            <input type="hidden" id="editUserNameHidden">
+            <input type="hidden" id="editUserId" name="id">
             <div class="p-8 border-b border-panel-border flex items-center justify-between bg-surface-container/40">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center text-primary shadow-lg shadow-primary/10 ring-1 ring-primary/20">
@@ -451,7 +455,7 @@
                         <label class="text-[11px] font-black text-label/60 uppercase tracking-widest ml-1 text-primary">Nueva Contraseña</label>
                         <div class="relative group">
                             <i class="fas fa-key absolute left-4 top-1/2 -translate-y-1/2 text-label/30 group-focus-within:text-primary transition-colors"></i>
-                            <input type="password" id="editUserPassword" name="password" class="w-full h-12 bg-panel-fill/60 border-2 border-panel-border rounded-xl pl-11 pr-4 text-sm font-bold focus:border-primary outline-none transition-all" placeholder="DEJAR EN BLANCO PARA NO CAMBIAR">
+                            <input type="password" id="editUserPassword" name="password" class="w-full h-12 bg-panel-fill/60 border-2 border-panel-border rounded-xl pl-11 pr-4 text-sm font-bold focus:border-primary outline-none transition-all" placeholder="••••••••">
                         </div>
                     </div>
                     <div class="space-y-2">
@@ -463,37 +467,84 @@
                     </div>
                 </div>
 
-                <div class="space-y-3">
-                    <label class="text-[11px] font-black text-label/60 uppercase tracking-widest ml-1">Áreas de Trabajo</label>
-                    <div class="flex gap-4 h-[220px]">
-                        <div class="flex-1 flex flex-col border border-panel-border rounded-xl bg-surface-container/10 overflow-hidden">
-                            <div id="editUserAvailableList" class="p-2 space-y-1 overflow-y-auto custom-scrollbar flex-grow">
-                                <!-- Areas -->
-                            </div>
-                        </div>
-                        <div class="flex flex-col items-center justify-center text-label/10">
-                            <i class="fas fa-arrows-alt-h text-xl"></i>
-                        </div>
-                        <div class="flex-1 flex flex-col border border-panel-border rounded-xl bg-primary/5 overflow-hidden ring-1 ring-primary/10">
-                            <div id="editUserSelectedList" class="p-2 space-y-1 overflow-y-auto custom-scrollbar flex-grow">
-                                <!-- Areas Selected -->
-                            </div>
-                        </div>
-                    </div>
-                    <input type="hidden" id="editSelectedUserAreasInput">
-                </div>
+                <p class="text-[10px] font-bold text-label/40 uppercase tracking-widest px-1 text-center italic">
+                    La modificación del perfil base no afectará sus permisos de plataforma ni sus áreas asignadas.
+                </p>
             </div>
 
             <div class="p-8 bg-surface-container/30 border-t border-panel-border flex items-center gap-4">
                 <button type="button" data-action="users-close-edit-modal" class="h-12 flex-1 rounded-2xl bg-tab-inactive border border-panel-border text-tab-inactive-text font-black text-[12px] uppercase tracking-widest hover:border-rose-500 hover:text-rose-500 transition-all active:scale-95 shadow-lg shadow-black/5">
                     Cancelar
                 </button>
-                <button type="submit" data-action="users-submit-edit" class="h-12 flex-1 bg-primary text-white text-[12px] font-black rounded-2xl uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3">
+                <button type="button" data-action="users-submit-edit" class="h-12 flex-1 bg-primary text-white text-[12px] font-black rounded-2xl uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3">
                     <i class="fas fa-save text-sm"></i>
                     <span>Guardar Cambios</span>
                 </button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- Modal: User Area Assignment -->
+<div id="userAreasModal" class="nexus-modal hidden fixed inset-0 z-[110] items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+    <div class="nexus-modal-content w-full max-w-3xl bg-panel-fill/95 backdrop-blur-xl border border-white/5 rounded-3xl shadow-2xl overflow-hidden ring-1 ring-white/10 flex flex-col">
+        <div class="p-8 border-b border-panel-border flex items-center justify-between bg-surface-container/30">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-violet-500/20 flex items-center justify-center text-violet-400 shadow-lg shadow-violet-500/10 ring-1 ring-violet-500/20">
+                    <i class="fas fa-sitemap text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-black text-violet-400 uppercase tracking-tighter italic drop-shadow-sm leading-none">Gestionar Áreas</h3>
+                    <p id="areasUserName" class="text-[11px] text-label font-bold uppercase tracking-[0.15em] mt-2 opacity-60">Vínculo Estructural de Trabajo</p>
+                </div>
+            </div>
+            <button data-action="users-close-areas-modal" class="w-10 h-10 flex items-center justify-center hover:bg-rose-500/10 hover:text-rose-500 rounded-xl transition-all group">
+                <i class="fas fa-times text-label group-hover:rotate-90 transition-transform"></i>
+            </button>
+        </div>
+        
+        <div class="p-8">
+            <div class="flex gap-6 h-[400px]">
+                <!-- Areas Available -->
+                <div class="flex-1 flex flex-col border border-panel-border rounded-2xl bg-surface-container/20 overflow-hidden">
+                    <div class="p-3 border-b border-panel-border flex items-center justify-between bg-surface-container/40">
+                        <span class="text-[10px] font-black text-label uppercase tracking-widest">Disponibles</span>
+                        <i class="fas fa-filter text-label/20 text-xs"></i>
+                    </div>
+                    <div id="areasAvailableList" class="flex-grow overflow-y-auto custom-scrollbar p-3 space-y-2">
+                        <!-- Area Cards -->
+                    </div>
+                </div>
+                
+                <div class="flex flex-col items-center justify-center">
+                    <div class="w-10 h-10 rounded-full bg-panel-border flex items-center justify-center text-label/20 shadow-sm mb-2">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                </div>
+
+                <!-- Areas Selected -->
+                <div class="flex-1 flex flex-col border border-panel-border rounded-2xl bg-surface-container/20 overflow-hidden ring-1 ring-violet-500/20">
+                    <div class="p-3 border-b border-panel-border flex items-center justify-between bg-violet-500/5">
+                        <span class="text-[10px] font-black text-violet-400 uppercase tracking-widest">Asignadas</span>
+                        <i class="fas fa-check-double text-violet-400/40 text-xs"></i>
+                    </div>
+                    <div id="areasSelectedList" class="flex-grow overflow-y-auto custom-scrollbar p-3 space-y-2 bg-violet-500/5">
+                        <!-- Area Cards -->
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" id="selectedManagementAreasInput">
+        </div>
+
+        <div class="p-8 bg-surface-container/10 border-t border-panel-border flex items-center gap-4">
+            <button data-action="users-close-areas-modal" class="h-12 flex-1 rounded-2xl bg-tab-inactive border border-panel-border text-tab-inactive-text font-black text-[12px] uppercase tracking-widest hover:border-rose-500 hover:text-rose-500 transition-all active:scale-95 shadow-lg shadow-black/5">
+                Cancelar
+            </button>
+            <button data-action="users-save-areas" class="h-12 flex-1 bg-violet-500 text-white text-[12px] font-black rounded-2xl uppercase tracking-widest shadow-lg shadow-violet-500/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3">
+                <i class="fas fa-save"></i>
+                <span>Actualizar Áreas</span>
+            </button>
+        </div>
     </div>
 </div>
 

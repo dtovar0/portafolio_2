@@ -83,11 +83,8 @@ def index():
 @core_bp.route("/portal")
 @login_required
 def portal():
-    """Vista de Catálogo para usuarios finales"""
-    from app.modules.core.models import Area, Platform
-    areas = Area.query.all()
-    platforms = Platform.query.filter_by(status='Activo').all()
-    return render_template("portal.html", areas=areas, platforms=platforms)
+    """Vista de Catálogo redirigida al módulo oficial"""
+    return redirect(url_for('portal_module.index'))
 
 @core_bp.route("/dashboard-2")
 @login_required

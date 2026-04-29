@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Nexus Portal{% endblock %}</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{{ url_for('core.serve_assets', filename='js/tailwind-config.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+    <link rel="stylesheet" href="{{ url_for('core.serve_assets', filename='css/global.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    {% block extra_css %}{% endblock %}
+
+    <script>
+        const CSRF_TOKEN = "{{ csrf_token() }}";
+    </script>
+</head>
+<body class="bg-bg text-text h-full overflow-x-hidden">
+    <!-- Clean Portal Header -->
+    <header class="h-20 px-8 flex items-center justify-between border-b border-panel-border bg-panel-fill/50 backdrop-blur-xl sticky top-0 z-50">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/20">
+                <i class="fas fa-cubes"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-black text-label tracking-tighter uppercase leading-none">Nexus <span class="text-primary">Portal</span></h1>
+                <p class="text-[9px] font-bold text-label/40 uppercase tracking-[0.2em] mt-1">Ecosistema Digital</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-6">
+            <!-- Simple User Info -->
+            <div class="flex items-center gap-3 px-4 py-2 bg-surface-container/50 border border-panel-border rounded-2xl">
+                <div class="flex flex-col items-end">
+                    <span class="text-[10px] font-black text-label uppercase tracking-tight">{{ current_user.nombre }}</span>
+                    <span class="text-[8px] font-bold text-label/40 uppercase tracking-widest italic">{{ current_user.role }}</span>
+                </div>
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-violet-600 flex items-center justify-center text-white text-[10px] font-bold border border-white/20">
+                    {{ current_user.nombre[0]|upper }}
+                </div>
+            </div>
+            
+            <button id="themeToggle" class="w-10 h-10 rounded-xl bg-surface-container/50 text-label/40 border border-panel-border hover:border-primary/30 hover:text-primary transition-all flex items-center justify-center" title="Cambiar Tema">
+                <i class="fas fa-palette text-sm"></i>
+            </button>
+            
+            <a href="{{ url_for('auth.logout') }}" class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/20 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all group" title="Cerrar Sesión">
+                <i class="fas fa-power-off text-sm group-hover:rotate-12 transition-transform"></i>
+            </a>
+        </div>
+    </header>
+
+    <main class="h-[calc(100vh-80px)] flex flex-col overflow-hidden">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Global Scripts -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="{{ url_for('core.serve_assets', filename='js/global.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

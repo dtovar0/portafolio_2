@@ -16,8 +16,9 @@
     .nexus-kpi-panel { 
         background: linear-gradient(to bottom, var(--color-surface-container) 0%, transparent 100%);
         border-bottom: 1px solid var(--color-panel-border);
-        padding: 2.5rem 2rem;
-        margin-bottom: 1rem;
+        padding: 1.5rem 2rem;
+        margin-bottom: 0.5rem;
+        flex-shrink: 0;
     }
 
     /* Tarjetas KPI Premium */
@@ -89,18 +90,18 @@
         color: var(--color-label-muted);
     }
 
-    .chart-container-box { min-height: 280px; width: 100%; position: relative; }
+    .chart-container-box { height: 100%; width: 100%; position: relative; flex-grow: 1; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div id="dashboard-root" class="w-full h-full overflow-y-auto custom-scrollbar flex flex-col animate-fade-in bg-panel-header/5">
+<div id="dashboard-root" class="w-full h-full overflow-hidden flex flex-col animate-fade-in bg-panel-header/5">
     
     <!-- === KPI HEADER PANEL === -->
     <div class="nexus-kpi-panel">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 max-w-[1800px] mx-auto">
             <!-- Áreas -->
-            <div class="premium-kpi-card group" style="--card-accent: #10b981; --card-accent-alpha: rgba(16, 185, 129, 0.1);">
+            <div class="premium-kpi-card group" style="--card-accent: var(--color-primary); --card-accent-alpha: rgba(37, 99, 235, 0.1);">
                 <div class="kpi-icon-wrapper shadow-[0_0_20px_rgba(16,185,129,0.1)]">
                     <i class="fas fa-network-wired"></i>
                 </div>
@@ -114,7 +115,7 @@
             </div>
 
             <!-- Plataformas -->
-            <div class="premium-kpi-card group" style="--card-accent: #2563eb; --card-accent-alpha: rgba(37, 99, 235, 0.1);">
+            <div class="premium-kpi-card group" style="--card-accent: var(--color-primary); --card-accent-alpha: rgba(37, 99, 235, 0.1);">
                 <div class="kpi-icon-wrapper shadow-[0_0_20px_rgba(37,99,235,0.1)]">
                     <i class="fas fa-layer-group"></i>
                 </div>
@@ -128,7 +129,7 @@
             </div>
 
             <!-- Usuarios -->
-            <div class="premium-kpi-card group" style="--card-accent: #8b5cf6; --card-accent-alpha: rgba(139, 92, 246, 0.1);">
+            <div class="premium-kpi-card group" style="--card-accent: var(--color-primary); --card-accent-alpha: rgba(139, 92, 246, 0.1);">
                 <div class="kpi-icon-wrapper shadow-[0_0_20px_rgba(139,92,246,0.1)]">
                     <i class="fas fa-users-viewfinder"></i>
                 </div>
@@ -142,7 +143,7 @@
             </div>
 
             <!-- Pendientes -->
-            <div class="premium-kpi-card group" style="--card-accent: #f59e0b; --card-accent-alpha: rgba(245, 158, 11, 0.1);">
+            <div class="premium-kpi-card group" style="--card-accent: var(--color-primary); --card-accent-alpha: rgba(245, 158, 11, 0.1);">
                 <div class="kpi-icon-wrapper shadow-[0_0_20px_rgba(245,158,11,0.1)]">
                     <i class="fas fa-microchip"></i>
                 </div>
@@ -156,7 +157,7 @@
             </div>
 
             <!-- Visitas -->
-            <div class="premium-kpi-card group" style="--card-accent: #3b82f6; --card-accent-alpha: rgba(59, 130, 246, 0.1);">
+            <div class="premium-kpi-card group" style="--card-accent: var(--color-primary); --card-accent-alpha: rgba(37, 99, 235, 0.1);">
                 <div class="kpi-icon-wrapper shadow-[0_0_20px_rgba(59,130,246,0.1)]">
                     <i class="fas fa-bolt-lightning"></i>
                 </div>
@@ -177,31 +178,31 @@
             
             <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8 min-h-0">
                 <!-- Charts con diseño de panel unificado -->
-                <div class="bg-panel-fill border border-panel-border rounded-[2rem] p-8 flex flex-col shadow-sm gap-6 overflow-hidden">
+                <div class="bg-panel-fill border border-panel-border rounded-[2rem] p-8 flex flex-col shadow-sm gap-6 overflow-hidden h-full">
                     <header class="flex items-center justify-between">
                         <h3 class="text-xs font-black text-label uppercase tracking-widest shrink-0">Densidad por Plataforma</h3>
                     </header>
                     <div class="flex-1 chart-container-box" id="c-platform"></div>
                 </div>
                 
-                <div class="bg-panel-fill border border-panel-border rounded-[2rem] p-8 flex flex-col shadow-sm gap-6 overflow-hidden">
+                <div class="bg-panel-fill border border-panel-border rounded-[2rem] p-8 flex flex-col shadow-sm gap-6 overflow-hidden h-full">
                     <h3 class="text-xs font-black text-label uppercase tracking-widest shrink-0">Población por Área</h3>
                     <div class="flex-1 chart-container-box" id="c-area"></div>
                 </div>
 
-                <div class="bg-panel-fill border border-panel-border rounded-[2rem] p-8 flex flex-col shadow-sm gap-6 overflow-hidden">
+                <div class="bg-panel-fill border border-panel-border rounded-[2rem] p-8 flex flex-col shadow-sm gap-6 overflow-hidden h-full">
                     <h3 class="text-xs font-black text-label uppercase tracking-widest shrink-0">Solicitudes Activas</h3>
                     <div class="flex-1 chart-container-box" id="c-pending"></div>
                 </div>
 
-                <div class="bg-panel-fill border border-panel-border rounded-[2rem] p-8 flex flex-col shadow-sm gap-6 overflow-hidden">
+                <div class="bg-panel-fill border border-panel-border rounded-[2rem] p-8 flex flex-col shadow-sm gap-6 overflow-hidden h-full">
                     <h3 class="text-xs font-black text-label uppercase tracking-widest shrink-0">Tráfico de Aplicativos</h3>
                     <div class="flex-1 chart-container-box" id="c-visits"></div>
                 </div>
             </div>
 
             <!-- Activity Feed Premium -->
-            <div class="bg-panel-fill border border-panel-border rounded-[2.5rem] flex flex-col shadow-2xl overflow-hidden min-h-[500px]">
+            <div class="bg-panel-fill border border-panel-border rounded-[2.5rem] flex flex-col shadow-2xl overflow-hidden min-h-0">
                 <header class="shrink-0 p-8 border-b border-panel-border bg-surface-container/20 flex items-center justify-between">
                     <span class="text-xs font-black text-label uppercase tracking-widest">Telemetría Global</span>
                     <button onclick="window.location.href='/audit'" class="w-10 h-10 rounded-xl bg-surface-container hover:bg-primary/20 text-label/30 hover:text-primary transition-all flex items-center justify-center">
@@ -214,7 +215,7 @@
                         {% for r in log_list %}
                         <div class="flex gap-6 relative group">
                             {% if not loop.last %}<div class="absolute left-[11px] top-10 bottom-[-32px] w-[2px] bg-panel-border opacity-30"></div>{% endif %}
-                            <div class="w-[24px] h-[24px] rounded-lg z-10 shrink-0 mt-1 border-4 border-panel-fill shadow-lg group-hover:scale-125 transition-transform" style="background: {{ '#10b981' if r.action == 'Alta' else '#f59e0b' if r.action == 'Modificación' else '#ef4444' if r.action == 'Baja' else '#3b82f6' }};"></div>
+                            <div class="w-[24px] h-[24px] rounded-lg z-10 shrink-0 mt-1 border-4 border-panel-fill shadow-lg group-hover:scale-125 transition-transform" style="background: {{ 'rgb(var(--color-success))' if r.action == 'Alta' else 'rgb(var(--color-warning))' if r.action == 'Modificación' else 'rgb(var(--color-danger))' if r.action == 'Baja' else 'var(--color-primary)' }};"></div>
                             <div class="flex flex-col gap-1.5 flex-1 min-w-0">
                                 <div class="flex items-center justify-between gap-4">
                                     <span class="text-xs font-black text-primary truncate uppercase tracking-tighter">{{ r.user or 'Sistema' }}</span>
@@ -228,9 +229,15 @@
                         {% endfor %}
                     </div>
                     {% else %}
-                    <div class="h-full flex flex-col items-center justify-center text-center opacity-20">
-                        <i class="fas fa-radar text-4xl mb-6"></i>
-                        <span class="text-xs font-black uppercase tracking-widest">Sin señal activa</span>
+                    <div class="flex flex-col items-center justify-center h-full p-6 text-center animate-in fade-in duration-1000 opacity-40">
+                        <div class="w-16 h-16 rounded-2xl bg-panel-border/30 flex items-center justify-center text-label/20 mb-6 ring-1 ring-white/5 shadow-inner">
+                            <i class="fas fa-satellite-dish text-3xl"></i>
+                        </div>
+                        <h4 class="text-[11px] font-black text-label uppercase tracking-widest italic">Sin Señal Activa</h4>
+                        <p class="text-[9px] text-label/30 font-bold uppercase tracking-[0.2em] mt-2 leading-relaxed">
+                            El flujo de auditoría está en espera. <br>
+                            <span class="text-primary font-black opacity-100 uppercase">Esperando Transmisión</span>
+                        </p>
                     </div>
                     {% endif %}
                 </div>
@@ -256,29 +263,38 @@
             const el = document.getElementById(id);
             if (!el) return;
             el.innerHTML = `
-                <div class="h-full w-full flex flex-col items-center justify-center p-8 text-center opacity-40">
-                    <div class="w-16 h-16 rounded-2xl bg-label/5 border border-label/10 flex items-center justify-center mb-4">
-                        <i class="fas fa-satellite-dish text-2xl text-label/20"></i>
+                <div class="flex flex-col items-center justify-center h-full p-6 text-center animate-in fade-in duration-1000">
+                    <div class="w-16 h-16 rounded-2xl bg-panel-border/30 flex items-center justify-center text-label/20 mb-4 ring-1 ring-white/5 shadow-inner">
+                        <i class="fas fa-satellite-dish text-2xl"></i>
                     </div>
-                    <h4 class="text-[10px] font-black text-label/40 uppercase tracking-[0.2em] mb-1">${metric}</h4>
-                    <p class="text-[9px] text-label/20 font-bold uppercase tracking-widest">Esperando Transmisión...</p>
+                    <h4 class="text-[11px] font-black text-label uppercase tracking-widest italic opacity-60">${metric}</h4>
+                    <p class="text-[9px] text-label/30 font-bold uppercase tracking-[0.2em] mt-2 leading-relaxed">
+                        Aún no hay registros suficientes. <br>
+                        <span class="text-primary font-black">ESPERANDO TELEMETRÍA</span>
+                    </p>
                 </div>
             `;
         }
 
         const baseCfg = {
-            chart: { toolbar: { show: false }, background: 'transparent', fontFamily: 'Inter', zoom: { enabled: false } },
+            chart: { 
+                toolbar: { show: false }, 
+                background: 'transparent', 
+                fontFamily: 'Inter', 
+                zoom: { enabled: false },
+                theme: { mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light' }
+            },
             stroke: { curve: 'smooth', width: 4 },
-            grid: { borderColor: 'rgba(148, 163, 184, 0.05)', strokeDashArray: 4 },
+            grid: { borderColor: 'var(--color-panel-border)', strokeDashArray: 4 },
             xaxis: {
                 axisBorder: { show: false }, axisTicks: { show: false },
-                labels: { style: { colors: 'rgba(148, 163, 184, 0.4)', fontSize: '9px', fontWeight: 800 } }
+                labels: { style: { colors: 'var(--color-label-muted)', fontSize: '9px', fontWeight: 800 } }
             },
             yaxis: {
-                labels: { style: { colors: 'rgba(148, 163, 184, 0.4)', fontSize: '9px', fontWeight: 800 } }
+                labels: { style: { colors: 'var(--color-label-muted)', fontSize: '9px', fontWeight: 800 } }
             },
             tooltip: { theme: 'dark' },
-            colors: [accent]
+            colors: ['var(--color-primary)']
         };
 
         function render() {
@@ -286,7 +302,7 @@
 
             if (data.up.v.length > 0 && !data.up.v.every(v => v === 0)) {
                 new ApexCharts(document.querySelector("#c-platform"), {
-                    ...baseCfg, chart: { ...baseCfg.chart, type: 'bar', height: 280 },
+                    ...baseCfg, chart: { ...baseCfg.chart, type: 'bar', height: '100%' },
                     series: [{ name: 'Usuarios', data: data.up.v }],
                     xaxis: { ...baseCfg.xaxis, categories: data.up.l },
                     plotOptions: { bar: { borderRadius: 12, distributed: true, columnWidth: '35%' } },
@@ -296,7 +312,7 @@
 
             if (data.ua.v.length > 0 && !data.ua.v.every(v => v === 0)) {
                 new ApexCharts(document.querySelector("#c-area"), {
-                    ...baseCfg, chart: { ...baseCfg.chart, type: 'bar', height: 280 },
+                    ...baseCfg, chart: { ...baseCfg.chart, type: 'bar', height: '100%' },
                     series: [{ name: 'Densidad', data: data.ua.v }],
                     xaxis: { ...baseCfg.xaxis, categories: data.ua.l },
                     plotOptions: { bar: { borderRadius: 10, horizontal: true, barHeight: '35%' } },
@@ -306,7 +322,7 @@
 
             if (data.pr.v.length > 0 && !data.pr.v.every(v => v === 0)) {
                 new ApexCharts(document.querySelector("#c-pending"), {
-                    ...baseCfg, chart: { ...baseCfg.chart, type: 'area', height: 280 },
+                    ...baseCfg, chart: { ...baseCfg.chart, type: 'area', height: '100%' },
                     series: [{ name: 'Pendientes', data: data.pr.v }],
                     xaxis: { ...baseCfg.xaxis, categories: data.pr.l },
                     fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.5, opacityTo: 0 } },
@@ -316,14 +332,14 @@
 
             if (data.mv.v.length > 0 && !data.mv.v.every(v => v === 0)) {
                 new ApexCharts(document.querySelector("#c-visits"), {
-                    ...baseCfg, chart: { ...baseCfg.chart, type: 'line', height: 280 },
+                    ...baseCfg, chart: { ...baseCfg.chart, type: 'line', height: '100%' },
                     series: [{ name: 'Visitas', data: data.mv.v }],
                     xaxis: { ...baseCfg.xaxis, categories: data.mv.l },
                     stroke: { curve: 'smooth', width: 5 },
                     markers: { size: 5 },
                     colors: ['#ef4444']
                 }).render();
-            } else { drawEmpty('c-visits', 'Análisis de Atrafico'); }
+            } else { drawEmpty('c-visits', 'Análisis de Tráfico'); }
         }
 
         render();

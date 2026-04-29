@@ -72,6 +72,12 @@ table.dataTable tbody tr {
   /* Esmeralda — Estado positivo */
   --color-success: 5 150 105;          /* #059669 — Emerald-600 */
 
+  /* Ámbar — Estado advertencia */
+  --color-warning: 245 158 11;         /* #f59e0b — Amber-500 */
+
+  /* Rosa/Rojo — Estado crítico */
+  --color-danger: 225 29 72;           /* #e11d48 — Rose-600 */
+
   /* Pizarra — Secundario neutro */
   --color-secondary: 100 116 139;      /* #64748b — Slate-500  */
 

@@ -290,19 +290,39 @@ def update_user():
         data = request.get_json()
         user_id = data.get('user_id')
         user = User.query.get(user_id)
-        
         if not user:
-            return jsonify({"status": "error", "message": "Usuario no encontrado"}), 404
-            
-        target_email = data.get('email')
-        if target_email: user.email = target_email
-        if "nombre" in data: user.nombre = data["nombre"]
-        if "role" in data: user.role = data["role"]
+             return jsonify({"status": "error", "message": "Usuario no encontrado"}), 404
+
+        target_email = data.get('email', '').strip()
+        nombre = data.get('nombre', '').strip()
+
+        # Safeguard: Prevent hijacking 'admin' identifier
+        is_reserved = target_email.lower() == 'admin' or nombre.lower() == 'admin'
+        is_already_admin = (user.email.lower() == 'admin' or user.nombre.lower() == 'admin')
         
-        if "password" in data and data["password"]:
-            user.set_password(data["password"])
+        if is_reserved and not is_already_admin:
+            return jsonify({"status": "error", "message": "El identificador 'admin' es reservado del sistema."}), 403
+
+        if target_email and target_email != user.email: 
+            user.email = target_email
+            
+        if nombre and nombre != user.nombre: 
+            user.nombre = nombre
+            
+        role = data.get('role', '').strip()
+        if role and role != user.role: 
+            user.role = role
+        
+        password = data.get('password', '').strip()
+        if password:
+            user.set_password(password)
             
         db.session.commit()
+
+        # REFRESH SESSION: If I am editing myself, I must re-login to avoid being kicked out
+        if current_user.is_authenticated and user.id == current_user.id:
+            login_user(user, remember=True)
+
         return jsonify({"status": "success", "message": "Usuario actualizado correctamente"})
     except Exception as e:
         db.session.rollback()

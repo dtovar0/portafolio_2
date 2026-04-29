@@ -49,6 +49,10 @@ function getPageLength() {
 function initRequestsDataTable() {
     requestsDataTable = $('#requestsDT').DataTable({
         data: REQUESTS_DATA,
+        createdRow: function(row, data, dataIndex) {
+            $(row).addClass('cursor-pointer hover:bg-primary/[0.02] transition-colors group');
+            $(row).attr('data-id', data.id);
+        },
         columns: [
             { 
                 data: 'id', 
@@ -63,7 +67,7 @@ function initRequestsDataTable() {
                 data: 'user_name',
                 render: (data, type, row) => `
                     <div class="flex flex-col">
-                        <span class="font-black text-label leading-none mb-1">${data}</span>
+                        <span class="font-black text-label leading-none mb-1 group-hover:text-primary transition-colors">${data}</span>
                         <span class="text-[9px] font-bold text-label/40 uppercase tracking-tighter">${row.user_email}</span>
                     </div>`
             },
@@ -108,8 +112,48 @@ function initRequestsDataTable() {
         }
     });
 
+    // Row Click Event for Edit
+    $('#requestsDT tbody').on('click', 'tr', function(e) {
+        if ($(e.target).closest('.row-checkbox').length) return;
+        const data = requestsDataTable.row(this).data();
+        if (data) openEditModal(data);
+    });
+
     // Alias for global search in top bar if needed
     window.activeNexusTable = requestsDataTable;
+}
+
+function openEditModal(data) {
+    const modal = $('#editRequestModal');
+    
+    // Populate Data
+    $('#modalRequestIdDisplay').text(`ID: #${data.id.toString().padStart(4, '0')}`);
+    $('#modalUserInitial').text(data.user_name.charAt(0).toUpperCase());
+    $('#modalUserName').text(data.user_name);
+    $('#modalUserEmail').text(data.user_email);
+    $('#modalPlatformName').text(data.platform_name);
+    $('#modalAreaName').text(data.area_name);
+    $('#modalRequestDate').text(data.created_at);
+    
+    // Status Badge
+    const status = data.status.toLowerCase();
+    let badgeCls = 'nx-badge-primary';
+    if (status.includes('aprobado')) badgeCls = 'nx-badge-success text-emerald-500';
+    else if (status.includes('pendiente')) badgeCls = 'nx-badge-warning text-amber-500';
+    else badgeCls = 'nx-badge-error text-rose-500';
+    
+    $('#modalStatusBadge').html(`<span class="nx-badge ${badgeCls} text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-sm">${data.status}</span>`);
+
+    // Actions Logic
+    if (data.status === 'Pendiente') {
+        $('#modalActionFooter').removeClass('hidden').addClass('flex');
+        $('#modalBtnApprove').off('click').on('click', () => quickAction(data.id, 'approve'));
+        $('#modalBtnReject').off('click').on('click', () => quickAction(data.id, 'reject'));
+    } else {
+        $('#modalActionFooter').removeClass('flex').addClass('hidden');
+    }
+
+    modal.removeClass('hidden').addClass('flex');
 }
 
 function renderGhostRows(settings, columns) {
@@ -182,22 +226,46 @@ async function processRequests(ids, action) {
 }
 
 function initCharts() {
-    // Current Chart Logic (ApexCharts)
+    const renderNoData = (container, icon, title, sub) => {
+        container.innerHTML = `
+            <div class="flex flex-col items-center justify-center h-full p-6 text-center animate-in fade-in duration-1000">
+                <div class="w-16 h-16 rounded-2xl bg-panel-border/30 flex items-center justify-center text-label/20 mb-4 ring-1 ring-white/5 shadow-inner">
+                    <i class="fas ${icon} text-2xl"></i>
+                </div>
+                <h4 class="text-[11px] font-black text-label uppercase tracking-widest italic opacity-60">${title}</h4>
+                <p class="text-[9px] text-label/30 font-bold uppercase tracking-[0.2em] mt-2 leading-relaxed">${sub}</p>
+            </div>
+        `;
+    };
+
+    // 1. Status Chart (Solicitudes Procesadas)
     const statusDiv = document.getElementById('statusChart');
     if (statusDiv) {
         statusDiv.innerHTML = '';
-        new ApexCharts(statusDiv, {
-            series: [COUNTS_DATA.pending, COUNTS_DATA.approved, COUNTS_DATA.rejected],
-            chart: { type: 'donut', height: 320, fontFamily: 'Inter', background: 'transparent' },
-            labels: ['Pendientes', 'Aprobadas', 'Rechazadas'],
-            colors: ['#f59e0b', '#10b981', '#ef4444'],
-            plotOptions: { pie: { donut: { size: '75%' } } },
-            dataLabels: { enabled: false },
-            stroke: { width: 0 },
-            legend: { position: 'bottom', labels: { colors: 'rgb(var(--color-label))' } }
-        }).render();
+        const hasData = (COUNTS_DATA.pending + COUNTS_DATA.approved + COUNTS_DATA.rejected) > 0;
+        
+        if (!hasData) {
+            renderNoData(statusDiv, 'fa-chart-pie', 'Sin Solicitudes', 'El motor de auditoría está en espera');
+        } else {
+            new ApexCharts(statusDiv, {
+                series: [COUNTS_DATA.pending, COUNTS_DATA.approved, COUNTS_DATA.rejected],
+                chart: { type: 'donut', height: '100%', width: '100%', fontFamily: 'Inter', background: 'transparent' },
+                labels: ['Pendientes', 'Aprobadas', 'Rechazadas'],
+                colors: ['#f59e0b', '#10b981', '#ef4444'],
+                plotOptions: { pie: { donut: { size: '75%' } } },
+                dataLabels: { enabled: false },
+                stroke: { width: 0 },
+                legend: { 
+                    position: 'bottom', 
+                    labels: { colors: '#64748b' },
+                    fontSize: '10px',
+                    fontWeight: 600
+                }
+            }).render();
+        }
     }
 
+    // 2. Platform Chart (Usuarios por Plataforma)
     const platformDiv = document.getElementById('platformChart');
     if (platformDiv) {
         platformDiv.innerHTML = '';
@@ -205,14 +273,23 @@ function initCharts() {
         REQUESTS_DATA.forEach(r => counts[r.platform_name] = (counts[r.platform_name] || 0) + 1);
         const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0, 5);
 
-        new ApexCharts(platformDiv, {
-            series: [{ name: 'Solicitudes', data: sorted.map(p => p[1]) }],
-            chart: { type: 'bar', height: 320, toolbar: { show: false }, fontFamily: 'Inter' },
-            colors: ['#6366f1'],
-            plotOptions: { bar: { borderRadius: 8, columnWidth: '40%' } },
-            xaxis: { categories: sorted.map(p => p[0]), labels: { style: { colors: 'rgba(148, 163, 184, 0.4)' } } },
-            yaxis: { labels: { style: { colors: 'rgba(148, 163, 184, 0.4)' } } },
-            grid: { borderColor: 'rgba(148, 163, 184, 0.05)', strokeDashArray: 4 }
-        }).render();
+        if (sorted.length === 0) {
+            renderNoData(platformDiv, 'fa-users-cog', 'Sin Distribución', 'No hay usuarios vinculados a plataformas');
+        } else {
+            new ApexCharts(platformDiv, {
+                series: [{ name: 'Solicitudes', data: sorted.map(p => p[1]) }],
+                chart: { type: 'bar', height: '100%', width: '100%', toolbar: { show: false }, fontFamily: 'Inter' },
+                colors: ['#6366f1'],
+                plotOptions: { bar: { borderRadius: 8, columnWidth: '40%' } },
+                xaxis: { 
+                    categories: sorted.map(p => p[0]), 
+                    labels: { style: { colors: '#64748b', fontWeight: 600, fontSize: '10px' } } 
+                },
+                yaxis: { 
+                    labels: { style: { colors: '#64748b', fontWeight: 600, fontSize: '10px' } } 
+                },
+                grid: { borderColor: 'rgba(148, 163, 184, 0.1)', strokeDashArray: 4 }
+            }).render();
+        }
     }
 }

@@ -826,33 +826,64 @@
             window.openModal('platformModal');
         });
 
-        // Global Delegation for Delete
+        // Global Delegation for Delete with Block Validation
         $(document).on('click', '[data-action="platforms-delete-selected"]', async function() {
             const selected = document.querySelectorAll('.platform-checkbox:checked');
             if (selected.length === 0) return;
 
+            let totalUsersAffected = 0;
+            selected.forEach(cb => {
+                const row = platformsDataTable.row($(cb).closest('tr')).data();
+                if (row) totalUsersAffected += (row.users_count || 0);
+            });
+
+            // BLOCK LOGIC: Cannot delete if has users
+            if (totalUsersAffected > 0) {
+                return Swal.fire({
+                    title: '<span class="text-rose-500 uppercase italic font-black tracking-tighter">Acción Bloqueada</span>',
+                    html: `<div class="text-xs font-bold text-slate-300 leading-relaxed uppercase tracking-widest">
+                            No es posible eliminar plataformas con usuarios activos.<br><br>
+                            Se detectaron <span class="text-rose-500 font-black">${totalUsersAffected} accesos vinculados</span>.<br>
+                            Por favor, remueva los accesos de los usuarios antes de intentar dar de baja el servicio.
+                           </div>`,
+                    icon: 'error',
+                    confirmButtonText: 'Entendido',
+                    confirmButtonColor: '#6366f1',
+                    background: '#1e293b',
+                    color: '#ffffff',
+                    backdrop: 'rgba(15, 23, 42, 0.75)'
+                });
+            }
+
+            // Standard Confirmation for empty platforms
             const confirm = await Swal.fire({
-                title: '¿Confirmar Baja?',
-                text: `Se eliminarán ${selected.length} servicios del catálogo de forma permanente.`,
+                title: '<span class="text-white uppercase italic font-black tracking-tighter">¿Confirmar Baja?</span>',
+                html: `<div class="text-xs font-bold text-slate-300 uppercase tracking-widest">Se eliminarán ${selected.length} servicios de forma permanente.</div>`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#f43f5e',
-                confirmButtonText: 'Sí, Eliminar'
+                confirmButtonText: 'Sí, Ejecutar Baja',
+                cancelButtonText: 'Cancelar',
+                background: '#1e293b',
+                color: '#ffffff',
+                backdrop: 'rgba(15, 23, 42, 0.75)'
             });
 
             if (confirm.isConfirmed) {
-                for (let cb of selected) {
-                    await fetch(`/admin/platforms/delete/${cb.dataset.id}`, { method: 'GET' });
+                const procModal = document.getElementById('processingModal');
+                if (procModal) {
+                    procModal.classList.remove('hidden');
+                    procModal.classList.add('flex');
+                    setTimeout(() => procModal.classList.add('show'), 50);
                 }
-                Swal.fire({
-                    toast: true,
-                    position: 'bottom-end',
-                    icon: 'success',
-                    title: 'Registros eliminados',
-                    showConfirmButton: false,
-                    timer: 3000
-                });
-                refreshPlatforms();
+
+                try {
+                    await Promise.all(Array.from(selected).map(cb => fetch(`/admin/platforms/delete/${cb.dataset.id}`, { method: 'GET' })));
+                    startSuccessCountdown("Los servicios han sido purgados permanentemente del catálogo.");
+                } catch (e) {
+                    if (procModal) procModal.classList.add('hidden');
+                    Swal.fire('Error', 'Fallo técnico al procesar la baja.', 'error');
+                }
             }
         });
 
@@ -908,9 +939,15 @@
 
             formData.append('users', JSON.stringify(selectedUserIds));
             
-            // Map toggle to status string
             const isChecked = document.getElementById('platformStatusToggle').checked;
             formData.append('status', isChecked ? 'Activo' : 'Inactivo');
+
+            const procModal = document.getElementById('processingModal');
+            if (procModal) {
+                procModal.classList.remove('hidden');
+                procModal.classList.add('flex');
+                setTimeout(() => procModal.classList.add('show'), 50);
+            }
 
             try {
                 const res = await fetch(url, { method: 'POST', body: formData });
@@ -925,9 +962,7 @@
                 });
 
                 if (result.success) {
-                    Toast.fire({ icon: 'success', title: 'Cambios guardados con éxito' });
-                    window.closeModal('platformModal');
-                    refreshPlatforms();
+                    startSuccessCountdown("La plataforma y sus parámetros de acceso han sido actualizados correctamente.");
                 } else {
                     console.error("Backend Error:", result.error);
                     Toast.fire({ 

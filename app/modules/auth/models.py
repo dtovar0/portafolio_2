@@ -15,6 +15,12 @@ user_platforms = db.Table('user_platforms',
     db.Column('platform_id', db.Integer, db.ForeignKey('platforms.id'), primary_key=True)
 )
 
+# Helper Table for User Favorites
+user_favorites = db.Table('user_favorites',
+    db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True),
+    db.Column('platform_id', db.Integer, db.ForeignKey('platforms.id'), primary_key=True)
+)
+
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
     
@@ -31,6 +37,7 @@ class User(db.Model, UserMixin):
     # Relationships
     areas = db.relationship('Area', secondary='user_areas', backref=db.backref('users', lazy=True))
     platforms = db.relationship('Platform', secondary='user_platforms', backref=db.backref('users', lazy='dynamic'))
+    favorites = db.relationship('Platform', secondary='user_favorites', backref=db.backref('favorited_by', lazy='dynamic'))
 
     # User Interface Preferences
     pref_notifications = db.Column(db.Boolean, default=True)

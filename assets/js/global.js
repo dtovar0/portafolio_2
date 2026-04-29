@@ -515,6 +515,79 @@ function closeModal(modalId) {
     }
 }
 
+/**
+ * GLOBAL SUCCESS HUD CONTROLLER
+ * START SUCCESS COUNTDOWN (3s)
+ * Centralized handler for successful management operations with cascading effect
+ */
+function startSuccessCountdown(customMessage = null) {
+    const procModal = document.getElementById('processingModal');
+    const successModal = document.getElementById('successManagementModal');
+    const messageEl = document.getElementById('successModalMessage');
+    const textEl = document.getElementById('successCountdownText');
+
+    // ─── STAGE 1: CLEANUP & SPINNER ───
+    // Close any active modal
+    document.querySelectorAll('.nexus-modal').forEach(m => {
+        m.classList.add('hidden');
+        m.classList.remove('flex', 'show');
+    });
+
+    // Show Spinner immediately
+    if (procModal) {
+        procModal.classList.remove('hidden');
+        procModal.classList.add('flex');
+        setTimeout(() => procModal.classList.add('show'), 10);
+    }
+
+    // ─── STAGE 2: CASCADE DELAY (1200ms) ───
+    setTimeout(() => {
+        // Hide Spinner first
+        if (procModal) {
+            procModal.classList.remove('show');
+            
+            // WAIT for spinner exit transition (300ms) before showing success
+            setTimeout(() => {
+                procModal.classList.add('hidden');
+                procModal.classList.remove('flex');
+
+                // ─── STAGE 3: SHOW SUCCESS HUD ───
+                if (successModal) {
+                    if (customMessage && messageEl) messageEl.textContent = customMessage;
+                    
+                    successModal.classList.remove('hidden');
+                    successModal.classList.add('flex');
+                    
+                    // Trigger Reflow for Animation
+                    void successModal.offsetWidth;
+                    successModal.classList.add('show');
+
+                    // ─── STAGE 4: 3s COUNTDOWN ───
+                    let seconds = 3;
+                    if (textEl) textEl.textContent = `(${seconds}s)`;
+
+                    const interval = setInterval(() => {
+                        seconds--;
+                        if (textEl) textEl.textContent = `(${seconds}s)`;
+                        
+                        if (seconds <= 0) {
+                            clearInterval(interval);
+                            location.reload();
+                        }
+                    }, 1000);
+                }
+            }, 300);
+        } else {
+            // Fallback if no spinner
+            if (successModal) {
+                successModal.classList.remove('hidden');
+                successModal.classList.add('flex');
+                setTimeout(() => successModal.classList.add('show'), 50);
+            }
+        }
+    }, 1200);
+}
+
 // Global Listener for ESC key (Close Modals, Dropdowns, and Clear Search)
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
@@ -530,7 +603,7 @@ document.addEventListener('keydown', (e) => {
         }
 
         // 2. Logic for Modals
-        const activeModal = document.querySelector('.nexus-modal.show');
+        const activeModal = document.querySelector('.nexus-modal:not(.hidden)');
         if (activeModal) {
             closeModal(activeModal.id);
         }

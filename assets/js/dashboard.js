@@ -17,18 +17,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const el = document.getElementById(containerId);
         if (!el) return;
         el.innerHTML = `
-            <div class="h-full w-full flex flex-col items-center justify-center p-6 animate-fade-in">
-                <div class="w-16 h-16 rounded-3xl bg-surface-container/20 border border-panel-border/40 flex items-center justify-center mb-4 relative">
-                    <div class="absolute inset-0 bg-primary/5 blur-xl rounded-full"></div>
-                    <i class="fas ${iconClass} text-2xl text-label/20 relative z-10"></i>
+            <div class="flex flex-col items-center justify-center h-full p-6 text-center animate-in fade-in duration-1000">
+                <div class="w-16 h-16 rounded-2xl bg-panel-border/30 flex items-center justify-center text-label/20 mb-4 ring-1 ring-white/5 shadow-inner">
+                    <i class="fas ${iconClass} text-2xl"></i>
                 </div>
-                <h4 class="text-[10px] font-black text-label/40 uppercase tracking-[0.2em] mb-1">Métrica: ${title}</h4>
-                <p class="text-[9px] text-label/20 font-bold uppercase tracking-widest text-center max-w-[200px] leading-relaxed">
-                    Aún no hay registros suficientes para proyectar tendencias tácticas.
+                <h4 class="text-[11px] font-black text-label uppercase tracking-widest italic opacity-60">${title}</h4>
+                <p class="text-[9px] text-label/30 font-bold uppercase tracking-[0.2em] mt-2 leading-relaxed">
+                    Aún no hay registros suficientes para proyectar tendencias tácticas. <br>
+                    <span class="text-primary font-black opacity-100">ESPERANDO TELEMETRÍA</span>
                 </p>
-                <div class="mt-4 px-3 py-1 rounded-full border border-primary/10 bg-primary/5">
-                    <span class="text-[8px] font-black text-primary uppercase tracking-widest">Esperando Telemetría</span>
-                </div>
             </div>
         `;
     };

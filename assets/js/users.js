@@ -6,6 +6,7 @@
 var currentPage = 1;
 var rowsPerPage = 10;
 var currentFilteredUsers = [];
+var currentEditUserId = null;
 
 var iconsMap = {
     'server': '<i class="fas fa-server"></i>',
@@ -39,7 +40,6 @@ function getAreaColor(name) {
 }
 
 // ─── Modal Functions ───
-
 async function refreshPicklistAreas(prefix, selectedNames = []) {
     try {
         const res = await fetch('/admin/areas-api');
@@ -343,9 +343,11 @@ function updateActionButtons() {
     const btnEdit = document.getElementById('btnEditUser');
     const btnDelete = document.getElementById('btnDeleteUser');
     const btnAccess = document.getElementById('btnAccessUser');
+    const btnAreas = document.getElementById('btnAreasUser');
 
     if (btnEdit) btnEdit.disabled = (checkedCount !== 1);
     if (btnAccess) btnAccess.disabled = (checkedCount !== 1);
+    if (btnAreas) btnAreas.disabled = (checkedCount !== 1);
     if (btnDelete) btnDelete.disabled = (checkedCount === 0);
     
     // Header Select All sync
@@ -536,8 +538,14 @@ async function saveNewUser(event) {
     const areas = areasInput ? areasInput.value : '[]';
     fd.set('areas', areas);
     
-    const statusToggle = document.getElementById('addUserStatusToggle');
     fd.set('status', (statusToggle && statusToggle.checked) ? 'Activo' : 'Inactivo');
+
+    const procModal = document.getElementById('processingModal');
+    if (procModal) {
+        procModal.classList.remove('hidden');
+        procModal.classList.add('flex');
+        setTimeout(() => procModal.classList.add('show'), 50);
+    }
 
     try {
         const res = await fetch('/admin/add-user', { 
@@ -548,9 +556,7 @@ async function saveNewUser(event) {
         const data = await res.json();
         
         if (data.success) {
-            closeModal('addUserModal');
-            showToast('Usuario registrado correctamente', 'success');
-            setTimeout(() => location.reload(), 1000);
+            startSuccessCountdown("El nuevo usuario ha sido registrado y configurado exitosamente en el ecosistema.");
         } else {
             showToast(data.error || 'Fallo al registrar usuario', 'error');
         }
@@ -566,7 +572,13 @@ async function editSelectedUser() {
     const user = allUsersData.find(u => u.id == checked.value);
     if (!user) return;
 
-    document.getElementById('editUserNameHidden').value = user.id;
+    const form = document.getElementById('editUserForm');
+    if (form) form.reset();
+
+    currentEditUserId = user.id;
+    console.log("Nexus Debug: Opening edit modal for User ID:", currentEditUserId);
+    
+    document.getElementById('editUserId').value = user.id;
     document.getElementById('editUserNameDisplay').innerText = user.name + ' (' + user.email + ')';
     // Use setTimeout to ensure the modal is ready and no other resets are pending
     setTimeout(() => {
@@ -600,25 +612,43 @@ async function editSelectedUser() {
 }
 
 async function saveUserChanges() {
-    const userId = document.getElementById('editUserNameHidden').value;
-    const form = document.getElementById('editUserForm');
+    let userId = document.getElementById('editUserId').value;
+    if (!userId) userId = currentEditUserId;
     
+    console.log("Nexus Debug: Attempting to save User ID:", userId);
+
+    if (!userId) {
+        return showToast('Error crítico: No se identificó al usuario (ID faltante).', 'error');
+    }
+    
+    const form = document.getElementById('editUserForm');
     const fd = new FormData(form);
     const areas = document.getElementById('editSelectedUserAreasInput').value;
     fd.set('areas', areas);
     fd.set('status', document.getElementById('editUserStatusToggle').checked ? 'Activo' : 'Inactivo');
 
-    // Password Validation
+    // Password Validation: Require BOTH if either is touched
     const pass = document.getElementById('editUserPassword').value;
     const confirm = document.getElementById('editUserPasswordConfirm').value;
     
-    if (pass) {
+    if (pass || confirm) {
+        if (!pass || !confirm) {
+            return showToast('Para cambiar la contraseña, debe completar ambos campos.', 'warning');
+        }
         if (pass !== confirm) {
-            return showToast('Las contraseñas no coinciden', 'error');
+            return showToast('Las contraseñas no coinciden.', 'error');
         }
         if (pass.length < 6) {
-            return showToast('La contraseña es demasiado corta (mín. 6 car.)', 'error');
+            return showToast('La nueva contraseña debe tener al menos 6 caracteres.', 'error');
         }
+    }
+
+    // 1. Show Processing Modal
+    const procModal = document.getElementById('processingModal');
+    const procMsg = document.getElementById('procMessage');
+    if (procModal) {
+        procModal.classList.remove('hidden');
+        procModal.classList.add('flex');
     }
 
     try {
@@ -627,15 +657,18 @@ async function saveUserChanges() {
             body: fd,
             headers: { 'X-CSRFToken': typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : '' }
         });
+        
         const data = await res.json();
+        
+        if (procModal) procModal.classList.add('hidden');
+
         if (data.success) {
-            closeModal('editUserModal');
-            showToast('Cambios aplicados exitosamente', 'success');
-            setTimeout(() => location.reload(), 1000);
+            startSuccessCountdown("El perfil del usuario ha sido actualizado exitosamente.");
         } else {
             showToast(data.error || 'Error al actualizar', 'error');
         }
     } catch (e) {
+        if (procModal) procModal.classList.add('hidden');
         console.error("Edit User Error:", e);
         showToast('Error de red al actualizar usuario', 'error');
     }
@@ -648,17 +681,29 @@ function deleteSelectedUsers() {
     const count = checked.length;
     
     Swal.fire({
-        title: `¿Eliminar ${count > 1 ? count + ' usuarios' : 'usuario'}?`,
-        text: "Esta acción es irreversible y revocará todos los accesos.",
+        title: '<span class="text-white uppercase italic font-black tracking-tighter">¿Confirmar Purga?</span>',
+        html: `<div class="text-xs font-bold text-slate-300 leading-relaxed uppercase tracking-widest">
+                Estás por eliminar <span class="text-rose-500 font-black">${count > 1 ? count + ' registros' : 'el registro'}</span> permanentemente.<br>
+                Esta acción revocará todos los accesos vinculados de forma irreversible.
+               </div>`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#f43f5e',
         confirmButtonText: 'Sí, Eliminar Ahora',
         cancelButtonText: 'Cancelar',
-        background: 'var(--color-body-bg)',
-        color: 'var(--color-body-text)'
+        background: '#1e293b',
+        color: '#ffffff',
+        backdrop: 'rgba(15, 23, 42, 0.75)'
     }).then(async (result) => {
         if (result.isConfirmed) {
+            // Show Global Spinner
+            const procModal = document.getElementById('processingModal');
+            if (procModal) {
+                procModal.classList.remove('hidden');
+                procModal.classList.add('flex');
+                setTimeout(() => procModal.classList.add('show'), 50);
+            }
+
             const ids = Array.from(checked).map(cb => cb.value);
             let errors = 0;
             
@@ -674,11 +719,12 @@ function deleteSelectedUsers() {
             }
             
             if (errors === 0) {
-                showToast('Usuarios purgados con éxito', 'success');
+                startSuccessCountdown("Los registros de usuario y sus accesos asociados han sido purgados permanentemente del sistema.");
             } else {
-                showToast(`Se eliminaron usuarios pero hubo ${errors} fallas.`, 'warning');
+                if (procModal) procModal.classList.add('hidden');
+                showToast(`Se eliminaron algunos usuarios pero hubo ${errors} fallas.`, 'warning');
+                setTimeout(() => location.reload(), 1500);
             }
-            setTimeout(() => location.reload(), 800);
         }
     });
 }
@@ -735,11 +781,17 @@ function createPlatformAccessCard(p, isSelected) {
         <div class="w-10 h-10 rounded-lg flex items-center justify-center text-white shadow-lg flex-shrink-0" style="background: ${p.bg_color || '#334155'}">
             <i class="fas fa-layer-group text-[14px]"></i>
         </div>
-        <div class="flex-grow min-w-0">
-            <div class="text-[12px] font-black text-label uppercase tracking-tighter truncate card-name">${p.name}</div>
-            <div class="text-[10px] text-label/40 font-bold uppercase truncate">Área: ${p.area_name || 'General'}</div>
+        <div class="flex-grow min-w-0 flex flex-col">
+            <div class="flex items-center gap-2 mb-1">
+                <span class="text-[11px] font-black text-label uppercase tracking-tighter truncate card-name">${p.name}</span>
+            </div>
+            <div class="flex items-center">
+                <span class="px-2 py-0.5 rounded-md bg-panel-border/30 text-[9px] font-black text-label/60 uppercase tracking-widest border border-panel-border/50">
+                    <i class="fas fa-tag text-[7px] mr-1 opacity-50"></i> ${p.area_name || 'General'}
+                </span>
+            </div>
         </div>
-        <div class="w-8 h-8 rounded-full border border-panel-border group-hover:border-primary/40 flex items-center justify-center text-label/20 group-hover:text-primary transition-all">
+        <div class="w-8 h-8 rounded-full border border-panel-border group-hover:border-primary/40 flex items-center justify-center text-label/20 group-hover:text-primary transition-all shadow-inner">
             <i class="fas ${isSelected ? 'fa-times' : 'fa-plus'} text-xs"></i>
         </div>
     `;
@@ -786,6 +838,13 @@ async function saveUserPlatformAccess() {
     const val = document.getElementById('selectedUserPlatformsInput').value;
     const platformIds = JSON.parse(val || '[]');
 
+    const procModal = document.getElementById('processingModal');
+    if (procModal) {
+        procModal.classList.remove('hidden');
+        procModal.classList.add('flex');
+        setTimeout(() => procModal.classList.add('show'), 50);
+    }
+
     try {
         const res = await fetch(`/admin/update-user-access/${currentAccessUserId}`, {
             method: 'POST',
@@ -797,9 +856,9 @@ async function saveUserPlatformAccess() {
         });
         const data = await res.json();
         if (data.success) {
-            closeModal('userAccessModal');
-            showToast('Accesos actualizados corectamente', 'success');
-            setTimeout(() => location.reload(), 1000);
+            startSuccessCountdown("Los permisos de acceso a las plataformas han sido sincronizados correctamente.");
+        } else {
+            showToast(data.error || 'Error al actualizar accesos', 'error');
         }
     } catch (err) { 
         showToast('Error de red', 'error');
@@ -876,7 +935,145 @@ window.importLDAPUser = function(username, name, email) {
     showToast(`Datos de ${username} cargados`, 'info');
 };
 
+
+// ─── Areas Management Logic (New Dedicated Flow) ───
+
+let currentManagementUserId = null;
+
+async function openUserAreasModal() {
+    const checked = document.querySelector('.user-checkbox:checked');
+    if (!checked) return;
+    const user = allUsersData.find(u => u.id == checked.value);
+    if (!user) return;
+
+    currentManagementUserId = user.id;
+    document.getElementById('areasUserName').innerText = user.name;
+    
+    renderManagementAreas(user);
+    openModal('userAreasModal');
+}
+
+function renderManagementAreas(user) {
+    const allAreas = window.__areaData || [];
+    const userAreaNames = (user.areas || []).map(a => a.name || a);
+    
+    const availList = document.getElementById('areasAvailableList');
+    const selectedList = document.getElementById('areasSelectedList');
+    const hiddenInput = document.getElementById('selectedManagementAreasInput');
+    
+    if (availList && selectedList) {
+        availList.innerHTML = '';
+        selectedList.innerHTML = '';
+        
+        allAreas.forEach(area => {
+            const isSelected = userAreaNames.includes(area.name);
+            const card = createAreaManagementCard(area, isSelected);
+            if (isSelected) selectedList.appendChild(card);
+            else availList.appendChild(card);
+        });
+        
+        if (hiddenInput) {
+            const userAreaIds = (user.areas || []).map(a => a.id);
+            hiddenInput.value = JSON.stringify(userAreaIds);
+        }
+    }
+}
+
+function createAreaManagementCard(area, isSelected) {
+    const card = document.createElement('div');
+    card.className = `flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer group hover:scale-[1.02] active:scale-95 ${isSelected ? 'bg-violet-500/10 border-violet-500/30' : 'bg-surface-container/20 border-panel-border hover:border-violet-500/40'}`;
+    card.onclick = () => toggleManagementArea(area.name, isSelected);
+    
+    card.innerHTML = `
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white" style="background: ${area.color || '#6366f1'}">
+                <i class="fas fa-${area.icon || 'box'} text-xs"></i>
+            </div>
+            <div>
+                <div class="text-[11px] font-black uppercase italic tracking-tighter ${isSelected ? 'text-violet-400' : 'text-label'} card-name">${area.name}</div>
+            </div>
+        </div>
+        <div class="w-6 h-6 rounded-full border border-panel-border group-hover:border-violet-500/40 flex items-center justify-center text-label/20 group-hover:text-violet-500 transition-all shadow-inner">
+            <i class="fas ${isSelected ? 'fa-times' : 'fa-plus'} text-[10px]"></i>
+        </div>
+    `;
+    return card;
+}
+
+function toggleManagementArea(areaName, isSelected) {
+    const availList = document.getElementById('areasAvailableList');
+    const selectedList = document.getElementById('areasSelectedList');
+    const allAreas = window.__areaData || [];
+    const area = allAreas.find(a => a.name === areaName);
+    if (!area) return;
+
+    const isNowSelected = !isSelected;
+    const currentList = isSelected ? selectedList : availList;
+    
+    // Remove from current
+    const items = Array.from(currentList.children);
+    const itemToMove = items.find(el => el.querySelector('.card-name').textContent === areaName);
+    if (itemToMove) itemToMove.remove();
+
+    // Add to target
+    const targetList = isNowSelected ? selectedList : availList;
+    const newCard = createAreaManagementCard(area, isNowSelected);
+    targetList.appendChild(newCard);
+    
+    // Update hidden input
+    const selectedIds = Array.from(document.querySelectorAll('#areasSelectedList .card-name')).map(el => {
+        const name = el.textContent;
+        const a = allAreas.find(areaObj => areaObj.name === name);
+        return a ? a.id : null;
+    }).filter(id => id !== null);
+    
+    document.getElementById('selectedManagementAreasInput').value = JSON.stringify(selectedIds);
+}
+
+async function saveUserAreas() {
+    if (!currentManagementUserId) return;
+    const val = document.getElementById('selectedManagementAreasInput').value;
+    const areaIds = JSON.parse(val || '[]');
+
+    const procModal = document.getElementById('processingModal');
+    if (procModal) {
+        procModal.classList.remove('hidden');
+        procModal.classList.add('flex');
+        setTimeout(() => procModal.classList.add('show'), 50);
+    }
+
+    try {
+        const res = await fetch(`/admin/update-user-areas/${currentManagementUserId}`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'X-CSRFToken': CSRF_TOKEN
+            },
+            body: JSON.stringify({ area_ids: areaIds })
+        });
+        const data = await res.json();
+        if (data.success) {
+            startSuccessCountdown("La asignación estructural de áreas de trabajo ha sido actualizada. Se han sincronizado los accesos en cascada.");
+        } else {
+            showToast(data.error || 'Error al actualizar áreas', 'error');
+        }
+    } catch (err) { 
+        showToast('Error de red', 'error');
+    }
+}
+
 function changeUserPage(offset) {
     currentPage += offset;
     renderUsersTable();
 }
+
+// Attach New Listeners
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const action = btn.getAttribute('data-action');
+
+    if (action === 'users-open-areas') openUserAreasModal();
+    if (action === 'users-close-areas-modal') closeModal('userAreasModal');
+    if (action === 'users-save-areas') saveUserAreas();
+});

@@ -95,23 +95,57 @@ function initAreasModule() {
         }
     });
 
-    // Acción Global: Eliminar
+    // Action Global: Eliminar with Structural Block Validation
     document.getElementById('btnDeleteArea')?.addEventListener('click', () => {
         if (selectedAreas.length > 0) {
+            let totalPlatformsAffected = 0;
+            
+            // Analyze Structural Impact
+            selectedAreas.forEach(id => {
+                const area = currentAreas.find(a => a.id === id);
+                if (area) totalPlatformsAffected += (area.platforms_count || 0);
+            });
+
+            // BLOCK LOGIC: Cannot delete if has platforms
+            if (totalPlatformsAffected > 0) {
+                return Swal.fire({
+                    title: '<span class="text-rose-500 uppercase italic font-black tracking-tighter">Baja Bloqueada</span>',
+                    html: `<div class="text-xs font-bold text-slate-300 leading-relaxed uppercase tracking-widest">
+                            No es posible eliminar áreas que contienen infraestructura activa.<br><br>
+                            Se detectaron <span class="text-rose-500 font-black">${totalPlatformsAffected} plataformas vinculadas</span>.<br>
+                            Por favor, elimine o mueva los servicios antes de intentar dar de baja el departamento.
+                           </div>`,
+                    icon: 'error',
+                    confirmButtonText: 'Entendido',
+                    confirmButtonColor: '#6366f1',
+                    background: '#1e293b',
+                    color: '#ffffff',
+                    backdrop: 'rgba(15, 23, 42, 0.75)'
+                });
+            }
+
+            // Standard Confirmation for empty areas
             Swal.fire({
-                title: '¿Confirmar eliminación?',
-                text: `Se eliminarán ${selectedAreas.length} área(s). Esta acción no se puede deshacer.`,
+                title: '<span class="text-white uppercase italic font-black tracking-tighter">¿Confirmar eliminación?</span>',
+                html: `<div class="text-xs font-bold text-slate-300 uppercase tracking-widest">Se eliminarán ${selectedAreas.length} área(s) de forma permanente.</div>`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#ef4444',
                 cancelButtonColor: '#334155',
                 confirmButtonText: 'Sí, eliminar',
                 cancelButtonText: 'Cancelar',
-                background: 'var(--color-body-bg)',
-                color: 'var(--color-body-text)'
+                background: '#1e293b',
+                color: '#ffffff',
+                backdrop: 'rgba(15, 23, 42, 0.75)'
             }).then(async (result) => {
                 if (result.isConfirmed) {
-                    showToast('Eliminando...', 'info');
+                    const procModal = document.getElementById('processingModal');
+                    if (procModal) {
+                        procModal.classList.remove('hidden');
+                        procModal.classList.add('flex');
+                        setTimeout(() => procModal.classList.add('show'), 50);
+                    }
+
                     try {
                         const response = await fetch('/admin/areas/delete-bulk', {
                             method: 'POST',
@@ -120,12 +154,13 @@ function initAreasModule() {
                         });
                         const data = await response.json();
                         if (data.status === 'success') {
-                            showToast(data.message, 'success');
-                            setTimeout(() => location.reload(), 800);
+                            startSuccessCountdown("El área ha sido purgada exitosamente del sistema.");
                         } else {
+                            if (procModal) procModal.classList.add('hidden');
                             showToast(data.message, 'error');
                         }
                     } catch (error) {
+                        if (procModal) procModal.classList.add('hidden');
                         showToast('Error crítico al eliminar', 'error');
                     }
                 }
@@ -328,6 +363,10 @@ function openAreaModal() {
 
     renderPickers();
     renderUserPicklist();
+}
+
+function closeAreaModal() {
+    closeModal('areaModal');
 }
 
 function closeEditAreaModal() {
@@ -604,7 +643,12 @@ async function saveArea() {
     const color = document.getElementById(`${prefix}Color`).value;
     const user_ids = editId ? selectedEditUserIdList : selectedUserIdList;
 
-    showToast('Guardando...', 'info');
+    const procModal = document.getElementById('processingModal');
+    if (procModal) {
+        procModal.classList.remove('hidden');
+        procModal.classList.add('flex');
+        setTimeout(() => procModal.classList.add('show'), 50);
+    }
 
     try {
         const response = await fetch(url, {
@@ -615,8 +659,7 @@ async function saveArea() {
         const data = await response.json();
         
         if (data.status === 'success') {
-            showToast(data.message, 'success');
-            setTimeout(() => location.reload(), 1000);
+            startSuccessCountdown("La configuración del área ha sido sincronizada exitosamente.");
         } else {
             showToast(data.message, 'error');
         }

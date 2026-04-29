@@ -38,37 +38,8 @@ def users_list():
                     'area_name': p.area.name if p.area else 'General'
                 })
         
-        # Create a unique set of areas (assigned manually + derived from platform access)
+        # Simplified: ONLY show areas explicitly assigned to the user
         areas_map = {a.id: {'id': a.id, 'name': a.name, 'icon': a.icon, 'color': a.color} for a in u.areas}
-        
-        for p_info in user_platforms:
-            # We need the area object to get the full info if not already in map
-            if p_info.get('area_id') and p_info['area_id'] not in areas_map:
-                # This requires getting the area info from the platform's area relationship
-                # Since we already have the area_name in p_info, we can use that if we don't want more queries,
-                # but for consistency with icons/colors, we should ensure the data is there.
-                pass # The logic below handles enriching p_info
-        
-        # Merge area info from platforms into the final areas list
-        # For simplicity and performance, we'll collect all area IDs from platforms first
-        for p_info in user_platforms:
-            # Add unique areas from platforms
-            area_found = False
-            for aid in areas_map:
-                if areas_map[aid]['name'] == p_info['area_name']:
-                    area_found = True
-                    break
-            if not area_found:
-                # If the area from a platform isn't in the manual list, add it
-                # We'll use a temporary ID or find the real one
-                target_area = Area.query.filter_by(name=p_info['area_name']).first()
-                if target_area:
-                    areas_map[target_area.id] = {
-                        'id': target_area.id,
-                        'name': target_area.name,
-                        'icon': target_area.icon,
-                        'color': target_area.color
-                    }
 
         users_data.append({
             'id': u.id,
@@ -109,6 +80,9 @@ def add_user():
         areas_json = request.form.get('areas', '[]')
         auth_source = request.form.get('auth_source', 'local')
         
+        if email.lower().strip() == 'admin' or nombre.lower().strip() == 'admin':
+            return jsonify({"success": False, "error": "El identificador 'admin' es reservado del sistema."}), 403
+
         if User.query.filter_by(email=email).first():
             return jsonify({"success": False, "error": "El correo ya está registrado."}), 409
 
@@ -145,26 +119,77 @@ def edit_user(user_id):
         if not user:
             return jsonify({"success": False, "error": "Usuario no encontrado"}), 404
             
-        role = request.form.get('role')
-        status_str = request.form.get('status')
+        role = request.form.get('role', '').strip()
+        status_str = request.form.get('status', '').strip()
         areas_json = request.form.get('areas', '[]')
         
-        if role: user.role = role
-        if status_str: user.is_active = (status_str == 'Activo')
+        if role and role != user.role: 
+            user.role = role
         
-        # Update Password if provided
-        new_password = request.form.get('password')
+        if status_str: 
+            new_active = (status_str == 'Activo')
+            if new_active != user.is_active:
+                user.is_active = new_active
+        
+        # Update Password ONLY if a real value is provided
+        new_password = request.form.get('password', '').strip()
         if new_password and user.auth_source == 'local':
             user.set_password(new_password)
-            add_audit_log(f"CAMBIO PASSWORD: {user.email}", status="warning", detail=f"Contraseña de usuario local actualizada por administrador")
+            add_audit_log(f"CAMBIO PASSWORD: {user.email}", status="warning", detail=f"Contraseña actualizada para {user.email}")
 
-        # Update Areas
+        # ─── CASCADE PURGE LOGIC ───
         area_names = json.loads(areas_json)
         selected_areas = Area.query.filter(Area.name.in_(area_names)).all()
-        user.areas = selected_areas
         
+        # Identify removed areas
+        current_area_ids = {a.id for a in user.areas}
+        selected_area_ids = {a.id for a in selected_areas}
+        removed_area_ids = current_area_ids - selected_area_ids
+        
+        if removed_area_ids:
+            for area_id in removed_area_ids:
+                area_obj = Area.query.get(area_id)
+                platforms_in_area = Platform.query.filter_by(area_id=area_id).all()
+                platform_ids = [p.id for p in platforms_in_area]
+                
+                if platform_ids:
+                    affected_reqs = AccessRequest.query.filter(
+                        AccessRequest.user_email == user.email,
+                        AccessRequest.platform_id.in_(platform_ids),
+                        AccessRequest.status.in_(['Aprobado', 'Pendiente'])
+                    ).all()
+                    
+                    for req in affected_reqs:
+                        req.status = 'Eliminado'
+                        req.processed_at = datetime.now()
+                        add_audit_log(f"REVOCACIÓN: {user.email}", status="warning", detail=f"Acceso a {req.platform.name} revocado por baja de área {area_obj.name}")
+
+        # NEW: Total Purge if NO areas are left
+        if not selected_area_ids:
+            total_affected = AccessRequest.query.filter(
+                AccessRequest.user_email == user.email,
+                AccessRequest.status.in_(['Aprobado', 'Pendiente'])
+            ).all()
+            for req in total_affected:
+                req.status = 'Eliminado'
+                req.processed_at = datetime.now()
+            
+            add_audit_log(f"PURGA TOTAL: {user.email}", status="danger", detail="Se eliminaron todos los accesos al no contar con áreas asignadas.")
+            
+            add_audit_log(
+                f"LIMPIEZA DE ÁREAS: {user.email}", 
+                status="success", 
+                detail=f"Se eliminaron {len(removed_area_ids)} áreas y sus permisos asociados han sido revocados."
+            )
+
+        # Update the user's areas relationship
+        user.areas = selected_areas
         db.session.commit()
         
+        # REFRESH SESSION: If I am editing myself, I must re-login to avoid being kicked out
+        if current_user.is_authenticated and user.id == current_user.id:
+            login_user(user, remember=True)
+
         add_audit_log(f"MODIFICAR USUARIO: {user.email}", status="success", detail=f"Perfil de usuario actualizado")
         
         return jsonify({"success": True})
@@ -185,6 +210,15 @@ def delete_user(user_id):
             return jsonify({"success": False, "error": "No puedes eliminar tu propia cuenta"}), 400
             
         email = user.email
+        
+        # ─── FULL PERMISSION PURGE ON DELETE ───
+        affected_reqs = AccessRequest.query.filter_by(user_email=email).all()
+        for req in affected_reqs:
+            req.status = 'Eliminado'
+            req.processed_at = datetime.now()
+            # No need for individual audit logs here to avoid flooding, 
+            # the main delete log will cover the intent.
+        
         db.session.delete(user)
         db.session.commit()
         
@@ -316,4 +350,57 @@ def ldap_search_api():
             return jsonify({"success": True, "users": users})
             
     except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@users_bp.route('/update-user-areas/<int:user_id>', methods=['POST'])
+@login_required
+@admin_required
+def update_user_areas(user_id):
+    try:
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({"success": False, "error": "Usuario no encontrado"}), 404
+            
+        data = request.get_json()
+        new_area_ids = data.get('area_ids', [])
+        
+        selected_areas = Area.query.filter(Area.id.in_(new_area_ids)).all()
+        
+        # Identify removed areas for cascade purge
+        current_area_ids = {a.id for a in user.areas}
+        selected_area_ids = set(new_area_ids)
+        removed_area_ids = current_area_ids - selected_area_ids
+        
+        if removed_area_ids:
+            for area_id in removed_area_ids:
+                area_obj = Area.query.get(area_id)
+                platforms_in_area = Platform.query.filter_by(area_id=area_id).all()
+                platform_ids = [p.id for p in platforms_in_area]
+                
+                if platform_ids:
+                    affected_reqs = AccessRequest.query.filter(
+                        AccessRequest.user_email == user.email,
+                        AccessRequest.platform_id.in_(platform_ids),
+                        AccessRequest.status.in_(['Aprobado', 'Pendiente'])
+                    ).all()
+                    
+                    for req in affected_reqs:
+                        req.status = 'Eliminado'
+                        req.processed_at = datetime.now()
+                        add_audit_log(f"REVOCACIÓN ÁREA: {user.email}", status="warning", detail=f"Acceso a {req.platform.name} revocado por baja de área {area_obj.name}")
+
+        # Update the user's areas relationship
+        user.areas = selected_areas
+        db.session.commit()
+        
+        # Refresh session if self-editing
+        if current_user.is_authenticated and user.id == current_user.id:
+            from flask_login import login_user
+            login_user(user, remember=True)
+
+        add_audit_log(f"ACTUALIZAR ÁREAS: {user.email}", status="success", detail=f"Sincronización estructural de áreas completada")
+        
+        return jsonify({"success": True})
+    except Exception as e:
+        db.session.rollback()
         return jsonify({"success": False, "error": str(e)}), 500
