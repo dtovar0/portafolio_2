@@ -15,15 +15,11 @@ def index():
     config = SMTPConfig.query.first()
     
     # Ensuring default templates exist
-    default_slugs = ['test', 'inicio', 'error', 'guardado', 'terminado', 'usuario_creado', 'solicitud_admin', 'solicitud_usuario', 'solicitud_aprobada', 'solicitud_rechazada']
+    default_slugs = ['test', 'usuario_creado', 'solicitud_admin', 'solicitud_usuario', 'solicitud_aprobada', 'solicitud_rechazada']
     existing_slugs = [t.slug for t in NotificationTemplate.query.filter(NotificationTemplate.slug.in_(default_slugs)).all()]
     
     defaults = {
         'test': {'name': 'Test', 'subject': '🟢 NEXUS: VERIFICACIÓN_SISTEMA', 'body': '⚡ ALERTA DE PRUEBA\nEstado: SISTEMA_OK\nUsuario: {usuario}\nVerificación: EXITOSA', 'is_html': False},
-        'inicio': {'name': 'Inicio', 'subject': '🚀 NEXUS: ARRANQUE_INICIAL_{usuario}', 'body': '🚀 ARRANQUE NEXUS\nOperación: INICIALIZANDO\nUsuario: {usuario}\nHora: {hora}\nBienvenido de vuelta.', 'is_html': False},
-        'error': {'name': 'Error', 'subject': '🛑 NEXUS: ALERTA_SEGURIDAD_CRÍTICA', 'body': '🛑 NEXUS CRÍTICO\nError: ACCESO_DENEGADO\nUsuario: {usuario}\nIP: {ip}\nAcción: BLOQUEO_SEGURIDAD', 'is_html': False},
-        'guardado': {'name': 'Guardado', 'subject': '💾 NEXUS: SINCRONIZACIÓN_DATOS', 'body': '💾 SINCRONIZACIÓN NEXUS\nDestino: BASE_DATOS_CORE\nEstado: DATOS_GUARDADOS\nUsuario: {usuario}', 'is_html': False},
-        'terminado': {'name': 'Terminado', 'subject': '✅ NEXUS: PROCESO_FINALIZADO', 'body': '✅ NEXUS COMPLETADO\nProceso: ACCIÓN_FINALIZADA\nEjecutor: {usuario}\nEstado: DATOS_SINCRONIZADOS', 'is_html': False},
         'usuario_creado': {
             'name': 'Bienvenida', 
             'subject': '🎉 Bienvenido a NEXUS: {nombre}', 
