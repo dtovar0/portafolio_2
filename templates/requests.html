@@ -242,13 +242,19 @@
 
             <!-- Modal Footer -->
             <footer id="modalActionFooter" class="modal-footer">
-                <!-- Action buttons will be hidden if status is not Pending -->
-                <button id="modalBtnReject" class="nexus-btn nexus-btn-secondary flex-1 !h-14 !text-rose-500 !border-rose-500/20 shadow-lg shadow-rose-500/5">
-                    <i class="fas fa-times"></i> Denegar Solicitud
-                </button>
-                <button id="modalBtnApprove" class="nexus-btn nexus-btn-primary flex-1 !h-14 !bg-emerald-500 shadow-xl shadow-emerald-500/20">
-                    <i class="fas fa-check"></i> Aprobar Acceso
-                </button>
+                <div class="footer-left">
+                    <button onclick="closeModal('editRequestModal')" class="nexus-btn nexus-btn-secondary">
+                        Cancelar
+                    </button>
+                </div>
+                <div class="footer-right">
+                    <button id="modalBtnReject" class="nexus-btn nexus-btn-error">
+                        <i class="fas fa-times"></i> Denegar
+                    </button>
+                    <button id="modalBtnApprove" class="nexus-btn nexus-btn-success">
+                        <i class="fas fa-check"></i> Aprobar Acceso
+                    </button>
+                </div>
             </footer>
         </div>
     </div>
@@ -361,9 +367,16 @@
         const ghostCount = pageLen - (info.end - info.start);
         if (ghostCount <= 0) return;
 
-        let ghostHtml = '';
         for (let i = 0; i < ghostCount; i++) {
-            ghostHtml += `<tr class="ghost-row pointer-events-none select-none opacity-5">${'<td></td>'.repeat(columns)}</tr>`;
+            ghostHtml += `
+                <tr class="ghost-row pointer-events-none select-none opacity-5">
+                    <td class="text-center"><div></div></td>
+                    <td class="text-left"><div></div></td>
+                    <td class="text-left"><div></div></td>
+                    <td class="text-center"><div></div></td>
+                    <td class="text-center"><div></div></td>
+                    <td class="text-center"><div></div></td>
+                </tr>`;
         }
         tbody.append(ghostHtml);
     }

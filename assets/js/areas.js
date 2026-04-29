@@ -255,8 +255,8 @@ function renderAreasTable() {
                          ${area.users_count || 0}
                     </div>
                 </td>
-                <td class="text-right pr-6">
-                    <div class="inline-flex items-center gap-2 bg-surface-container/30 px-4 py-1.5 rounded-xl border border-panel-border transition-all group-hover:border-primary/30 group-hover:bg-primary/5">
+                <td class="text-center">
+                    <div class="inline-flex items-center justify-center gap-2 bg-surface-container/30 px-4 py-1.5 rounded-xl border border-panel-border transition-all group-hover:border-primary/30 group-hover:bg-primary/5">
                         <span class="text-[11px] font-black text-primary italic leading-none">${area.platforms_count || 0}</span>
                         <i class="fas fa-layer-group text-[10px] text-label/20 group-hover:text-primary transition-colors"></i>
                     </div>
@@ -282,8 +282,13 @@ function renderGhostRows(columns) {
         const tr = document.createElement('tr');
         tr.className = 'pointer-events-none select-none';
         tr.innerHTML = `
-            <td style="border-left:3px solid transparent;"></td>
-            ${'<td></td>'.repeat(columns - 1)}
+            <td class="text-center" style="border-left:3px solid transparent;"></td>
+            <td class="text-center"></td>
+            <td class="text-left"></td>
+            <td class="text-left"></td>
+            <td class="text-center"></td>
+            <td class="text-center"></td>
+            <td class="text-center"></td>
         `;
         tbody.appendChild(tr);
     }

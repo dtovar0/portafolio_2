@@ -34,15 +34,15 @@
 
                     <!-- Botones de Acción Globales -->
                     <div class="flex items-center gap-2">
-                        <button id="btnEditArea" class="h-12 px-5 rounded-2xl bg-surface-container/50 border border-panel-border text-label font-black text-[12px] uppercase tracking-widest flex items-center gap-3 hover:border-primary hover:text-primary transition-all disabled:opacity-30 disabled:pointer-events-none active:scale-95" disabled>
+                        <button id="btnEditArea" class="nexus-btn nexus-btn-secondary" disabled>
                             <i class="fas fa-edit"></i>
                             <span>Modificar</span>
                         </button>
-                        <button id="btnDeleteArea" class="h-12 px-5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 font-black text-[12px] uppercase tracking-widest flex items-center gap-3 hover:bg-rose-500 hover:text-white transition-all disabled:opacity-30 disabled:pointer-events-none active:scale-95" disabled>
+                        <button id="btnDeleteArea" class="nexus-btn nexus-btn-error" disabled>
                             <i class="fas fa-trash-alt"></i>
                             <span>Eliminar</span>
                         </button>
-                        <button onclick="openAreaModal()" class="h-12 px-6 rounded-2xl bg-primary text-white font-black text-[12px] uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-3">
+                        <button onclick="openAreaModal()" class="nexus-btn nexus-btn-primary">
                             <i class="fas fa-plus"></i>
                             <span>Nueva Área</span>
                         </button>
@@ -57,14 +57,14 @@
                                     <thead class="sticky top-0 z-20">
                                         <tr class="bg-slate-900/80 backdrop-blur-md">
                                             <th class="w-[5%] text-center" style="border-left:3px solid transparent;padding:0 0.5rem;">
-                                                <input type="checkbox" id="selectAllAreas" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary flex-shrink-0 cursor-pointer">
+                                                <input type="checkbox" id="selectAllAreas" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary flex-shrink-0 cursor-pointer mx-auto">
                                             </th>
                                             <th class="w-[8%] text-center">Ícono</th>
-                                            <th class="w-[20%]">Área</th>
-                                            <th class="w-[30%]">Descripción</th>
+                                            <th class="w-[20%] text-left">Área</th>
+                                            <th class="w-[30%] text-left">Descripción</th>
                                             <th class="w-[12%] text-center">Estado</th>
                                             <th class="w-[10%] text-center">Usuarios</th>
-                                            <th class="w-[15%] text-right" style="padding-right: 1.25rem;">Plataformas</th>
+                                            <th class="w-[15%] text-center">Plataformas</th>
                                         </tr>
                                     </thead>
                                     <tbody id="areasTableBody">
@@ -122,17 +122,17 @@
 
             <div class="p-8 min-h-[480px] overflow-y-auto custom-scrollbar">
                 <!-- STEP 1: BASIC DATA -->
-                <div id="stepSection1" class="step-section space-y-6">
-                    <div class="space-y-2 group">
+                <div id="stepSection1" class="step-sect                    <div class="space-y-2 group">
                         <label class="text-[11px] font-black text-label/40 uppercase tracking-widest ml-1 group-focus-within:text-primary transition-colors">Nombre del Área</label>
                         <input type="text" id="areaName" placeholder="EJ: RECURSOS HUMANOS" 
-                               class="w-full h-14 bg-input-bg border-2 border-panel-border rounded-2xl px-6 text-sm font-bold text-input outline-none focus:border-primary/40 focus:ring-4 focus:ring-primary/10 transition-all">
+                               class="w-full h-12 bg-input-bg border-2 border-panel-border rounded-xl px-6 text-sm font-bold text-input outline-none focus:border-primary/40 focus:ring-4 focus:ring-primary/10 transition-all premium-validate" required data-validation-type="text">
                     </div>
                     <div class="space-y-2 group">
                         <label class="text-[11px] font-black text-label/40 uppercase tracking-widest ml-1 group-focus-within:text-primary transition-colors">Descripción Operativa</label>
                         <textarea id="areaDescription" placeholder="DESCRIPCIÓN DE RESPONSABILIDADES..." rows="3"
-                              class="w-full bg-input-bg border-2 border-panel-border rounded-2xl px-6 py-4 text-sm font-bold text-input outline-none focus:border-primary/40 focus:ring-4 focus:ring-primary/10 transition-all resize-none"></textarea>
+                               class="w-full bg-input-bg border-2 border-panel-border rounded-xl px-6 py-4 text-sm font-bold text-input outline-none focus:border-primary/40 focus:ring-4 focus:ring-primary/10 transition-all resize-none premium-validate" required data-validation-type="text"></textarea>
                     </div>
+            </div>
                     <div class="flex items-center px-6 h-14 bg-surface-container/20 border border-panel-border rounded-2xl justify-between">
                         <div class="flex flex-col">
                             <span class="text-[10px] font-black text-label/40 uppercase tracking-widest">Estado Inicial</span>
@@ -198,27 +198,30 @@
                 </div>
             </div>
 
-            <div class="p-8 pt-4 bg-surface-container/30 border-t border-panel-border flex items-center gap-4">
-                <!-- Cancelar (Solo Paso 1) -->
-                <button type="button" id="btnCancelArea" onclick="closeAreaModal()" class="h-12 flex-1 rounded-2xl bg-tab-inactive border border-panel-border text-tab-inactive-text font-black text-[12px] uppercase tracking-widest hover:border-rose-500 hover:text-rose-500 transition-all active:scale-95 shadow-lg shadow-black/5">
-                    Cancelar
-                </button>
-
-                <!-- Anterior (Paso 2 y 3) -->
-                <button type="button" id="btnPrevStep" onclick="changeStep(currentStep - 1)" class="h-12 flex-1 rounded-2xl bg-tab-inactive border border-panel-border text-tab-inactive-text font-black text-[12px] uppercase tracking-widest hover:border-primary transition-all active:scale-95 hidden">
-                    Anterior
-                </button>
-                
-                <!-- Acción Principal -->
-                <button type="button" id="btnNextStep" onclick="changeStep(currentStep + 1)" class="h-12 flex-1 bg-primary text-white text-[12px] font-black rounded-2xl uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3">
-                    <span>Continuar</span>
-                    <i class="fas fa-arrow-right text-xs"></i>
-                </button>
-                <button type="button" id="btnSaveArea" onclick="saveArea()" class="h-12 flex-1 bg-emerald-500 text-white text-[12px] font-black rounded-2xl uppercase tracking-widest shadow-lg shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-all hidden items-center justify-center gap-3">
-                    <i class="fas fa-save text-sm"></i>
-                    <span>Finalizar</span>
-                </button>
-            </div>
+            <footer class="modal-footer">
+                <div class="footer-left">
+                    <!-- Cancelar (Solo Paso 1) -->
+                    <button type="button" id="btnCancelArea" onclick="closeAreaModal()" class="nexus-btn nexus-btn-secondary">
+                        Cancelar
+                    </button>
+                    <!-- Anterior (Paso 2 y 3) -->
+                    <button type="button" id="btnPrevStep" onclick="changeStep(currentStep - 1)" class="nexus-btn nexus-btn-secondary hidden">
+                        <i class="fas fa-chevron-left"></i>
+                        <span>Anterior</span>
+                    </button>
+                </div>
+                <div class="footer-right">
+                    <!-- Acción Principal -->
+                    <button type="button" id="btnNextStep" onclick="changeStep(currentStep + 1)" class="nexus-btn nexus-btn-primary">
+                        <span>Continuar</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <button type="button" id="btnSaveArea" onclick="saveArea()" class="nexus-btn nexus-btn-success hidden">
+                        <i class="fas fa-save"></i>
+                        <span>Finalizar</span>
+                    </button>
+                </div>
+            </footer>
         </form>
     </div>
 </div>
@@ -267,13 +270,14 @@
                     <div class="space-y-2 group">
                         <label class="text-[11px] font-black text-label/40 uppercase tracking-widest ml-1 group-focus-within:text-primary transition-colors">Nombre del Área</label>
                         <input type="text" id="editAreaName" placeholder="EJ: RECURSOS HUMANOS" 
-                               class="w-full h-14 bg-input-bg border-2 border-panel-border rounded-2xl px-6 text-sm font-bold text-input outline-none focus:border-primary/40 focus:ring-4 focus:ring-primary/10 transition-all">
+                               class="w-full h-12 bg-input-bg border-2 border-panel-border rounded-xl px-6 text-sm font-bold text-input outline-none focus:border-primary/40 focus:ring-4 focus:ring-primary/10 transition-all premium-validate" required data-validation-type="text">
                     </div>
                     <div class="space-y-2 group">
                         <label class="text-[11px] font-black text-label/40 uppercase tracking-widest ml-1 group-focus-within:text-primary transition-colors">Descripción Operativa</label>
                         <textarea id="editAreaDescription" placeholder="DESCRIPCIÓN DE RESPONSABILIDADES..." rows="3"
-                              class="w-full bg-input-bg border-2 border-panel-border rounded-2xl px-6 py-4 text-sm font-bold text-input outline-none focus:border-primary/40 focus:ring-4 focus:ring-primary/10 transition-all resize-none"></textarea>
+                               class="w-full bg-input-bg border-2 border-panel-border rounded-xl px-6 py-4 text-sm font-bold text-input outline-none focus:border-primary/40 focus:ring-4 focus:ring-primary/10 transition-all resize-none premium-validate" required data-validation-type="text"></textarea>
                     </div>
+                </div>
                     <div class="flex items-center px-6 h-14 bg-surface-container/20 border border-panel-border rounded-2xl justify-between">
                         <div class="flex flex-col">
                             <span class="text-[10px] font-black text-label/40 uppercase tracking-widest">Estado de Operación</span>
@@ -339,27 +343,30 @@
                 </div>
             </div>
 
-            <div class="p-8 pt-4 bg-surface-container/30 border-t border-panel-border flex items-center gap-4">
-                <!-- Cancelar (Solo Paso 1) -->
-                <button type="button" id="btnCancelEditArea" onclick="closeEditAreaModal()" class="h-12 flex-1 rounded-2xl bg-tab-inactive border border-panel-border text-tab-inactive-text font-black text-[12px] uppercase tracking-widest hover:border-rose-500 hover:text-rose-500 transition-all active:scale-95 shadow-lg shadow-black/5">
-                    Cancelar
-                </button>
-
-                <!-- Anterior (Paso 2 y 3) -->
-                <button type="button" id="btnEditPrevStep" onclick="changeEditStep(currentEditStep - 1)" class="h-12 flex-1 rounded-2xl bg-tab-inactive border border-panel-border text-tab-inactive-text font-black text-[12px] uppercase tracking-widest hover:border-primary transition-all active:scale-95 hidden">
-                    Anterior
-                </button>
-                
-                <!-- Acción Principal -->
-                <button type="button" id="btnEditNextStep" onclick="changeEditStep(currentEditStep + 1)" class="h-12 flex-1 bg-primary text-white text-[12px] font-black rounded-2xl uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3">
-                    <span>Continuar</span>
-                    <i class="fas fa-arrow-right text-xs"></i>
-                </button>
-                <button type="button" id="btnSaveEditedArea" onclick="saveArea()" class="h-12 flex-1 bg-emerald-500 text-white text-[12px] font-black rounded-2xl uppercase tracking-widest shadow-lg shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-all hidden items-center justify-center gap-3">
-                    <i class="fas fa-save text-sm"></i>
-                    <span>Guardar Cambios</span>
-                </button>
-            </div>
+            <footer class="modal-footer">
+                <div class="footer-left">
+                    <!-- Cancelar (Solo Paso 1) -->
+                    <button type="button" id="btnCancelEditArea" onclick="closeEditAreaModal()" class="nexus-btn nexus-btn-secondary">
+                        Cancelar
+                    </button>
+                    <!-- Anterior (Paso 2 y 3) -->
+                    <button type="button" id="btnEditPrevStep" onclick="changeEditStep(currentEditStep - 1)" class="nexus-btn nexus-btn-secondary hidden">
+                        <i class="fas fa-chevron-left"></i>
+                        <span>Anterior</span>
+                    </button>
+                </div>
+                <div class="footer-right">
+                    <!-- Acción Principal -->
+                    <button type="button" id="btnEditNextStep" onclick="changeEditStep(currentEditStep + 1)" class="nexus-btn nexus-btn-primary">
+                        <span>Continuar</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <button type="button" id="btnSaveEditedArea" onclick="saveArea()" class="nexus-btn nexus-btn-success hidden">
+                        <i class="fas fa-save"></i>
+                        <span>Guardar Cambios</span>
+                    </button>
+                </div>
+            </footer>
         </form>
     </div>
 </div>

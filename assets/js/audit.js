@@ -49,7 +49,7 @@ function initAuditDataTable() {
             dataSrc: 'logs'
         },
         columns: [
-            { data: 'id', width: '80px', render: (data) => `<div class="flex items-center h-full text-primary/60 font-black">#${String(data).padStart(5, '0')}</div>` },
+            { data: 'id', width: '80px', render: (data) => `<div class="flex items-center h-full text-primary/60 font-black text-left">#${String(data).padStart(5, '0')}</div>` },
             { data: 'user', width: '130px', render: (data) => `<div class="flex items-center h-full font-bold text-label/80 truncate">${data || 'SYSTEM'}</div>` },
             { 
                 data: 'action', 
@@ -87,7 +87,7 @@ function initAuditDataTable() {
                     }
 
                     return `
-                        <div class="flex items-center h-full">
+                        <div class="flex items-center justify-center h-full">
                             <span class="nx-badge ${cls} flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-black tracking-widest border border-current/10 shadow-sm">
                                 <i class="fas ${icon} text-[8px] opacity-70"></i>
                                 ${label}
@@ -108,8 +108,8 @@ function initAuditDataTable() {
                     return `<div class="flex items-center justify-center h-full"><span class="nx-badge ${cls}">${data.toUpperCase()}</span></div>`;
                 }
             },
-            { data: 'description', width: 'auto', render: (data) => `<div class="flex items-center h-full text-[12px] font-bold text-label/60 line-clamp-1 min-w-0 overflow-hidden text-ellipsis" title="${data || ''}">${data || '-'}</div>` },
-            { data: 'time', width: '180px', render: (data) => `<div class="flex items-center h-full font-mono text-[12px] font-bold text-label/60 justify-end">${data}</div>` }
+            { data: 'description', width: 'auto', render: (data) => `<div class="flex items-center h-full text-[12px] font-bold text-label/60 line-clamp-1 min-w-0 overflow-hidden text-ellipsis text-left" title="${data || ''}">${data || '-'}</div>` },
+            { data: 'time', width: '180px', render: (data) => `<div class="flex items-center h-full font-mono text-[12px] font-bold text-label/60 justify-center">${data}</div>` }
         ],
         autoWidth: false,
         pageLength: getPageLength(),
@@ -194,10 +194,12 @@ function renderGhostRows(settings, columns) {
     for (let i = 0; i < ghostCount; i++) {
         ghostHtml += `
             <tr class="ghost-row pointer-events-none select-none">
-                <td><div></div></td>
-                ${Array(columns - 1).fill(0).map(() => `
-                    <td><div></div></td>
-                `).join('')}
+                <td class="text-left"><div></div></td>
+                <td class="text-left"><div></div></td>
+                <td class="text-center"><div></div></td>
+                <td class="text-center"><div></div></td>
+                <td class="text-left"><div></div></td>
+                <td class="text-center"><div></div></td>
             </tr>`;
     }
     tbody.append(ghostHtml);
