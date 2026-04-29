@@ -83,7 +83,7 @@ function populateUserAreasPicklist(containerId, items, prefix) {
 
 function createAreaCardModern(area, isSelected, prefix) {
     const card = document.createElement('div');
-    card.className = 'group flex items-center gap-3 p-3 rounded-xl border border-panel-border bg-surface-container/20 hover:border-primary/40 hover:bg-primary/5 transition-all cursor-pointer select-none picklist-card-premium' + (isSelected ? ' ring-1 ring-primary/20' : '');
+    card.className = 'group flex items-center justify-between p-3 rounded-2xl border border-panel-border bg-white hover:border-primary/40 hover:shadow-lg transition-all cursor-pointer select-none picklist-card-premium mb-3' + (isSelected ? ' ring-1 ring-primary/20' : '');
     card.setAttribute('data-action', 'users-toggle-area');
     card.setAttribute('data-area-name', area.name);
     card.setAttribute('data-list-id', isSelected ? `${prefix}SelectedList` : `${prefix}AvailableList`);
@@ -91,15 +91,14 @@ function createAreaCardModern(area, isSelected, prefix) {
     const colors = area.color || getAreaColor(area.name);
 
     card.innerHTML = `
-        <div class="w-10 h-10 rounded-lg flex items-center justify-center text-white shadow-lg flex-shrink-0" style="background: ${colors}">
-            <i class="fas fa-${area.icon || 'box'}"></i>
+        <div class="flex items-center gap-4 flex-grow min-w-0">
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center text-white shadow-lg flex-shrink-0" style="background: ${colors}">
+                <i class="fas fa-${area.icon || 'box'} text-lg"></i>
+            </div>
+            <div class="text-[13px] font-black text-label uppercase tracking-tighter italic truncate card-name">${area.name}</div>
         </div>
-        <div class="flex-grow min-w-0">
-            <div class="text-[12px] font-black text-label uppercase tracking-tighter truncate card-name">${area.name}</div>
-            <div class="text-[10px] text-label/40 font-bold uppercase truncate">${area.description || 'Área de trabajo'}</div>
-        </div>
-        <div class="w-8 h-8 rounded-full border border-panel-border group-hover:border-primary/40 flex items-center justify-center text-label/20 group-hover:text-primary transition-all">
-            <i class="fas ${isSelected ? 'fa-times' : 'fa-plus'} text-xs"></i>
+        <div class="w-9 h-9 rounded-full border-2 border-panel-border/60 group-hover:border-primary/40 flex items-center justify-center text-label/20 group-hover:text-primary transition-all flex-shrink-0 ml-2">
+            <i class="fas ${isSelected ? 'fa-times' : 'fa-plus'} text-[10px]"></i>
         </div>
     `;
     return card;
@@ -418,6 +417,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (statusToggle) {
                         $(statusToggle).prop('checked', true).trigger('change');
                     }
+                    const roleToggle = form.querySelector('#addUserRoleToggle');
+                    if (roleToggle) {
+                        $(roleToggle).prop('checked', false).trigger('change');
+                        const roleInput = document.getElementById('addUserRole');
+                        if (roleInput) roleInput.value = 'usuario';
+                    }
                 }
             }, 50);
             
@@ -474,15 +479,26 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Status Toggles Live Text
+    // Status & Role Toggles Live Text
     document.addEventListener('change', (e) => {
-        if (e.target.classList.contains('js-status-toggle')) {
-            const labelOn = e.target.dataset.onLabel || 'Activo';
-            const labelOff = e.target.dataset.offLabel || 'Inactivo';
+        if (e.target.classList.contains('js-status-toggle') || e.target.classList.contains('js-role-toggle')) {
+            const isRole = e.target.classList.contains('js-role-toggle');
+            const labelOn = e.target.dataset.onLabel || (isRole ? 'Administrador' : 'Activo');
+            const labelOff = e.target.dataset.offLabel || (isRole ? 'Usuario' : 'Inactivo');
             const targetId = e.target.dataset.targetId;
+            
             if (targetId) {
                 const textEl = document.getElementById(targetId);
                 if (textEl) textEl.textContent = e.target.checked ? labelOn : labelOff;
+            }
+
+            // If it's a role toggle, update the hidden input
+            if (isRole) {
+                const hiddenInputId = e.target.id.replace('Toggle', '');
+                const hiddenInput = document.getElementById(hiddenInputId);
+                if (hiddenInput) {
+                    hiddenInput.value = e.target.checked ? 'administrador' : 'usuario';
+                }
             }
         }
     });
@@ -507,10 +523,8 @@ function changeUserStep(step) {
         s2.classList.remove('hidden');
         progress.style.width = '100%';
         btnBack.classList.remove('hidden');
-        btnBack.classList.add('flex');
         btnNext.classList.add('hidden');
         btnSubmit.classList.remove('hidden');
-        btnSubmit.classList.add('flex');
         btnCancel.classList.add('hidden');
     } else {
         s1.classList.remove('hidden');
@@ -592,7 +606,15 @@ async function editSelectedUser() {
         }
 
         // Map other fields inside timeout for safety
-        document.getElementById('editUserRole').value = user.role;
+        const roleToggle = document.getElementById('editUserRoleToggle');
+        const roleInput = document.getElementById('editUserRole');
+        const roleText = document.getElementById('editUserRoleText');
+        if (roleToggle && roleInput) {
+            const isAdmin = (user.role || '').toLowerCase() === 'administrador';
+            $(roleToggle).prop('checked', isAdmin).trigger('change');
+            roleInput.value = isAdmin ? 'administrador' : 'usuario';
+            if (roleText) roleText.textContent = isAdmin ? 'Administrador' : 'Usuario';
+        }
         
         // Password visibility for local users
         const passSection = document.getElementById('editUserPasswordSection');

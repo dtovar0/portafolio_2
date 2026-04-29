@@ -3,9 +3,9 @@
         <!-- Brand / Logo -->
         <div class="h-16 px-6 border-b border-panel-border flex items-center justify-between mb-4 flex-shrink-0">
             <div class="flex items-center gap-3 brand-text overflow-hidden transition-all duration-300">
-                {% if sys_config and sys_config.portal_identity_type == 'image' and sys_config.portal_image %}
+                {% if sys_config and sys_config.portal_identity_type == 'image' and sys_config.portal_icon %}
                     <div class="w-9 h-9 flex-shrink-0 rounded-xl overflow-hidden flex items-center justify-center shadow-lg shadow-primary/30 ring-2 ring-primary/20">
-                        <img src="{{ sys_config.portal_image }}" alt="Logo" class="w-full h-full object-cover">
+                        <img src="{{ sys_config.portal_icon }}" alt="Logo" class="w-full h-full object-cover">
                     </div>
                 {% elif sys_config and sys_config.portal_icon %}
                     <div class="w-9 h-9 flex-shrink-0 rounded-xl flex items-center justify-center shadow-lg shadow-primary/30 ring-2 ring-primary/20" 

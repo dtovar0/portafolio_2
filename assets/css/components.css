@@ -1514,6 +1514,10 @@ input[name="db_engine"]:checked + label .w-5.h-5 .bg-primary {
     border: 1px solid transparent;
 }
 
+.nexus-btn.hidden {
+    display: none !important;
+}
+
 .nexus-btn:active {
     transform: scale(0.96);
 }
@@ -1594,12 +1598,30 @@ input[name="db_engine"]:checked + label .w-5.h-5 .bg-primary {
 
 .modal-footer {
     padding: 1.5rem 2rem !important;
-    background: rgb(var(--color-surface-container-bg)) / 0.3 !important;
+    background: rgb(var(--color-surface-container-bg) / 0.5) !important;
     border-top: 1px solid rgb(var(--color-panel-border)) !important;
+    display: flex !important;
+    gap: 1.5rem !important;
+    align-items: center !important;
+    justify-content: space-between !important; /* Separación extrema */
+    flex-shrink: 0 !important;
+}
+
+/* Grupos para control de alineación */
+.modal-footer .footer-left,
+.modal-footer .footer-right {
     display: flex !important;
     gap: 1rem !important;
     align-items: center !important;
-    justify-content: flex-end !important;
+}
+
+/* Regla Maestra: Botones simétricos en el footer */
+.modal-footer button,
+.modal-footer .nexus-btn {
+    min-width: 160px !important; /* Ancho base garantizado */
+    height: 3.5rem !important;
+    justify-content: center !important;
+    flex: none !important; /* Evitar que crezcan desigualmente */
 }
 
 /* 3. TACTICAL CHECKBOX */
