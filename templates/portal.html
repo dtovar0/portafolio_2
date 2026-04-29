@@ -10,9 +10,8 @@
 <div id="portalWrapper" class="w-full h-full overflow-hidden flex flex-col portal-entry">
 
     <!-- HERO HEADER -->
-    <div class="portal-hero flex-shrink-0 relative overflow-hidden" 
-         style="{% if sys_config %}background-color: {{ sys_config.bg_color }}; color: {{ sys_config.text_color }};{% endif %}">
-        <div class="portal-hero-glow" style="{% if sys_config %}background: radial-gradient(ellipse, {{ sys_config.bg_color }} 0%, transparent 70%); opacity: 0.5;{% endif %}"></div>
+    <div class="portal-hero flex-shrink-0 relative overflow-hidden">
+        <div class="portal-hero-glow"></div>
         <div class="portal-hero-grid"></div>
 
         {% if sys_config and sys_config.portal_banner %}

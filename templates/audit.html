@@ -3,11 +3,9 @@
 {% block title %}Auditoría | Nexus Premium{% endblock %}
 
 {% block breadcrumbs %}
-<span class="text-secondary">Nexus</span>
-<svg class="w-4 h-4 text-label/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-</svg>
-<span class="text-primary">Auditoría</span>
+<span class="text-secondary cursor-pointer hover:text-primary transition-colors" onclick="window.location.href='/'">Inicio</span>
+<svg class="w-4 h-4 text-label/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+<span class="text-primary font-bold">Auditoría</span>
 {% endblock %}
 
 {% block content %}
@@ -18,7 +16,7 @@
 
         <!-- Standard Nexus Table View -->
         <div id="tab-panel-audit"
-            class="tab-panel tab-panel-content flex-1 min-h-0 flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-500 rounded-2xl border border-panel-border shadow-2xl shadow-primary/5 overflow-hidden">
+            class="tab-panel tab-panel-content flex-1 min-h-0 flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-500 rounded-xl border border-panel-border shadow-2xl shadow-primary/5 overflow-hidden">
             <!-- PANEL HEADER -->
             <header class="flex-shrink-0 bg-panel-header border-b border-panel-border px-6 py-6 flex items-center justify-between">
                 <div class="flex items-center gap-4">
@@ -48,7 +46,7 @@
                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                         <input type="text" id="auditSearch" placeholder="Filtrar eventos de auditoría..."
-                            class="w-full bg-input-bg border-2 border-panel-border rounded-2xl pl-12 pr-5 py-3 text-sm font-bold text-input outline-none focus:border-input-focus focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-label/50">
+                            class="w-full bg-input-bg border-2 border-panel-border rounded-xl pl-12 pr-5 py-3 text-sm font-bold text-input outline-none focus:border-input-focus focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-label/50">
                     </div>
                     <button id="refreshAudit" class="nexus-btn nexus-btn-primary">
                         <i class="fas fa-sync group-hover:rotate-180 transition-transform duration-500"></i>

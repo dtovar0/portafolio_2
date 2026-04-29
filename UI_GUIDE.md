@@ -6,6 +6,12 @@
 - **Botón Simétrico**: `w-[180px] h-12 rounded-xl text-[10px] uppercase font-black`.
 - **Selección de Fila**: `.nexus-row-selected` (Fondo transparente, solo indicador en checkbox).
 
+## 📐 Estándar de Paneles y Contenedores
+- **Borde**: `1px solid rgb(var(--color-panel-border))`
+- **Redondeo (Radius)**: `12px` (Clase Tailwind: `rounded-xl`)
+- **Fondo**: `rgb(var(--color-panel-fill))`
+- **Aplicación**: Todos los paneles de KPIs, Gráficas, Tablas y Modales DEBEN usar este estándar para mantener la consistencia corporativa.
+
 ## 🧩 Componentes Reutilizables
 
 ### 1. Botón de Acción Gris

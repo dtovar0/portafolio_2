@@ -2,11 +2,17 @@
 
 {% block title %}Gestión de Áreas | Nexus Premium{% endblock %}
 
+{% block breadcrumbs %}
+<span class="text-secondary cursor-pointer hover:text-primary transition-colors" onclick="window.location.href='/'">Inicio</span>
+<svg class="w-4 h-4 text-label/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+<span class="text-primary font-bold">Áreas</span>
+{% endblock %}
+
 {% block content %}
 <div id="areasWrapper" class="w-full h-full p-6 overflow-hidden flex flex-col">
     <!-- PANEL AREA -->
     <div class="flex-1 min-h-0 flex flex-col">
-        <div id="tab-panel-areas" class="tab-panel tab-panel-content flex-1 min-h-0 flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-500 rounded-2xl border border-panel-border shadow-2xl shadow-primary/5 overflow-hidden">
+        <div id="tab-panel-areas" class="tab-panel tab-panel-content flex-1 min-h-0 flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-500 rounded-xl border border-panel-border shadow-2xl shadow-primary/5 overflow-hidden">
             
             <header class="flex-shrink-0 bg-panel-header border-b border-panel-border px-6 py-6 flex items-center justify-between">
                 <div class="flex items-center gap-4">
@@ -29,7 +35,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                         <input type="text" id="areaSearch" placeholder="Buscar área o descripción..."
-                            class="w-full bg-input-bg border-2 border-panel-border rounded-2xl pl-12 pr-5 py-3 text-sm font-bold text-input outline-none focus:border-input-focus focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-label/50">
+                            class="w-full bg-input-bg border-2 border-panel-border rounded-xl pl-12 pr-5 py-3 text-sm font-bold text-input outline-none focus:border-input-focus focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-label/50">
                     </div>
 
                     <!-- Botones de Acción Globales -->
@@ -83,7 +89,7 @@
 
 <!-- Modal de Modificar (3 Pasos) --><!-- Modal de Nueva Área (3 Pasos) -->
 <div id="areaModal" class="nexus-modal hidden fixed inset-0 z-[110] items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-    <div class="nexus-modal-content w-full max-w-2xl bg-panel-fill border border-panel-border rounded-3xl shadow-2xl overflow-hidden shadow-black/50 ring-1 ring-white/10">
+    <div class="nexus-modal-content w-full max-w-2xl bg-panel-fill border border-panel-border rounded-xl shadow-2xl overflow-hidden shadow-black/50 ring-1 ring-white/10">
         <form id="areaForm" class="flex flex-col h-full overflow-hidden">
             <input type="hidden" id="areaId">
             <div class="p-6 border-b border-panel-border flex items-center justify-between bg-surface-container/30">
@@ -228,7 +234,7 @@
 </div>
 
 <div id="editAreaModal" class="nexus-modal hidden fixed inset-0 z-[110] items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-    <div class="nexus-modal-content w-full max-w-2xl bg-panel-fill border border-panel-border rounded-3xl shadow-2xl overflow-hidden shadow-black/50 ring-1 ring-white/10">
+    <div class="nexus-modal-content w-full max-w-2xl bg-panel-fill border border-panel-border rounded-xl shadow-2xl overflow-hidden shadow-black/50 ring-1 ring-white/10">
         <form id="editAreaForm" class="flex flex-col h-full overflow-hidden">
             <input type="hidden" id="editAreaId">
             <div class="p-6 border-b border-panel-border flex items-center justify-between bg-surface-container/30">

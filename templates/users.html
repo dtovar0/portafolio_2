@@ -5,14 +5,14 @@
 {% block breadcrumbs %}
 <span class="text-secondary cursor-pointer hover:text-primary transition-colors" onclick="window.location.href='/'">Inicio</span>
 <svg class="w-4 h-4 text-label/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-<span class="text-primary font-bold">Administración de Usuarios</span>
+<span class="text-primary font-bold">Usuarios</span>
 {% endblock %}
 
 {% block content %}<div id="usersWrapper" class="w-full h-full p-6 overflow-hidden flex flex-col">
     <!-- PANEL AREA: flex-1 + min-h-0 so it respects parent's height -->
     <div class="flex-1 min-h-0 flex flex-col">
         <!-- Standard Nexus Table View -->
-        <div id="tab-panel-users" class="tab-panel tab-panel-content flex-1 min-h-0 flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-500 rounded-2xl border border-panel-border shadow-2xl shadow-primary/5 overflow-hidden">
+        <div id="tab-panel-users" class="tab-panel tab-panel-content flex-1 min-h-0 flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-500 rounded-xl border border-panel-border shadow-2xl shadow-primary/5 overflow-hidden">
             
             <!-- PANEL HEADER (Clonado de Audit) -->
             <header class="flex-shrink-0 bg-panel-header border-b border-panel-border px-6 py-6 flex items-center justify-between">
@@ -38,7 +38,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                         <input type="text" id="userSearch" placeholder="Buscar por nombre, correo o rol..."
-                            class="w-full bg-input-bg border-2 border-panel-border rounded-2xl pl-12 pr-5 py-3 text-sm font-bold text-input outline-none focus:border-input-focus focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-label/50">
+                            class="w-full bg-input-bg border-2 border-panel-border rounded-xl pl-12 pr-5 py-3 text-sm font-bold text-input outline-none focus:border-input-focus focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-label/50">
                     </div>
 
                     <!-- Botones de Acción (A la derecha como en Audit) -->
@@ -122,7 +122,7 @@
             </button>
         </div>
         <div class="p-8 grid grid-cols-2 gap-8 bg-slate-50/50">
-            <div data-action="users-open-local-flow" class="group flex flex-col items-center justify-center p-8 rounded-[2.5rem] bg-white border border-panel-border hover:border-primary/60 hover:bg-primary/5 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 cursor-pointer relative overflow-hidden shadow-xl shadow-black/[0.03]">
+            <div data-action="users-open-local-flow" class="group flex flex-col items-center justify-center p-8 rounded-xl bg-white border border-panel-border hover:border-primary/60 hover:bg-primary/5 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 cursor-pointer relative overflow-hidden shadow-xl shadow-black/[0.03]">
                 <div class="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full -mr-12 -mt-12 blur-3xl transition-all group-hover:bg-primary/30"></div>
                 <div class="w-24 h-24 rounded-3xl bg-primary/10 text-primary flex items-center justify-center mb-6 transition-all group-hover:scale-110 group-hover:rotate-3 shadow-lg shadow-primary/5">
                     <i class="fas fa-user-plus text-4xl"></i>
@@ -130,7 +130,7 @@
                 <h4 class="text-lg font-black text-primary uppercase tracking-tighter italic">Usuario Local</h4>
                 <p class="text-[10px] text-label/50 font-black text-center mt-3 uppercase tracking-widest leading-relaxed">Registro Manual en<br>Base de datos Local</p>
             </div>
-            <div data-action="users-open-ldap-flow" class="group flex flex-col items-center justify-center p-8 rounded-[2.5rem] bg-white border border-panel-border hover:border-sky-500/60 hover:bg-sky-500/5 hover:shadow-2xl hover:shadow-sky-500/10 transition-all duration-500 cursor-pointer relative overflow-hidden shadow-xl shadow-black/[0.03]">
+            <div data-action="users-open-ldap-flow" class="group flex flex-col items-center justify-center p-8 rounded-xl bg-white border border-panel-border hover:border-sky-500/60 hover:bg-sky-500/5 hover:shadow-2xl hover:shadow-sky-500/10 transition-all duration-500 cursor-pointer relative overflow-hidden shadow-xl shadow-black/[0.03]">
                 <div class="absolute top-0 right-0 w-24 h-24 bg-sky-500/10 rounded-full -mr-12 -mt-12 blur-3xl transition-all group-hover:bg-sky-500/30"></div>
                 <div class="w-24 h-24 rounded-3xl bg-sky-500/10 text-sky-500 flex items-center justify-center mb-6 transition-all group-hover:scale-110 group-hover:-rotate-3 shadow-lg shadow-sky-500/5">
                     <i class="fas fa-network-wired text-4xl"></i>
@@ -303,7 +303,7 @@
                     
                     <div class="flex gap-4 h-[400px]">
                         <!-- Available -->
-                        <div class="flex-1 flex flex-col border border-panel-border rounded-3xl bg-slate-50/30 overflow-hidden">
+                        <div class="flex-1 flex flex-col border border-panel-border rounded-xl bg-slate-50/30 overflow-hidden">
                             <div class="p-4 border-b border-panel-border flex items-center justify-between bg-slate-100/50">
                                 <span class="text-[11px] font-black text-slate-700 uppercase tracking-widest">Disponibles</span>
                                 <i class="fas fa-filter text-slate-400 text-xs"></i>
@@ -319,7 +319,7 @@
                         </div>
                         
                         <!-- Selected -->
-                        <div class="flex-1 flex flex-col border border-panel-border rounded-3xl bg-slate-50/30 overflow-hidden">
+                        <div class="flex-1 flex flex-col border border-panel-border rounded-xl bg-slate-50/30 overflow-hidden">
                             <div class="p-4 border-b border-panel-border flex items-center justify-between bg-slate-100/50">
                                 <span class="text-[11px] font-black text-slate-700 uppercase tracking-widest">Asignadas</span>
                                 <i class="fas fa-check-double text-slate-400 text-xs"></i>
@@ -370,7 +370,7 @@
         <div class="p-8">
             <div class="flex gap-4 h-[400px]">
                 <!-- Platforms Available -->
-                <div class="flex-1 flex flex-col border border-panel-border rounded-2xl bg-surface-container/20 overflow-hidden">
+                <div class="flex-1 flex flex-col border border-panel-border rounded-xl bg-surface-container/20 overflow-hidden">
                     <div class="p-3 border-b border-panel-border flex items-center justify-between bg-surface-container/40">
                         <span class="text-[10px] font-black text-label uppercase tracking-widest">Disponibles</span>
                         <div class="flex items-center gap-2">
@@ -390,7 +390,7 @@
                 </div>
 
                 <!-- Platforms Selected -->
-                <div class="flex-1 flex flex-col border border-panel-border rounded-2xl bg-surface-container/20 overflow-hidden">
+                <div class="flex-1 flex flex-col border border-panel-border rounded-xl bg-surface-container/20 overflow-hidden">
                     <div class="p-3 border-b border-panel-border flex items-center justify-between bg-primary/5">
                         <span class="text-[10px] font-black text-primary uppercase tracking-widest">Con Acceso</span>
                         <div class="flex items-center gap-2">
@@ -534,7 +534,7 @@
         <div class="p-8">
             <div class="flex gap-6 h-[400px]">
                 <!-- Areas Available -->
-                <div class="flex-1 flex flex-col border border-panel-border rounded-2xl bg-surface-container/20 overflow-hidden">
+                <div class="flex-1 flex flex-col border border-panel-border rounded-xl bg-surface-container/20 overflow-hidden">
                     <div class="p-3 border-b border-panel-border flex items-center justify-between bg-surface-container/40">
                         <span class="text-[10px] font-black text-label uppercase tracking-widest">Disponibles</span>
                         <i class="fas fa-filter text-label/20 text-xs"></i>
@@ -545,13 +545,13 @@
                 </div>
                 
                 <div class="flex flex-col items-center justify-center">
-                    <div class="w-10 h-10 rounded-full bg-panel-border flex items-center justify-center text-label/20 shadow-sm mb-2">
+                    <div class="w-10 h-10 rounded-xl bg-panel-border flex items-center justify-center text-label/20 shadow-sm mb-2">
                         <i class="fas fa-exchange-alt"></i>
                     </div>
                 </div>
 
                 <!-- Areas Selected -->
-                <div class="flex-1 flex flex-col border border-panel-border rounded-2xl bg-surface-container/20 overflow-hidden ring-1 ring-violet-500/20">
+                <div class="flex-1 flex flex-col border border-panel-border rounded-xl bg-surface-container/20 overflow-hidden ring-1 ring-violet-500/20">
                     <div class="p-3 border-b border-panel-border flex items-center justify-between bg-violet-500/5">
                         <span class="text-[10px] font-black text-violet-400 uppercase tracking-widest">Asignadas</span>
                         <i class="fas fa-check-double text-violet-400/40 text-xs"></i>

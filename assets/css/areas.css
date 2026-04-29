@@ -1,11 +1,11 @@
 /* ═══════════════════════════════════════════════════════════════════
-   NEXUS PREMIUM — Módulo de Solicitudes v3.0 "Enterprise Edition"
+   NEXUS PREMIUM — Módulo de Áreas v3.0 "Enterprise Edition"
    Diseño: Corporativo refinado · Tipografía: Inter (sistema)
    Paleta: Hereda tokens del sistema global (tokens.css)
 ═══════════════════════════════════════════════════════════════════ */
 
 /* ── Shell principal ── */
-.nx-requests-shell {
+.nx-areas-shell {
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -129,7 +129,7 @@
     background: rgb(var(--color-panel-fill));
     padding: 22px 24px 20px;
     border: 1px solid rgb(var(--color-panel-border));
-    border-radius: 12px;
+    border-radius: 10px;
     cursor: pointer;
     transition: all 0.15s ease;
 }
@@ -251,7 +251,7 @@
 .nx-panel {
     background: rgb(var(--color-panel-fill));
     border: 1px solid rgb(var(--color-panel-border));
-    border-radius: 12px;
+    border-radius: 10px;
     display: flex;
     flex-direction: column;
     min-height: 0;
@@ -418,7 +418,7 @@
     flex: 1; min-height: 0;
     overflow: hidden;
     border: 1px solid rgb(var(--color-panel-border));
-    border-radius: 12px;
+    border-radius: 10px;
     background: rgb(var(--color-panel-fill));
     display: flex; flex-direction: column;
 }
