@@ -10,7 +10,11 @@ from app.modules.auth.services import validate_ldap_connection
 from app.modules.auth.models import AuthConfig
 from app.modules.notifications.services import send_test_email
 from app.modules.notifications.models import SMTPConfig
-from psx5k_cmd import test_connectivity
+try:
+    from psx5k_cmd import test_connectivity
+    HAS_PSX = True
+except ImportError:
+    HAS_PSX = False
 
 def run_health_check():
     app = create_app()
@@ -56,11 +60,14 @@ def run_health_check():
 
         # 4. PSX5K
         print("\n🛰️  4. COMUNICACIÓN PSX5K (SSH/CLI)")
-        success, msg = test_connectivity()
-        if success:
-            print(f"   ✅ Conectividad PSX: EXITOSA")
+        if HAS_PSX:
+            success, msg = test_connectivity()
+            if success:
+                print(f"   ✅ Conectividad PSX: EXITOSA")
+            else:
+                print(f"   ❌ Fallo de PSX: {msg}")
         else:
-            print(f"   ❌ Fallo de PSX: {msg}")
+            print("   ℹ️  Módulo PSX no instalado en este entorno.")
 
         # 5. Worker
         print("\n⚙️  5. ESTADO DEL WORKER DAEMON")
