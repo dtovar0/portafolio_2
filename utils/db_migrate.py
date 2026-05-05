@@ -69,6 +69,13 @@ def migrate_db():
                 except Exception as e:
                     pass
 
+            # 7. Columnas de SYSTEM_CONFIG
+            try:
+                conn.execute(text("ALTER TABLE system_config ADD COLUMN portal_banner TEXT AFTER bg_color;"))
+                print("✅ Columna system_config.portal_banner agregada.")
+            except Exception as e:
+                print("ℹ️ Columna system_config.portal_banner ya existe o la tabla no está presente.")
+
             conn.commit()
 
 if __name__ == '__main__':
