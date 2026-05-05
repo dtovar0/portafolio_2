@@ -94,6 +94,9 @@ def create_app():
     from app.modules.requests.routes import requests_bp
     from app.modules.portal.routes import portal_bp
 
+
+
+
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(core_bp)
@@ -105,6 +108,7 @@ def create_app():
     app.register_blueprint(platforms_bp)
     app.register_blueprint(requests_bp)
     app.register_blueprint(portal_bp)
+
 
 
     # Sincronizar Modelos (Importar antes de crear tablas)

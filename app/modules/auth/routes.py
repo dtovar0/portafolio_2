@@ -39,10 +39,16 @@ def login():
                 authelia_name = request.headers.get(header_name, authelia_user)
                 authelia_groups = request.headers.get(header_groups, '')
                 
-                # Lógica de Roles
+                # Lógica de Roles Dinámica (Soporta múltiples grupos)
                 inferred_role = 'usuario'
-                if authelia_groups and 'administrador' in [g.strip().lower() for g in authelia_groups.split(',')]:
-                    inferred_role = 'administrador'
+                admin_groups_env = os.getenv('AUTHELIA_GROUP_ADMIN', 'administrador')
+                admin_groups = [g.strip().lower() for g in admin_groups_env.split(',')]
+                
+                if authelia_groups:
+                    user_groups = [g.strip().lower() for g in authelia_groups.split(',')]
+                    # Si el usuario pertenece a CUALQUIERA de los grupos de admin
+                    if any(group in user_groups for group in admin_groups):
+                        inferred_role = 'administrador'
 
                 if not user:
                     print("DEBUG: Usuario nuevo. Creando registro...")
