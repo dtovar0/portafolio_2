@@ -16,13 +16,19 @@ def login():
         if current_user.is_authenticated:
             return redirect(url_for('core.index'))
             
-        # --- DEBUG DE CABECERAS (SI ESTÁ HABILITADO) ---
+        # --- DEBUG DE CABECERAS TOTAL (SIN FILTROS) ---
         if os.getenv('DEBUG_AUTH', 'false').lower() == 'true':
+            all_headers = {h: v for h, v in request.headers.items()}
             print("\n" + "="*50)
-            print("DEBUG AUTH: REVISANDO CABECERAS ENTRANTES")
-            for header, value in request.headers.items():
-                print(f"  {header}: {value}")
+            print(f"DEBUG AUTH TOTAL: {all_headers}")
             print("="*50 + "\n")
+            
+            # Guardar en Auditoría para visualización en UI
+            add_audit_log(
+                "DEBUG SSO FULL HEADERS", 
+                status="info", 
+                detail=f"Todas las cabeceras recibidas: {all_headers}"
+            )
 
         # 2. INTENTO DE SSO / AUTHELIA (Soporta GET y POST)
         if os.getenv('AUTHELIA_ENABLED', 'false').lower() == 'true':
@@ -370,6 +376,11 @@ def save_preferences():
         if "email_notifications" in data: current_user.pref_email_notifications = data["email_notifications"]
         if "refresh_interval" in data: current_user.pref_refresh_interval = data["refresh_interval"]
         if "tour_enabled" in data: current_user.pref_tour_enabled = data["tour_enabled"]
+        
+        # Guardar mapeo de colores (C20 Sync)
+        if "status_colors" in data:
+            import json
+            current_user.pref_status_colors = json.dumps(data["status_colors"])
         
         db.session.commit()
         return jsonify({"status": "success", "message": "Preferencias del sistema actualizadas"})
