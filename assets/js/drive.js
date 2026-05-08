@@ -277,10 +277,61 @@ class NexusDrive {
         this.updateLayout();
     }
 
+    updateBreadcrumbs() {
+        const container = document.getElementById('dynamic-breadcrumbs');
+        if (!container) return;
+
+        let html = `<span class="text-secondary cursor-pointer hover:text-primary transition-colors" onclick="window.location.href='/drive/dashboard'">Nexus Drive</span>`;
+        const separator = `<svg class="w-4 h-4 text-label/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>`;
+
+        if (this.currentArea) {
+            html += separator + `<span class="text-secondary/60 cursor-pointer hover:text-primary transition-colors" onclick="window.nexusDrive.openArea('${this.currentArea}')">${this.currentArea}</span>`;
+        }
+
+        if (this.currentPlatform) {
+            html += separator + `<span class="text-secondary/60 cursor-pointer hover:text-primary transition-colors" onclick="window.nexusDrive.openPlatform(${JSON.stringify(this.currentPlatform).replace(/"/g, '&quot;')})">${this.currentPlatform.name}</span>`;
+        }
+
+        if (this.currentPlatform && this.currentPath) {
+            // Obtener path relativo a la plataforma
+            let relativePath = this.currentPath;
+            const platPath = this.currentPlatform.storage_path || this.currentPlatform.name;
+            
+            if (relativePath.startsWith(platPath)) {
+                relativePath = relativePath.substring(platPath.length);
+            }
+
+            const parts = relativePath.split('/').filter(p => p !== '');
+            let currentBuildPath = platPath;
+
+            parts.forEach((part, index) => {
+                currentBuildPath += '/' + part;
+                const isLast = index === parts.length - 1;
+                const colorClass = isLast ? 'text-primary font-bold' : 'text-secondary/60 cursor-pointer hover:text-primary transition-colors';
+                const action = isLast ? '' : `onclick="window.nexusDrive.loadFiles('${currentBuildPath.replace(/'/g, "\\'")}')"`;
+                
+                html += separator + `<span class="${colorClass}" ${action}>${part}</span>`;
+            });
+
+            // Si no hay carpetas adicionales, la plataforma es la última y debe estar en negrita/primario
+            if (parts.length === 0 && this.currentPlatform) {
+                // Reemplazar la última parte de la plataforma para que se vea como activa
+                const platMatch = new RegExp(`${this.currentPlatform.name}</span>$`);
+                html = html.replace(platMatch, `${this.currentPlatform.name}</span>`).replace(`text-secondary/60 cursor-pointer hover:text-primary transition-colors" onclick="window.nexusDrive.openPlatform`, `text-primary font-bold" onclick="window.nexusDrive.openPlatform`);
+            }
+        } else if (this.currentArea && !this.currentPlatform) {
+             // El área es el último nivel activo
+             html = html.replace(`${this.currentArea}</span>`, `<span class="text-primary font-bold">${this.currentArea}</span>`);
+        }
+
+        container.innerHTML = html;
+    }
+
     openArea(areaName) {
         this.currentArea = areaName;
         this.currentPlatform = null;
         this.currentPath = '/';
+        this.updateBreadcrumbs();
         
         const target = areaName.toLowerCase().trim();
         const areaPlatforms = this.platforms.filter(p => {
@@ -329,6 +380,7 @@ class NexusDrive {
     async openPlatform(platform) {
         this.currentPlatform = platform;
         this.lastPassword = null; // Reset password on new platform
+        this.updateBreadcrumbs();
         
         // 1. Si la plataforma está encriptada, pedir password ANTES de listar
         if (platform.is_encrypted) {
@@ -492,6 +544,7 @@ class NexusDrive {
 
     async loadFiles(path, password = null) {
         this.currentPath = path;
+        this.updateBreadcrumbs();
         try {
             const data = await DriveAPI.post('/drive/api/drive/list', { path, password });
             if (data.success) {
