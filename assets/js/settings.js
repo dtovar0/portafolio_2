@@ -99,23 +99,25 @@ function initLivePreview() {
         });
     }
 
-    // 4. Live Sync: Color Pickers
-    const bgColorInput = document.getElementById('portal-bg-color');
-    const textColorInput = document.getElementById('portal-text-color');
-
-    if (bgColorInput) {
-        bgColorInput.addEventListener('input', (e) => {
-            previewPortalIcon.style.backgroundColor = e.target.value;
-            const sidebarLogo = document.querySelector('#sidebar div.brand-text > div');
-            if (sidebarLogo) sidebarLogo.style.backgroundColor = e.target.value;
+        if (textColorInput) {
+        textColorInput.addEventListener('input', (e) => {
+            previewPortalIcon.style.color = e.target.value;
+            // Immediate color sync for sidebar if in icon mode
+            const sidebarLogo = document.getElementById('sidebar-logo-container');
+            if (sidebarLogo && currentIdentityMode === 'icon') {
+                sidebarLogo.style.color = e.target.value;
+            }
         });
     }
 
-    if (textColorInput) {
-        textColorInput.addEventListener('input', (e) => {
-            previewPortalIcon.style.color = e.target.value;
-            const sidebarLogo = document.querySelector('#sidebar div.brand-text > div');
-            if (sidebarLogo) sidebarLogo.style.color = e.target.value;
+    // BG Color Sync
+    if (bgColorInput) {
+        bgColorInput.addEventListener('input', (e) => {
+            previewPortalIcon.style.backgroundColor = e.target.value;
+            const sidebarLogo = document.getElementById('sidebar-logo-container');
+            if (sidebarLogo && currentIdentityMode === 'icon') {
+                sidebarLogo.style.backgroundColor = e.target.value;
+            }
         });
     }
 }
@@ -158,6 +160,36 @@ function animatePreviewBoard() {
     if (previewIconContainer) {
         previewIconContainer.classList.add('animate-in', 'fade-in', 'zoom-in-95', 'duration-300');
         setTimeout(() => previewIconContainer.classList.remove('animate-in', 'fade-in', 'zoom-in-95', 'duration-300'), 300);
+    }
+}
+
+/**
+ * Updates global sidebar branding without reload
+ */
+function updateGlobalBranding() {
+    const previewIcon = document.getElementById('preview-portal-icon');
+    const previewName = document.getElementById('preview-portal-name');
+    const sidebarLogo = document.getElementById('sidebar-logo-container');
+    const sidebarName = document.getElementById('sidebar-portal-name');
+
+    if (previewIcon && sidebarLogo) {
+        sidebarLogo.innerHTML = previewIcon.innerHTML;
+        if (currentIdentityMode === 'icon') {
+            sidebarLogo.style.backgroundColor = document.getElementById('portal-bg-color')?.value || '';
+            sidebarLogo.style.color = document.getElementById('portal-text-color')?.value || '';
+        } else {
+            // In image mode, clear manual styles to show full image
+            sidebarLogo.style.backgroundColor = 'transparent';
+            sidebarLogo.style.color = 'inherit';
+        }
+        
+        // Visual feedback on sidebar
+        sidebarLogo.classList.add('scale-110', 'rotate-3');
+        setTimeout(() => sidebarLogo.classList.remove('scale-110', 'rotate-3'), 500);
+    }
+
+    if (previewName && sidebarName) {
+        sidebarName.textContent = previewName.textContent;
     }
 }
 
@@ -219,6 +251,7 @@ function saveSettings(containerId) {
         setTimeout(() => {
             if (result.status === 'success') {
                 showToast(result.message, 'success', true);
+                updateGlobalBranding();
             } else {
                 showToast('Error: ' + result.message, 'error', true);
             }

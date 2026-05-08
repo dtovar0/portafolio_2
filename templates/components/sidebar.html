@@ -3,22 +3,17 @@
         <!-- Brand / Logo -->
         <div class="h-16 px-6 border-b border-panel-border flex items-center justify-between mb-4 flex-shrink-0">
             <div class="flex items-center gap-3 brand-text overflow-hidden transition-all duration-300">
-                {% if sys_config and sys_config.portal_identity_type == 'image' and sys_config.portal_icon %}
-                    <div class="w-9 h-9 flex-shrink-0 rounded-xl overflow-hidden flex items-center justify-center shadow-lg shadow-primary/30 ring-2 ring-primary/20">
+                <div id="sidebar-logo-container" class="w-9 h-9 flex-shrink-0 rounded-xl overflow-hidden flex items-center justify-center shadow-lg shadow-primary/30 ring-2 ring-primary/20"
+                     style="{% if sys_config and sys_config.portal_identity_type == 'icon' %}background-color: {{ sys_config.bg_color }}; color: {{ sys_config.text_color }};{% endif %}">
+                    {% if sys_config and sys_config.portal_identity_type == 'image' and sys_config.portal_icon %}
                         <img src="{{ sys_config.portal_icon }}" alt="Logo" class="w-full h-full object-cover">
-                    </div>
-                {% elif sys_config and sys_config.portal_icon %}
-                    <div class="w-9 h-9 flex-shrink-0 rounded-xl flex items-center justify-center shadow-lg shadow-primary/30 ring-2 ring-primary/20" 
-                         style="background-color: var(--color-brand-identity-bg, rgb(var(--color-primary))); color: var(--color-brand-identity-text, white);">
+                    {% elif sys_config and sys_config.portal_icon %}
                         {{ sys_config.portal_icon | safe }}
-                    </div>
-                {% else %}
-                    <div class="w-9 h-9 flex-shrink-0 rounded-xl flex items-center justify-center shadow-lg shadow-primary/30 ring-2 ring-primary/20"
-                         style="background-color: var(--color-brand-identity-bg, rgb(var(--color-primary))); color: var(--color-brand-identity-text, white);">
+                    {% else %}
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    </div>
-                {% endif %}
-                <span class="sidebar-text text-lg font-black tracking-tighter whitespace-nowrap uppercase text-body-text">
+                    {% endif %}
+                </div>
+                <span id="sidebar-portal-name" class="sidebar-text text-lg font-black tracking-tighter whitespace-nowrap uppercase text-body-text">
                     {{ (sys_config.portal_name if sys_config and sys_config.portal_name else 'NEXUS') }}
                 </span>
             </div>
