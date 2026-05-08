@@ -326,7 +326,7 @@
                     orderable: false,
                     className: 'text-center',
                     render: (data) => `
-                        <div class="flex items-center justify-center">
+                        <div class="flex items-center justify-center h-full">
                             <input type="checkbox" class="platform-checkbox w-4 h-4 rounded border-panel-border text-primary focus:ring-primary/20 cursor-pointer" data-id="${data}" onchange="updateActionButtons()">
                         </div>` 
                 },
@@ -334,7 +334,7 @@
                     data: null, 
                     width: '5%',
                     orderable: false,
-                    className: 'text-left pl-2',
+                    className: 'text-left',
                     render: (data) => {
                         const style = `background: ${data.bg_color || '#6366f1'}; color: ${data.text_color || '#ffffff'}`;
                         return `
@@ -352,32 +352,37 @@
                     width: '25%',
                     className: 'text-left',
                     render: (data) => `
-                        <div class="flex flex-col">
-                            <span class="text-sm font-black text-primary uppercase italic leading-none">${data}</span>
-                        </div>` 
+                        <div class="flex items-center h-full text-primary font-black uppercase italic truncate">${data}</div>` 
                 },
                 { 
                     data: 'description', 
                     width: '35%',
                     className: 'text-left',
-                    render: (data) => `<div class="text-[12px] text-label/60 font-bold line-clamp-1">${data || '-'}</div>` 
+                    render: (data) => `<div class="flex items-center h-full font-bold text-label/60 text-[12px] truncate">${data || '-'}</div>` 
                 },
                 { 
                     data: 'users_count', 
                     width: '10%',
-                    className: 'text-left pl-4',
+                    className: 'text-left',
                     render: (data) => `
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-surface-container text-label/60 font-black text-[10px] uppercase">
-                            <i class="fas fa-users opacity-40"></i> ${data || 0}
+                        <div class="flex items-center h-full font-black text-label/40 text-[11px]">
+                            <i class="fas fa-users mr-2 opacity-30"></i> ${data || 0}
                         </div>` 
                 },
                 { 
                     data: 'status', 
                     width: '10%',
-                    className: 'text-left pl-4',
+                    className: 'text-left',
                     render: (data) => {
-                        const cls = data === 'Activo' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500';
-                        return `<span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${cls}">${data}</span>`;
+                        const status = String(data).toLowerCase();
+                        const cls = status === 'activo' ? 'nx-badge-success' : 'nx-badge-error';
+                        return `
+                            <div class="flex items-center h-full">
+                                <span class="nx-badge ${cls} flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-black tracking-widest border border-current/10 shadow-sm">
+                                    <i class="fas ${status === 'activo' ? 'fa-check-circle' : 'fa-times-circle'} text-[8px] opacity-70"></i>
+                                    ${String(data).toUpperCase()}
+                                </span>
+                            </div>`;
                     }
                 },
                 { 
@@ -386,13 +391,13 @@
                     orderable: false,
                     className: 'text-center',
                     render: (data) => {
-                        const iconCls = "w-7 h-7 rounded-lg flex items-center justify-center transition-all";
-                        const activeD = data.can_download ? 'bg-primary/10 text-primary' : 'text-label/20';
-                        const activeU = data.can_upload ? 'bg-primary/10 text-primary' : 'text-label/20';
-                        const activeE = data.is_encrypted ? 'bg-amber-500/10 text-amber-500' : 'text-label/20';
+                        const iconCls = "w-7 h-7 rounded-lg flex items-center justify-center transition-all border border-current/10 shadow-sm";
+                        const activeD = data.can_download ? 'bg-primary/10 text-primary' : 'text-label/10 bg-label/5 border-transparent';
+                        const activeU = data.can_upload ? 'bg-primary/10 text-primary' : 'text-label/10 bg-label/5 border-transparent';
+                        const activeE = data.is_encrypted ? 'bg-amber-500/10 text-amber-500' : 'text-label/10 bg-label/5 border-transparent';
 
                         return `
-                        <div class="flex items-center justify-center gap-1.5">
+                        <div class="flex items-center justify-center h-full gap-1.5">
                             <div class="${iconCls} ${activeD}" title="Descarga: ${data.can_download ? 'Habilitada' : 'Restringida'}">
                                 <i class="fas fa-cloud-arrow-down text-[10px]"></i>
                             </div>
