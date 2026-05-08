@@ -486,8 +486,7 @@
     }
 
     function getPageLength() {
-        const h = window.innerHeight;
-        return h < 900 ? 9 : 10;
+        return 10;
     }
 
     function renderGhostRows(settings, columns) {
@@ -495,6 +494,17 @@
         const info = api.page.info();
         const tbody = $(settings.nTBody);
         const pageLen = api.page.len();
+
+        // Calculate dynamic row height (Audit Style)
+        const container = api.table().container();
+        const gridH = $(container).height();
+        let rowH = 48;
+        
+        if (gridH > 0) {
+            // Header ~52px, Footer ~52px
+            rowH = Math.max(48, Math.floor((gridH - 110) / pageLen));
+        }
+        $(container).css('--row-h', rowH + 'px');
 
         tbody.find('.ghost-row').remove();
         
@@ -510,13 +520,13 @@
             
             ghostHtml += `
                 <tr class="ghost-row pointer-events-none select-none ${bgClass}">
-                    <td class="py-5 text-center"><div></div></td>
-                    <td class="py-5 text-center"><div></div></td>
-                    <td class="py-5 text-left"><div></div></td>
-                    <td class="py-5 text-left"><div></div></td>
-                    <td class="py-5 text-center"><div></div></td>
-                    <td class="py-5 text-center"><div></div></td>
-                    <td class="py-5 text-center"><div></div></td>
+                    <td class="py-0 text-center" style="height: var(--row-h, 52px)"><div></div></td>
+                    <td class="py-0 text-center"><div></div></td>
+                    <td class="py-0 text-left"><div></div></td>
+                    <td class="py-0 text-left"><div></div></td>
+                    <td class="py-0 text-center"><div></div></td>
+                    <td class="py-0 text-center"><div></div></td>
+                    <td class="py-0 text-center"><div></div></td>
                 </tr>`;
         }
         tbody.append(ghostHtml);
@@ -1220,6 +1230,11 @@
                 }
             });
         }
+
+        // Responsive Redraw
+        window.addEventListener('resize', () => {
+            if (platformsDataTable) platformsDataTable.draw();
+        });
 
         // Initial state
         setVisualMode('image');
