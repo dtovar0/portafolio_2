@@ -14,209 +14,257 @@
 <span class="text-primary font-bold">Dashboard</span>
 {% endblock %}
 
+{% block extra_css %}
+<style>
+    #dashboard-root { height: 100%; display: flex; flex-direction: column; min-height: 0; background: var(--color-bg); }
+    .nx-section-header { display: flex; align-items: center; justify-content: space-between; padding: 1.5rem 2rem 1rem; flex-shrink: 0; }
+    .nx-section-header__left { display: flex; align-items: center; gap: 0.75rem; }
+    .nx-section-header__rule { width: 12px; height: 2px; background: rgb(var(--color-primary)); border-radius: 2px; }
+    .nx-section-header__label { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; color: rgb(var(--color-body-text)); }
+    .nx-kpi-strip { display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 1.5rem; padding: 0 2rem 1.5rem; flex-shrink: 0; }
+    @media (min-width: 640px) { .nx-kpi-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (min-width: 1024px) { .nx-kpi-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+    .nx-kpi { position: relative; background: rgb(var(--color-panel-fill)); padding: 20px 24px 18px; border: 1px solid rgb(var(--color-panel-border)); border-radius: 12px; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+    .nx-kpi:hover { transform: translateY(-4px); box-shadow: 0 12px 24px -8px rgb(0 0 0 / 0.1); }
+    .nx-kpi__accent { position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--kpi-color, rgb(var(--color-primary))); }
+    .nx-kpi__header { display: flex; align-items: center; justify-content: space-between; }
+    .nx-kpi__label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: rgb(var(--color-body-text) / 0.4); }
+    .nx-kpi__icon { width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; background: var(--kpi-color-alpha, rgb(var(--color-primary) / 0.1)); color: var(--kpi-color, rgb(var(--color-primary))); }
+    .nx-kpi__value { font-size: 32px; font-weight: 900; color: rgb(var(--color-body-text)); letter-spacing: -0.04em; line-height: 1; }
+    .nx-kpi__footer { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
+    .nx-kpi__tag { font-size: 8px; font-weight: 900; padding: 2px 6px; border-radius: 4px; background: rgb(var(--color-surface-container-bg)); color: rgb(var(--color-body-text) / 0.5); text-transform: uppercase; border: 1px solid rgb(var(--color-panel-border)); border-radius: 6px; }
+    .dashboard-analytics-wrap { padding: 0 2rem 2rem; flex: 1; min-height: 0; display: flex; flex-direction: column; }
+</style>
+{% endblock %}
+
 {% block content %}
-<div id="dashboardWrapper" class="w-full h-full p-8 overflow-y-auto custom-scrollbar animate-in fade-in duration-700 space-y-12">
+<div id="dashboard-root" class="w-full h-full overflow-hidden flex flex-col animate-fade-in bg-panel-header/5">
     
-    <!-- 1. SÍNTESIS ESTRATÉGICA -->
-    <section>
-        <div class="flex items-center justify-between mb-6">
-            <div class="flex items-center gap-3">
-                <div class="w-1 h-6 bg-primary rounded-full"></div>
-                <h2 class="text-[11px] font-black text-label uppercase tracking-[0.3em]">Síntesis Estratégica</h2>
+    <!-- === KPI HEADER PANEL === -->
+    <header class="nx-section-header">
+        <div class="nx-section-header__left">
+            <div class="nx-section-header__rule"></div>
+            <h3 class="nx-section-header__label">Síntesis Operativa Drive</h3>
+        </div>
+    </header>
+
+    <div class="nx-kpi-strip">
+        <!-- Áreas -->
+        <div class="nx-kpi" style="--kpi-color: #f59e0b; --kpi-color-alpha: rgba(245, 158, 11, 0.1);">
+            <div class="nx-kpi__accent"></div>
+            <div class="nx-kpi__header">
+                <span class="nx-kpi__label">Áreas Activas</span>
+                <div class="nx-kpi__icon"><i class="fas fa-sitemap text-[11px]"></i></div>
             </div>
-            <span class="text-[9px] font-black text-label/30 uppercase tracking-widest">Métricas Clave del Ecosistema</span>
+            <div class="nx-kpi__value">{{ approved_areas|length }}</div>
+            <div class="nx-kpi__footer">
+                <span class="nx-kpi__tag">Ecosistema</span>
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <!-- Ecosistema -->
-            <div class="relative overflow-hidden bg-surface-container/30 border border-panel-border rounded-2xl p-6 group hover:border-amber-500/40 transition-all shadow-xl">
-                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-500 to-orange-600 opacity-40"></div>
-                <div class="flex justify-between items-start mb-4">
-                    <h3 class="text-[10px] font-black text-label/40 uppercase tracking-widest">Ecosistema</h3>
-                    <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center text-xs border border-amber-500/20">
-                        <i class="fas fa-sitemap"></i>
-                    </div>
-                </div>
-                <div class="flex items-end justify-between">
-                    <span class="text-4xl font-black text-label tracking-tighter">{{ approved_areas|length }}</span>
-                    <span class="text-[9px] font-black text-label/20 uppercase tracking-widest bg-label/5 px-3 py-1 rounded-md">Áreas</span>
-                </div>
-                <div class="mt-4 flex items-center gap-2">
-                    <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                    <span class="text-[9px] font-black text-label/30 uppercase tracking-widest">Sin cambios</span>
-                </div>
+        <!-- Plataformas -->
+        <div class="nx-kpi" style="--kpi-color: #3b82f6; --kpi-color-alpha: rgba(59, 130, 246, 0.1);">
+            <div class="nx-kpi__accent"></div>
+            <div class="nx-kpi__header">
+                <span class="nx-kpi__label">Nodos Operativos</span>
+                <div class="nx-kpi__icon"><i class="fas fa-server text-[11px]"></i></div>
             </div>
-
-            <!-- Capacidad -->
-            <div class="relative overflow-hidden bg-surface-container/30 border border-panel-border rounded-2xl p-6 group hover:border-blue-500/40 transition-all shadow-xl">
-                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-600 opacity-40"></div>
-                <div class="flex justify-between items-start mb-4">
-                    <h3 class="text-[10px] font-black text-label/40 uppercase tracking-widest">Capacidad</h3>
-                    <div class="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center text-xs border border-blue-500/20">
-                        <i class="fas fa-server"></i>
-                    </div>
-                </div>
-                <div class="flex items-end justify-between">
-                    <span class="text-4xl font-black text-label tracking-tighter">{{ total_platforms }}</span>
-                    <span class="text-[9px] font-black text-label/20 uppercase tracking-widest bg-label/5 px-3 py-1 rounded-md">Nodos</span>
-                </div>
-                <div class="mt-4 flex items-center gap-2">
-                    <div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
-                    <span class="text-[9px] font-black text-label/30 uppercase tracking-widest">Periodo Actual</span>
-                </div>
-            </div>
-
-            <!-- Identidades -->
-            <div class="relative overflow-hidden bg-surface-container/30 border border-panel-border rounded-2xl p-6 group hover:border-emerald-500/40 transition-all shadow-xl">
-                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 to-teal-600 opacity-40"></div>
-                <div class="flex justify-between items-start mb-4">
-                    <h3 class="text-[10px] font-black text-label/40 uppercase tracking-widest">Identidades</h3>
-                    <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center text-xs border border-emerald-500/20">
-                        <i class="fas fa-user-shield"></i>
-                    </div>
-                </div>
-                <div class="flex items-end justify-between">
-                    <span class="text-4xl font-black text-label tracking-tighter">{{ total_users }}</span>
-                    <span class="text-[9px] font-black text-label/20 uppercase tracking-widest bg-label/5 px-3 py-1 rounded-md">Usuarios</span>
-                </div>
-                <div class="mt-4 flex items-center gap-2">
-                    <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                    <span class="text-[9px] font-black text-label/30 uppercase tracking-widest">Activos</span>
-                </div>
-            </div>
-
-            <!-- Tráfico -->
-            <div class="relative overflow-hidden bg-surface-container/30 border border-panel-border rounded-2xl p-6 group hover:border-violet-500/40 transition-all shadow-xl">
-                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-violet-500 to-purple-600 opacity-40"></div>
-                <div class="flex justify-between items-start mb-4">
-                    <h3 class="text-[10px] font-black text-label/40 uppercase tracking-widest">Tráfico</h3>
-                    <div class="w-8 h-8 rounded-lg bg-violet-500/10 text-violet-500 flex items-center justify-center text-xs border border-violet-500/20">
-                        <i class="fas fa-bolt"></i>
-                    </div>
-                </div>
-                <div class="flex items-end justify-between">
-                    <span class="text-4xl font-black text-label tracking-tighter">{{ recent_activity|length }}</span>
-                    <span class="text-[9px] font-black text-label/20 uppercase tracking-widest bg-label/5 px-3 py-1 rounded-md">Impacto</span>
-                </div>
-                <div class="mt-4 flex items-center gap-2">
-                    <div class="w-1.5 h-1.5 rounded-full bg-violet-500"></div>
-                    <span class="text-[9px] font-black text-label/30 uppercase tracking-widest">Acumulado Global</span>
-                </div>
+            <div class="nx-kpi__value">{{ total_platforms }}</div>
+            <div class="nx-kpi__footer">
+                <span class="nx-kpi__tag">Capacidad</span>
             </div>
         </div>
-    </section>
 
-    <!-- 2. ANÁLISIS OPERATIVO -->
-    <section>
-        <div class="flex items-center justify-between mb-6">
-            <div class="flex items-center gap-3">
-                <div class="w-1 h-6 bg-primary rounded-full"></div>
-                <h2 class="text-[11px] font-black text-label uppercase tracking-[0.3em]">Análisis Operativo</h2>
+        <!-- Usuarios -->
+        <div class="nx-kpi" style="--kpi-color: #10b981; --kpi-color-alpha: rgba(16, 185, 129, 0.1);">
+            <div class="nx-kpi__accent"></div>
+            <div class="nx-kpi__header">
+                <span class="nx-kpi__label">Identidades</span>
+                <div class="nx-kpi__icon"><i class="fas fa-user-shield text-[11px]"></i></div>
             </div>
-            <span class="text-[9px] font-black text-label/30 uppercase tracking-widest">Métricas de Demanda y Eficiencia</span>
+            <div class="nx-kpi__value">{{ total_users }}</div>
+            <div class="nx-kpi__footer">
+                <span class="nx-kpi__tag">Usuarios</span>
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <!-- Izquierda: Gráficos de Densidad y Tráfico -->
-            <div class="lg:col-span-8 space-y-8">
-                <!-- Densidad de Plataformas -->
-                <div class="bg-surface-container/20 border border-panel-border rounded-[2.5rem] p-8 min-h-[350px] relative overflow-hidden group">
-                    <div class="flex items-center gap-3 mb-8">
-                        <div class="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center text-xs">
-                            <i class="fas fa-chart-bar"></i>
-                        </div>
-                        <h4 class="text-[10px] font-black text-label/60 uppercase tracking-widest">Densidad Plataformas</h4>
-                    </div>
-                    
-                    <!-- Placeholder de Gráfico -->
-                    <div class="absolute inset-0 flex flex-col items-center justify-center p-12 text-center pointer-events-none opacity-20">
-                        <div class="w-16 h-16 rounded-3xl bg-label/10 flex items-center justify-center mb-6">
-                            <i class="fas fa-satellite-dish text-3xl"></i>
-                        </div>
-                        <h5 class="text-sm font-black text-label uppercase tracking-tighter italic">Distribución Plataformas</h5>
-                        <p class="text-[9px] font-black text-label/60 uppercase tracking-widest mt-2">Aún no hay registros suficientes. <br>Esperando Telemetría</p>
-                    </div>
+        <!-- Actividad Reciente -->
+        <div class="nx-kpi" style="--kpi-color: #8b5cf6; --kpi-color-alpha: rgba(139, 92, 246, 0.1);">
+            <div class="nx-kpi__accent"></div>
+            <div class="nx-kpi__header">
+                <span class="nx-kpi__label">Eventos 24h</span>
+                <div class="nx-kpi__icon"><i class="fas fa-bolt text-[11px]"></i></div>
+            </div>
+            <div class="nx-kpi__value">{{ recent_activity|length }}</div>
+            <div class="nx-kpi__footer">
+                <span class="nx-kpi__tag">Impacto</span>
+            </div>
+        </div>
+    </div>
 
-                    <!-- Horizontal Bar Chart (Población Áreas) -->
-                    <div class="space-y-6 relative z-10">
-                        {% for stat in area_stats %}
-                        <div class="flex flex-col gap-2">
-                            <div class="flex justify-between items-center px-1">
-                                <span class="text-[10px] font-black text-label/60 uppercase tracking-tight">{{ stat.name }}</span>
-                                <span class="text-[10px] font-black text-primary">{{ stat.count }}</span>
-                            </div>
-                            <div class="h-6 w-full bg-label/5 rounded-full overflow-hidden border border-panel-border/20">
-                                <div class="h-full bg-primary/60 rounded-full transition-all duration-1000 shadow-[0_0_15px_rgba(99,102,241,0.2)]"
-                                     style="width: {{ (stat.count / 10 * 100) if stat.count < 10 else 100 }}%">
+    <!-- === ANALYTICS GRID === -->
+    <header class="nx-section-header">
+        <div class="nx-section-header__left">
+            <div class="nx-section-header__rule"></div>
+            <h3 class="nx-section-header__label">Análisis de Telemetría Drive</h3>
+        </div>
+    </header>
+
+    <div class="dashboard-analytics-wrap">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 flex-1 min-h-0">
+            
+            <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8 min-h-0">
+                <div class="bg-panel-fill border border-panel-border rounded-xl p-6 flex flex-col shadow-sm gap-4 min-h-[320px] h-full overflow-hidden">
+                    <header class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary text-[12px]"><i class="fas fa-chart-simple"></i></div>
+                        <h3 class="text-[10px] font-black text-label uppercase tracking-[0.2em] shrink-0">Distribución de Plataformas</h3>
+                    </header>
+                    <div class="h-[260px]" id="c-platform"></div>
+                </div>
+                
+                <div class="bg-panel-fill border border-panel-border rounded-xl p-6 flex flex-col shadow-sm gap-4 min-h-[320px] h-full overflow-hidden">
+                    <header class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center text-violet-500 text-[12px]"><i class="fas fa-users-viewfinder"></i></div>
+                        <h3 class="text-[10px] font-black text-label uppercase tracking-[0.2em] shrink-0">Distribución de Áreas</h3>
+                    </header>
+                    <div class="h-[260px]" id="c-area"></div>
+                </div>
+                
+                <div class="bg-panel-fill border border-panel-border rounded-xl p-6 flex flex-col shadow-sm gap-4 min-h-[320px] h-full overflow-hidden">
+                    <header class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-500 text-[12px]"><i class="fas fa-bolt-lightning"></i></div>
+                        <h3 class="text-[10px] font-black text-label uppercase tracking-[0.2em] shrink-0">Tráfico Aplicativos</h3>
+                    </header>
+                    <div class="h-[260px]" id="c-visits"></div>
+                </div>
+                
+                <div class="bg-panel-fill border border-panel-border rounded-xl p-6 flex flex-col shadow-sm gap-4 min-h-[320px] h-full overflow-hidden">
+                    <header class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500 text-[12px]"><i class="fas fa-chart-line"></i></div>
+                        <h3 class="text-[10px] font-black text-label uppercase tracking-[0.2em] shrink-0">Tendencia 7 Días</h3>
+                    </header>
+                    <div class="h-[260px]" id="c-audit"></div>
+                </div>
+            </div>
+
+            <!-- Activity Feed -->
+            <div class="bg-panel-fill border border-panel-border rounded-xl flex flex-col shadow-2xl overflow-hidden min-h-0">
+                <header class="shrink-0 p-8 border-b border-panel-border bg-surface-container/20 flex items-center justify-between">
+                    <span class="text-xs font-black text-label uppercase tracking-widest">Telemetría de Actividad</span>
+                </header>
+                <div class="flex-1 overflow-y-auto custom-scrollbar p-8">
+                    {% if recent_activity %}
+                    <div class="space-y-8">
+                        {% for r in recent_activity %}
+                        <div class="flex gap-6 relative group">
+                            {% if not loop.last %}<div class="absolute left-[11px] top-10 bottom-[-32px] w-[2px] bg-panel-border opacity-30"></div>{% endif %}
+                            <div class="w-[24px] h-[24px] rounded-lg z-10 shrink-0 mt-1 border-4 border-panel-fill shadow-lg group-hover:scale-125 transition-transform 
+                                {% if r.action == 'Alta' %}bg-emerald-500{% elif r.action == 'Descarga' %}bg-blue-500{% elif r.action == 'Baja' %}bg-rose-500{% else %}bg-amber-500{% endif %}"></div>
+                            <div class="flex flex-col gap-1.5 flex-1 min-w-0">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-xs font-black text-primary truncate uppercase tracking-tighter">{{ r.user.nombre if r.user else 'Sistema' }}</span>
+                                    <span class="text-[9px] font-black text-label/30 uppercase shrink-0">{{ r.created_at.strftime('%H:%M') if r.created_at else '' }}</span>
                                 </div>
+                                <p class="text-[12px] font-bold text-label leading-none">
+                                    {{ r.action }} <span class="text-primary italic">{{ r.file_name }}</span>
+                                </p>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
-                </div>
-
-                <!-- Tráfico Aplicativos -->
-                <div class="bg-surface-container/20 border border-panel-border rounded-[2.5rem] p-8 h-[220px] relative overflow-hidden">
-                    <div class="flex items-center gap-3 mb-8">
-                        <div class="w-8 h-8 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center text-xs">
-                            <i class="fas fa-bolt"></i>
-                        </div>
-                        <h4 class="text-[10px] font-black text-label/60 uppercase tracking-widest">Tráfico Aplicativos</h4>
-                    </div>
-                    <div class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center pointer-events-none opacity-20">
-                        <div class="w-12 h-12 rounded-2xl bg-label/10 flex items-center justify-center mb-4">
-                            <i class="fas fa-broadcast-tower text-xl"></i>
-                        </div>
-                        <h5 class="text-[12px] font-black text-label uppercase tracking-tighter italic">Análisis de Tráfico</h5>
-                        <p class="text-[8px] font-black text-label/60 uppercase tracking-widest mt-1">Esperando Telemetría</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Derecha: Telemetría Global (Timeline) -->
-            <div class="lg:col-span-4 bg-surface-container/30 border border-panel-border rounded-[2.5rem] p-8 shadow-2xl relative flex flex-col min-h-[600px]">
-                <div class="flex items-center justify-between mb-10">
-                    <h3 class="text-xs font-black text-label uppercase italic tracking-tighter">Telemetría Global</h3>
-                    <button class="w-8 h-8 rounded-xl bg-label/5 text-label/40 hover:text-primary transition-all flex items-center justify-center">
-                        <i class="fas fa-external-link-alt text-xs"></i>
-                    </button>
-                </div>
-
-                <div class="flex-1 space-y-8 relative">
-                    <!-- Vertical Line -->
-                    <div class="absolute left-[7px] top-2 bottom-2 w-0.5 bg-panel-border/30"></div>
-
-                    {% for activity in recent_activity %}
-                    <div class="relative pl-8 group">
-                        <!-- Bullet -->
-                        <div class="absolute left-0 top-1.5 w-4 h-4 rounded-full border-2 border-surface-container-bg transition-all
-                                    {% if activity.action == 'Alta' %}bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]
-                                    {% elif activity.action == 'Descarga' %}bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.4)]
-                                    {% elif activity.action == 'Baja' %}bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.4)]
-                                    {% else %}bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.4)]{% endif %}">
-                        </div>
-                        
-                        <div class="flex justify-between items-start">
-                            <div class="min-w-0">
-                                <p class="text-[10px] font-black text-primary uppercase tracking-tighter mb-0.5">{{ activity.user_name }}</p>
-                                <p class="text-[11px] font-bold text-label/80 leading-tight">
-                                    <span class="text-label/40 font-black uppercase text-[9px] mr-1">{{ activity.action }}</span> 
-                                    <span class="italic text-primary/80">{{ activity.target_name }}</span>
-                                </p>
-                            </div>
-                            <span class="text-[9px] font-black text-label/20 whitespace-nowrap">{{ activity.created_at.strftime('%H:%M') if activity.created_at else '' }}</span>
-                        </div>
-                    </div>
                     {% else %}
-                    <div class="flex flex-col items-center justify-center h-full opacity-20 py-20">
-                        <i class="fas fa-stream text-4xl mb-4"></i>
-                        <p class="text-[10px] font-black uppercase tracking-widest">Sincronizando logs...</p>
+                    <div class="flex flex-col items-center justify-center h-full opacity-20 py-20 text-center">
+                        <i class="fas fa-satellite-dish text-4xl mb-4"></i>
+                        <p class="text-[10px] font-black uppercase tracking-widest">Esperando Transmisión...</p>
                     </div>
-                    {% endfor %}
+                    {% endif %}
                 </div>
             </div>
         </div>
-    </section>
-
+    </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    (function() {
+        const telemetry = {{ telemetry|tojson if telemetry else '{}' }};
+        const accent = '#2563eb';
+
+        function drawEmpty(id, metric) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.innerHTML = `<div class="flex flex-col items-center justify-center h-full opacity-20 text-center p-6"><i class="fas fa-satellite-dish text-2xl mb-4"></i><h4 class="text-[11px] font-black uppercase italic">${metric}</h4><p class="text-[9px] font-bold uppercase mt-2">Esperando Telemetría</p></div>`;
+        }
+
+        function formatBytes(bytes, decimals = 1) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+
+        const baseCfg = {
+            chart: { toolbar: { show: false }, background: 'transparent', fontFamily: 'Outfit, Inter', zoom: { enabled: false }, animations: { enabled: true, easing: 'easeinout', speed: 800 }, redrawOnParentResize: true },
+            dataLabels: { enabled: false }, stroke: { curve: 'smooth', width: 2 },
+            grid: { borderColor: 'var(--color-panel-border)', strokeDashArray: 4, padding: { left: 30, right: 30, bottom: 20, top: 10 } },
+            xaxis: { axisBorder: { show: false }, axisTicks: { show: false }, tickPlacement: 'between', labels: { style: { colors: 'var(--color-label-muted)', fontSize: '8px', fontWeight: 800 }, rotate: 0, minHeight: 40, maxHeight: 40, offsetY: 0, formatter: (v) => v && v.length > 8 ? v.substring(0, 8) + '..' : v } },
+            yaxis: { labels: { style: { colors: 'var(--color-label-muted)', fontSize: '9px', fontWeight: 800 }, formatter: (v) => Math.floor(v) } },
+            tooltip: { theme: 'dark', x: { show: true } }, legend: { show: false }
+        };
+
+        function render() {
+            if (typeof ApexCharts === 'undefined') { return setTimeout(render, 100); }
+            if (!telemetry.up) return;
+
+            if (telemetry.up.v.length > 0) {
+                new ApexCharts(document.querySelector("#c-platform"), {
+                    ...baseCfg, chart: { ...baseCfg.chart, type: 'bar', height: '100%' },
+                    series: [{ name: 'Usuarios', data: telemetry.up.v }],
+                    xaxis: { ...baseCfg.xaxis, categories: telemetry.up.l },
+                    plotOptions: { bar: { borderRadius: 4, columnWidth: '50%', distributed: true } },
+                    colors: [accent, '#8b5cf6', '#10b981', '#f59e0b', '#3b82f6', '#ef4444']
+                }).render();
+            } else { drawEmpty('c-platform', 'Distribución Plataformas'); }
+
+            if (telemetry.ua.l.length > 0) {
+                new ApexCharts(document.querySelector("#c-area"), {
+                    ...baseCfg, chart: { ...baseCfg.chart, type: 'bar', height: '100%' },
+                    series: [{ name: 'Plataformas', data: telemetry.ua.up }, { name: 'Usuarios', data: telemetry.ua.uu }],
+                    xaxis: { ...baseCfg.xaxis, categories: telemetry.ua.l },
+                    plotOptions: { bar: { borderRadius: 4, columnWidth: '50%', distributed: false } },
+                    colors: ['#8b5cf6', '#10b981']
+                }).render();
+            } else { drawEmpty('c-area', 'Distribución Áreas'); }
+
+            if (telemetry.t.l.length > 0) {
+                new ApexCharts(document.querySelector("#c-visits"), {
+                    ...baseCfg, chart: { ...baseCfg.chart, type: 'bar', height: '100%' },
+                    series: [{ name: 'Subidas', data: telemetry.t.up }, { name: 'Descargas', data: telemetry.t.down }],
+                    xaxis: { ...baseCfg.xaxis, categories: telemetry.t.l },
+                    yaxis: { ...baseCfg.yaxis, labels: { ...baseCfg.yaxis.labels, formatter: (v) => formatBytes(v, 1) } },
+                    plotOptions: { bar: { borderRadius: 4, columnWidth: '50%' } },
+                    colors: ['#ef4444', '#f59e0b'],
+                    tooltip: { ...baseCfg.tooltip, y: { formatter: (v) => formatBytes(v, 2) } }
+                }).render();
+            } else { drawEmpty('c-visits', 'Análisis de Tráfico'); }
+
+            if (telemetry.trend.l.length > 0) {
+                new ApexCharts(document.querySelector("#c-audit"), {
+                    ...baseCfg, chart: { ...baseCfg.chart, type: 'line', height: '100%' },
+                    series: [{ name: 'Subidas', data: telemetry.trend.up }, { name: 'Descargas', data: telemetry.trend.down }],
+                    xaxis: { ...baseCfg.xaxis, categories: telemetry.trend.l },
+                    yaxis: { ...baseCfg.yaxis, labels: { ...baseCfg.yaxis.labels, formatter: (v) => formatBytes(v, 1) } },
+                    stroke: { curve: 'smooth', width: [3, 3], dashArray: [0, 6] },
+                    colors: ['#ef4444', '#f59e0b'],
+                    markers: { size: 4, strokeWidth: 0 },
+                    tooltip: { ...baseCfg.tooltip, y: { formatter: (v) => formatBytes(v, 2) } }
+                }).render();
+            } else { drawEmpty('c-audit', 'Tendencia de Tráfico'); }
+        }
+        render();
+    })();
+</script>
 {% endblock %}

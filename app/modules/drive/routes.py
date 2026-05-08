@@ -77,21 +77,71 @@ def dashboard():
             area_ids = [a.id for a in user.areas]
             recent_activity = DriveActivity.query.filter(DriveActivity.area_id.in_(area_ids)).order_by(DriveActivity.created_at.desc()).limit(12).all()
 
-        # Stats for the horizontal chart
-        area_stats = []
-        for area in approved_areas:
-            p_count = Platform.query.filter_by(area_id=area.id).count()
-            area_stats.append({
-                'name': area.name,
-                'count': p_count
-            })
+        # --- TELEMETRÍA AVANZADA ---
+        from sqlalchemy import func, case
+        from datetime import timedelta
+        
+        # 1. Distribución de Plataformas (Usuarios por Plataforma)
+        platform_stats = db.session.query(
+            Platform.name,
+            func.count(User.id).label('total')
+        ).join(Platform.users).group_by(Platform.id).all()
+        
+        up_labels = [r[0] for r in platform_stats]
+        up_values = [int(r[1]) for r in platform_stats]
+
+        # 2. Distribución de Áreas (Plataformas por Área)
+        area_stats_raw = db.session.query(
+            Area.name,
+            func.count(Platform.id).label('p_count'),
+            func.count(User.id).label('u_count')
+        ).outerjoin(Area.platforms).outerjoin(Area.users).group_by(Area.id).all()
+        
+        ua_labels = [r[0] for r in area_stats_raw]
+        ua_platforms = [int(r[1]) for r in area_stats_raw]
+        ua_users = [int(r[2]) for r in area_stats_raw]
+
+        # 3. Tráfico Aplicativos (Alta vs Descarga por Plataforma)
+        traffic_raw = db.session.query(
+            Platform.name,
+            func.sum(case((DriveActivity.action == 'Alta', DriveActivity.file_size), else_=0)).label('up'),
+            func.sum(case((DriveActivity.action == 'Descarga', DriveActivity.file_size), else_=0)).label('down')
+        ).join(DriveActivity, Platform.id == DriveActivity.platform_id).group_by(Platform.id).all()
+
+        t_labels = [r[0] for r in traffic_raw]
+        t_up = [float(r[1] or 0) for r in traffic_raw]
+        t_down = [float(r[2] or 0) for r in traffic_raw]
+
+        # 4. Tendencia 7 Días
+        today = datetime.now()
+        dates = [(today - timedelta(days=i)).strftime('%Y-%m-%d') for i in range(6, -1, -1)]
+        
+        trend_raw = db.session.query(
+            func.date(DriveActivity.created_at).label('date'),
+            func.sum(case((DriveActivity.action == 'Alta', DriveActivity.file_size), else_=0)).label('up'),
+            func.sum(case((DriveActivity.action == 'Descarga', DriveActivity.file_size), else_=0)).label('down')
+        ).filter(DriveActivity.created_at >= (today - timedelta(days=7)))\
+         .group_by(func.date(DriveActivity.created_at)).all()
+
+        trend_map = {r[0].strftime('%Y-%m-%d') if hasattr(r[0], 'strftime') else str(r[0]): (float(r[1] or 0), float(r[2] or 0)) for r in trend_raw}
+        
+        trend_dates = [d[5:10].replace('-', '/') for d in dates] # MM/DD
+        trend_up = [trend_map.get(d, (0, 0))[0] for d in dates]
+        trend_down = [trend_map.get(d, (0, 0))[1] for d in dates]
+
+        telemetry = {
+            'up': {'l': up_labels, 'v': up_values},
+            'ua': {'l': ua_labels, 'up': ua_platforms, 'uu': ua_users},
+            't': {'l': t_labels, 'up': t_up, 'down': t_down},
+            'trend': {'l': trend_dates, 'up': trend_up, 'down': trend_down}
+        }
             
         return render_template('drive_dashboard.html', 
                                approved_areas=approved_areas,
                                total_platforms=total_platforms,
                                total_users=total_users,
                                recent_activity=recent_activity,
-                               area_stats=area_stats)
+                               telemetry=telemetry)
     except Exception as e:
         current_app.logger.error(f"Error en Drive Dashboard: {e}")
         return render_template('errors/500.html'), 500
