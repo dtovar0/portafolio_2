@@ -56,9 +56,9 @@ def index():
          .limit(5).all()
         
         up_labels = [p[0] for p in platforms_with_user_counts]
-        up_values = [p[1] for p in platforms_with_user_counts]
+        up_values = [int(p[1]) for p in platforms_with_user_counts]
         
-        if not up_labels: # Fallback for demo/empty state
+        if not up_labels:
             up_labels = [p.name for p in Platform.query.limit(5).all()]
             up_values = [0] * len(up_labels)
 
@@ -75,8 +75,8 @@ def index():
          .limit(5).all()
 
         ua_labels = [a[0] for a in areas_stats]
-        ua_platforms = [a[1] for a in areas_stats]
-        ua_users = [a[2] for a in areas_stats]
+        ua_platforms = [int(a[1]) for a in areas_stats]
+        ua_users = [int(a[2]) for a in areas_stats]
 
         if not ua_labels:
             ua_labels = [a.name for a in Area.query.limit(5).all()]
@@ -95,8 +95,8 @@ def index():
          .limit(5).all()
 
         mv_labels = [p[0] for p in traffic_stats]
-        mv_in = [round(p[1] / (1024 * 1024), 2) for p in traffic_stats] # MB
-        mv_out = [round(p[2] / (1024 * 1024), 2) for p in traffic_stats] # MB
+        mv_in = [int(p[1] or 0) for p in traffic_stats] # RAW BYTES
+        mv_out = [int(p[2] or 0) for p in traffic_stats] # RAW BYTES
 
         if not mv_labels:
             mv_labels = [p.name for p in Platform.query.limit(5).all()]
@@ -106,13 +106,11 @@ def index():
         # 5. Chart Data: 7-Day Traffic Trend
         from datetime import datetime, timedelta
         end_date = datetime.now()
-        start_date = end_date - timedelta(days=6) # 7 days including today
+        start_date = end_date - timedelta(days=6)
         
-        # Generate dates list for labels
         dates_list = [(start_date + timedelta(days=i)).strftime('%Y-%m-%d') for i in range(7)]
         labels_7d = [(start_date + timedelta(days=i)).strftime('%d/%m') for i in range(7)]
         
-        # Query activity grouped by date and action
         trend_stats = db.session.query(
             db.func.date(DriveActivity.created_at).label('date'),
             db.func.sum(db.case((DriveActivity.action == 'Alta', DriveActivity.file_size), else_=0)).label('traffic_in'),
@@ -120,15 +118,14 @@ def index():
         ).filter(DriveActivity.created_at >= start_date.replace(hour=0, minute=0, second=0))\
          .group_by(db.func.date(DriveActivity.created_at)).all()
         
-        # Map stats to dates_list
         trend_map = {str(s[0]): (s[1], s[2]) for s in trend_stats}
         
         v_in_7d = []
         v_out_7d = []
         for d in dates_list:
             vals = trend_map.get(d, (0, 0))
-            v_in_7d.append(round(vals[0] / (1024 * 1024), 2)) # MB
-            v_out_7d.append(round(vals[1] / (1024 * 1024), 2)) # MB
+            v_in_7d.append(int(vals[0] or 0)) # RAW BYTES
+            v_out_7d.append(int(vals[1] or 0)) # RAW BYTES
 
         # 6. Activity Log
         subq = db.session.query(AuditLog.id).order_by(AuditLog.timestamp.desc()).limit(20).subquery()
