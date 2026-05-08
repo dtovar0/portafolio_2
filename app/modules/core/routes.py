@@ -100,12 +100,33 @@ def index():
             mv_in = [0] * len(mv_labels)
             mv_out = [0] * len(mv_labels)
         
-        # 5. Chart Data: Audit Actions
-        audit_stats = db.session.query(AuditLog.action, db.func.count(AuditLog.id))\
-                                .group_by(AuditLog.action).limit(5).all()
-        audit_labels = [s[0] for s in audit_stats]
-        audit_values = [s[1] for s in audit_stats]
+        # 5. Chart Data: 7-Day Traffic Trend
+        from datetime import datetime, timedelta
+        end_date = datetime.now()
+        start_date = end_date - timedelta(days=6) # 7 days including today
         
+        # Generate dates list for labels
+        dates_list = [(start_date + timedelta(days=i)).strftime('%Y-%m-%d') for i in range(7)]
+        labels_7d = [(start_date + timedelta(days=i)).strftime('%d/%m') for i in range(7)]
+        
+        # Query activity grouped by date and action
+        trend_stats = db.session.query(
+            db.func.date(DriveActivity.created_at).label('date'),
+            db.func.sum(db.case((DriveActivity.action == 'Alta', DriveActivity.file_size), else_=0)).label('traffic_in'),
+            db.func.sum(db.case((DriveActivity.action == 'Descarga', DriveActivity.file_size), else_=0)).label('traffic_out')
+        ).filter(DriveActivity.created_at >= start_date.replace(hour=0, minute=0, second=0))\
+         .group_by(db.func.date(DriveActivity.created_at)).all()
+        
+        # Map stats to dates_list
+        trend_map = {str(s[0]): (s[1], s[2]) for s in trend_stats}
+        
+        v_in_7d = []
+        v_out_7d = []
+        for d in dates_list:
+            vals = trend_map.get(d, (0, 0))
+            v_in_7d.append(round(vals[0] / (1024 * 1024), 2)) # MB
+            v_out_7d.append(round(vals[1] / (1024 * 1024), 2)) # MB
+
         # 6. Activity Log
         subq = db.session.query(AuditLog.id).order_by(AuditLog.timestamp.desc()).limit(20).subquery()
         pagination = AuditLog.query.filter(AuditLog.id.in_(db.session.query(subq)))\
@@ -126,8 +147,9 @@ def index():
                              traffic_mv_labels=mv_labels,
                              traffic_mv_in=mv_in,
                              traffic_mv_out=mv_out,
-                             audit_labels=audit_labels,
-                             audit_values=audit_values,
+                             trend_labels=labels_7d,
+                             trend_in=v_in_7d,
+                             trend_out=v_out_7d,
                              log_list=pagination.items)
                              
     except Exception as e:

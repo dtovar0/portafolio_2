@@ -264,8 +264,8 @@
 
                 <div class="bg-panel-fill border border-panel-border rounded-xl p-4 flex flex-col shadow-sm gap-4 overflow-hidden h-full">
                     <header class="flex items-center gap-2">
-                        <div class="w-6 h-6 rounded bg-amber-500/10 flex items-center justify-center text-amber-500 text-[10px]"><i class="fas fa-fingerprint"></i></div>
-                        <h3 class="text-[9px] font-black text-label uppercase tracking-widest shrink-0">Distribución Acciones</h3>
+                        <div class="w-6 h-6 rounded bg-amber-500/10 flex items-center justify-center text-amber-500 text-[10px]"><i class="fas fa-chart-line"></i></div>
+                        <h3 class="text-[9px] font-black text-label uppercase tracking-widest shrink-0">Tendencia 7 Días (MB)</h3>
                     </header>
                     <div class="flex-1 chart-container-box" id="c-audit"></div>
                 </div>
@@ -332,7 +332,11 @@
                 vin: {{ traffic_mv_in|tojson if traffic_mv_in else '[]' }},
                 vout: {{ traffic_mv_out|tojson if traffic_mv_out else '[]' }}
             },
-            au: { l: {{ audit_labels|tojson if audit_labels else '[]' }}, v: {{ audit_values|tojson if audit_values else '[]' }} }
+            tr: {
+                l: {{ trend_labels|tojson if trend_labels else '[]' }},
+                vin: {{ trend_in|tojson if trend_in else '[]' }},
+                vout: {{ trend_out|tojson if trend_out else '[]' }}
+            }
         };
 
         const accent = '{{ portal_settings.portal_logo_bg if (portal_settings and portal_settings.portal_logo_bg) else "#2563eb" }}';
@@ -429,17 +433,21 @@
                 }).render();
             } else { drawEmpty('c-visits', 'Análisis de Tráfico'); }
 
-            if (data.au.v.length > 0 && !data.au.v.every(v => v === 0)) {
+            if (data.tr.l.length > 0) {
                 new ApexCharts(document.querySelector("#c-audit"), {
-                    ...baseCfg, chart: { ...baseCfg.chart, type: 'donut', height: '100%' },
-                    series: data.au.v,
-                    labels: data.au.l,
-                    stroke: { show: false },
-                    legend: { show: true, position: 'bottom', labels: { colors: 'var(--color-label-muted)' } },
-                    dataLabels: { enabled: false },
-                    colors: ['#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ef4444']
+                    ...baseCfg, 
+                    chart: { ...baseCfg.chart, type: 'line', height: '100%', sparkline: { enabled: false } },
+                    series: [
+                        { name: 'Subidas (MB)', data: data.tr.vin },
+                        { name: 'Descargas (MB)', data: data.tr.vout }
+                    ],
+                    xaxis: { ...baseCfg.xaxis, categories: data.tr.l },
+                    stroke: { curve: 'smooth', width: [4, 4], dashArray: [0, 8] },
+                    colors: ['#ef4444', '#f59e0b'],
+                    legend: { show: true, position: 'top', labels: { colors: 'var(--color-label-muted)' } },
+                    markers: { size: 4, strokeWidth: 0, hover: { size: 6 } }
                 }).render();
-            } else { drawEmpty('c-audit', 'Distribución de Acciones'); }
+            } else { drawEmpty('c-audit', 'Tendencia de Tráfico'); }
         }
 
         render();
