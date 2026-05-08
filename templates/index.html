@@ -413,13 +413,10 @@
             if (data.ua.l.length > 0) {
                 new ApexCharts(document.querySelector("#c-area"), {
                     ...baseCfg, chart: { ...baseCfg.chart, type: 'bar', height: '100%' },
-                    series: [
-                        { name: 'Plataformas', data: data.ua.up },
-                        { name: 'Usuarios', data: data.ua.uu }
-                    ],
+                    series: [{ name: 'Plataformas', data: data.ua.up }],
                     xaxis: { ...baseCfg.xaxis, categories: data.ua.l },
-                    plotOptions: { bar: { borderRadius: 4, columnWidth: '50%' } },
-                    colors: ['#8b5cf6', '#10b981']
+                    plotOptions: { bar: { borderRadius: 4, columnWidth: '50%', distributed: true } },
+                    colors: ['#10b981', '#8b5cf6', '#3b82f6', '#f59e0b', '#ef4444']
                 }).render();
             } else { drawEmpty('c-area', 'Densidad por Áreas'); }
 
