@@ -499,14 +499,14 @@
         const tbody = $(settings.nTBody);
         const pageLen = api.page.len();
 
-        // Calculate dynamic row height (Audit Style)
+        // Calculate dynamic row height (Standard Nexus Standard)
         const container = api.table().container();
         const gridH = $(container).height();
         let rowH = 52;
         
         if (gridH > 0) {
-            // Header ~52px, Footer ~52px, Compensate for borders
-            rowH = Math.max(48, Math.floor((gridH - 60) / (pageLen + 1)));
+            // Header ~52px, Footer ~52px. We use pageLen to fill exactly 10 slots
+            rowH = Math.max(48, Math.floor((gridH - 105) / pageLen));
         }
         $(container).css('--row-h', rowH + 'px');
 
@@ -518,12 +518,9 @@
 
         let ghostHtml = '';
         for (let i = 0; i < ghostCount; i++) {
-            // Apply zebra striping to ghost rows based on their index
-            const isEven = (realRows + i) % 2 === 0;
-            const bgClass = isEven ? 'bg-white' : 'bg-slate-50/50';
-            
+            // Zebra striping is handled by global CSS nth-child
             ghostHtml += `
-                <tr class="ghost-row pointer-events-none select-none ${bgClass}">
+                <tr class="ghost-row pointer-events-none select-none">
                     <td class="text-center"><div></div></td>
                     <td class="text-center"><div></div></td>
                     <td class="text-left"><div></div></td>
