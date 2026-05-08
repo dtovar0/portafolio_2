@@ -517,14 +517,14 @@
         const tbody = $(settings.nTBody);
         const pageLen = api.page.len();
 
-        // Calculate dynamic row height (Standard Nexus Standard)
+        // Calculate dynamic row height (Audit 1:1)
         const container = api.table().container();
         const gridH = $(container).height();
-        let rowH = 52;
+        let rowH = 40;
         
         if (gridH > 0) {
-            // Header ~52px, Footer ~52px. We use pageLen to fill exactly 10 slots
-            rowH = Math.max(48, Math.floor((gridH - 105) / pageLen));
+            // Formula from audit.js: Math.max(40, Math.floor((gridH - 52) / (pageLen + 1)) - 1)
+            rowH = Math.max(40, Math.floor((gridH - 52) / (pageLen + 1)) - 1);
         }
         $(container).css('--row-h', rowH + 'px');
 
