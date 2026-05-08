@@ -55,8 +55,14 @@ def index():
 
         # 4. Chart Data: Most Visited
         most_visited = Platform.query.order_by(Platform.visits.desc()).limit(5).all()
+
+        # 5. Chart Data: Audit Actions
+        audit_stats = db.session.query(AuditLog.action, db.func.count(AuditLog.id))\
+                                .group_by(AuditLog.action).limit(5).all()
+        audit_labels = [s[0] for s in audit_stats]
+        audit_values = [s[1] for s in audit_stats]
         
-        # 5. Activity Log
+        # 6. Activity Log
         subq = db.session.query(AuditLog.id).order_by(AuditLog.timestamp.desc()).limit(20).subquery()
         pagination = AuditLog.query.filter(AuditLog.id.in_(db.session.query(subq)))\
                              .order_by(AuditLog.timestamp.desc()).paginate(page=page, per_page=10)
@@ -74,6 +80,8 @@ def index():
                              users_area_values=ua_values,
                              users_area_colors=ua_colors,
                              most_visited=most_visited,
+                             audit_labels=audit_labels,
+                             audit_values=audit_values,
                              log_list=pagination.items)
                              
     except Exception as e:
