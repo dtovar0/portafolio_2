@@ -62,11 +62,36 @@ def dashboard():
         user = current_user
         if user.role.lower() == 'administrador':
             approved_areas = Area.query.order_by(Area.name).all()
+            total_platforms = Platform.query.count()
+            total_users = User.query.count()
         else:
             approved_areas = [a for a in user.areas if a.status == 'Activo']
+            area_ids = [a.id for a in approved_areas]
+            total_platforms = Platform.query.filter(Platform.area_id.in_(area_ids)).count()
+            total_users = 1 # El usuario mismo
+            
+        # Recent activity (Global for admin, filtered for users)
+        if user.role.lower() == 'administrador':
+            recent_activity = DriveActivity.query.order_by(DriveActivity.created_at.desc()).limit(12).all()
+        else:
+            area_ids = [a.id for a in user.areas]
+            recent_activity = DriveActivity.query.filter(DriveActivity.area_id.in_(area_ids)).order_by(DriveActivity.created_at.desc()).limit(12).all()
+
+        # Stats for the horizontal chart
+        area_stats = []
+        for area in approved_areas:
+            p_count = Platform.query.filter_by(area_id=area.id).count()
+            area_stats.append({
+                'name': area.name,
+                'count': p_count
+            })
             
         return render_template('drive_dashboard.html', 
-                               approved_areas=approved_areas)
+                               approved_areas=approved_areas,
+                               total_platforms=total_platforms,
+                               total_users=total_users,
+                               recent_activity=recent_activity,
+                               area_stats=area_stats)
     except Exception as e:
         current_app.logger.error(f"Error en Drive Dashboard: {e}")
         return render_template('errors/500.html'), 500
