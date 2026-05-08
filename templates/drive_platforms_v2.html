@@ -38,7 +38,8 @@
     
     .dt-layout-row.dt-layout-table {
         flex: 1;
-        overflow: hidden;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
         display: flex;
         flex-direction: column;
     }
@@ -74,6 +75,15 @@
         display: flex;
         align-items: center;
         height: 100%;
+    }
+
+    .modern-table thead th {
+        white-space: nowrap !important;
+    }
+
+    .dt-layout-cell {
+        overflow-x: auto !important;
+        min-width: 100%;
     }
 </style>
 {% endblock %}
@@ -180,7 +190,7 @@
 
             <!-- Table Container: Zebra Striped & High Fidelity -->
             <div class="flex-1 overflow-hidden flex flex-col">
-                <div class="w-full flex-1 min-h-0 flex flex-col overflow-x-auto custom-scrollbar px-2">
+                <div class="w-full flex-1 min-h-0 flex flex-col overflow-x-auto custom-scrollbar">
                     <table class="modern-table w-full text-left" id="modern-table">
                         <thead>
                             <tr class="text-label border-b border-panel-border">
