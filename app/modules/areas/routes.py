@@ -81,7 +81,7 @@ def add_area():
             action='Alta',
             module='Áreas',
             target=name,
-            description=f"Nueva área creada: {name}",
+            detail=f"Nueva área creada: {name}",
             status='success'
         )
         db.session.add(log)
@@ -142,7 +142,7 @@ def edit_area(area_id):
             action='Modificación',
             module='Áreas',
             target=area.name,
-            description=f"Área actualizada: {area.name}",
+            detail=f"Área actualizada: {area.name}",
             status='success'
         )
         db.session.add(log)
@@ -174,7 +174,7 @@ def delete_area(area_id):
             action='Baja',
             module='Áreas',
             target=area_name,
-            description=f"Área eliminada: {area_name}",
+            detail=f"Área eliminada: {area_name}",
             status='success'
         )
         db.session.add(log)
@@ -217,7 +217,7 @@ def delete_areas_bulk():
                 action='Baja',
                 module='Áreas',
                 target=area_name,
-                description=f"Área eliminada (Bulk): {area_name}",
+                detail=f"Área eliminada (Bulk): {area_name}",
                 status='success'
             )
             db.session.add(log)
@@ -257,7 +257,7 @@ def update_area_users(area_id):
             action='Modificación',
             module='Accesos',
             target=area.name,
-            description=f"Accesos de usuarios actualizados para el área: {area.name}",
+            detail=f"Accesos de usuarios actualizados para el área: {area.name}",
             status='success'
         )
         db.session.add(log)

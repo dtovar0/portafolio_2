@@ -264,4 +264,4 @@ def save():
         
     except Exception as e:
         db.session.rollback()
-        return jsonify({"status": "error", "message": "Fallo interno al realizar la purga programada."}), 500
+        return jsonify({"status": "error", "message": "Ocurrió un error al guardar la configuración del sistema."}), 500

@@ -106,7 +106,7 @@ function initAuditDataTable() {
                     return `<div class="flex items-center justify-center h-full"><span class="nx-badge ${cls}">${data.toUpperCase()}</span></div>`;
                 }
             },
-            { data: 'description', width: 'auto', render: (data) => `<div class="flex items-center h-full text-[12px] font-bold text-label/60 line-clamp-1 min-w-0 overflow-hidden text-ellipsis text-left" title="${data || ''}">${data || '-'}</div>` },
+            { data: 'detail', width: 'auto', render: (data) => `<div class="flex items-center h-full text-[12px] font-bold text-label/60 line-clamp-1 min-w-0 overflow-hidden text-ellipsis text-left" title="${data || ''}">${data || '-'}</div>` },
             { data: 'time', width: '180px', render: (data) => `<div class="flex items-center h-full font-mono text-[12px] font-bold text-label/60 justify-center">${data}</div>` }
         ],
         autoWidth: false,

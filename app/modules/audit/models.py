@@ -10,7 +10,7 @@ class AuditLog(db.Model):
     action = db.Column(db.String(50), nullable=False) # Alta, Baja, Modificación, Acceso, etc.
     module = db.Column(db.String(50), nullable=True) # Usuarios, Áreas, Plataformas, etc.
     target = db.Column(db.String(100), nullable=True) # Nombre del objeto afectado
-    description = db.Column(db.Text, nullable=True)
+    detail = db.Column(db.Text, nullable=True)
     ip_address = db.Column(db.String(45), nullable=True)
     status = db.Column(db.String(20), default='success') # success, error, warning, info
 
@@ -22,7 +22,7 @@ class AuditLog(db.Model):
             "action": self.action,
             "module": self.module,
             "target": self.target,
-            "description": self.description,
+            "detail": self.detail,
             "ip": self.ip_address,
             "status": self.status
         }

@@ -116,7 +116,7 @@ def add_unit():
             action='Alta',
             module='Drive Units',
             target=name,
-            description=f"Nueva unidad de Drive creada: {name}",
+            detail=f"Nueva unidad de Drive creada: {name}",
             status='success'
         )
         db.session.add(log)
