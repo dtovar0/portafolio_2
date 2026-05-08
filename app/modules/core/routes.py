@@ -132,6 +132,12 @@ def index():
         pagination = AuditLog.query.filter(AuditLog.id.in_(db.session.query(subq)))\
                              .order_by(AuditLog.timestamp.desc()).paginate(page=page, per_page=10)
 
+        # Recent activity (Strictly filtered by current user for this dashboard)
+        recent_activity = DriveActivity.query.filter_by(user_id=current_user.id).order_by(DriveActivity.created_at.desc()).limit(20).all()
+        
+        # Activity Feed for Dashboard (Top 20 for pagination)
+        log_list = DriveActivity.query.order_by(DriveActivity.created_at.desc()).limit(20).all()
+
         return render_template("index.html", 
                              areas_count_num=areas_count,
                              total=platforms_total,

@@ -73,7 +73,7 @@ def dashboard():
         # Recent activity (Strictly filtered by current user for this dashboard)
         recent_activity = DriveActivity.query.filter_by(user_id=user.id)\
                                      .order_by(DriveActivity.created_at.desc())\
-                                     .limit(12).all()
+                                     .limit(20).all()
 
         # --- TELEMETRÍA PERSONALIZADA (SOLO USUARIO) ---
         from sqlalchemy import func, case

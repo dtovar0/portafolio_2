@@ -272,26 +272,36 @@
             </div>
 
             <!-- Activity Feed Premium -->
-            <div class="bg-panel-fill border border-panel-border rounded-xl flex flex-col shadow-2xl overflow-hidden min-h-0">
-                <header class="shrink-0 p-8 border-b border-panel-border bg-surface-container/20 flex items-center justify-between">
-                    <span class="text-xs font-black text-label uppercase tracking-widest">Telemetría Global</span>
-                    <button onclick="window.location.href='/audit'" class="w-10 h-10 rounded-xl bg-surface-container hover:bg-primary/20 text-label/30 hover:text-primary transition-all flex items-center justify-center">
-                        <i class="fas fa-up-right-from-square text-xs"></i>
-                    </button>
+            <div class="bg-panel-fill border border-panel-border rounded-xl flex flex-col shadow-2xl overflow-hidden min-h-0 h-full">
+                <header class="shrink-0 p-6 border-b border-panel-border bg-surface-container/20 flex items-center justify-between">
+                    <div class="flex flex-col">
+                        <span class="text-[10px] font-black text-label uppercase tracking-widest">Telemetría Global</span>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span id="page-indicator" class="text-[9px] font-bold text-primary uppercase">Página 1/2</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="prevPage()" id="btn-prev" class="w-8 h-8 rounded-lg bg-surface-container hover:bg-primary/20 text-label/30 hover:text-primary transition-all flex items-center justify-center opacity-50 cursor-not-allowed">
+                            <i class="fas fa-chevron-left text-[10px]"></i>
+                        </button>
+                        <button onclick="nextPage()" id="btn-next" class="w-8 h-8 rounded-lg bg-surface-container hover:bg-primary/20 text-label/30 hover:text-primary transition-all flex items-center justify-center">
+                            <i class="fas fa-chevron-right text-[10px]"></i>
+                        </button>
+                    </div>
                 </header>
-                <div class="flex-1 overflow-y-auto custom-scrollbar p-8">
+                <div class="flex-1 overflow-hidden p-6 relative">
                     {% if log_list %}
-                    <div class="space-y-8">
+                    <div id="activity-container" class="h-full flex flex-col justify-between space-y-4">
                         {% for r in log_list %}
-                        <div class="flex gap-6 relative group">
-                            {% if not loop.last %}<div class="absolute left-[11px] top-10 bottom-[-32px] w-[2px] bg-panel-border opacity-30"></div>{% endif %}
-                            <div class="w-[24px] h-[24px] rounded-lg z-10 shrink-0 mt-1 border-4 border-panel-fill shadow-lg group-hover:scale-125 transition-transform" style="background: {{ 'rgb(var(--color-success))' if r.action == 'Alta' else 'rgb(var(--color-warning))' if r.action == 'Modificación' else 'rgb(var(--color-danger))' if r.action == 'Baja' else 'var(--color-primary)' }};"></div>
-                            <div class="flex flex-col gap-1.5 flex-1 min-w-0">
+                        <div class="activity-item flex gap-4 relative group h-[40px] shrink-0 {% if loop.index > 10 %}hidden{% endif %}" data-page="{{ (loop.index0 // 10) + 1 }}">
+                            {% if not loop.last and loop.index % 10 != 0 %}<div class="absolute left-[9px] top-8 bottom-[-16px] w-[1px] bg-panel-border opacity-30"></div>{% endif %}
+                            <div class="w-[18px] h-[18px] rounded-md z-10 shrink-0 mt-1 border-2 border-panel-fill shadow-lg group-hover:scale-110 transition-transform" style="background: {{ 'rgb(var(--color-success))' if r.action == 'Alta' else 'rgb(var(--color-warning))' if r.action == 'Modificación' else 'rgb(var(--color-danger))' if r.action == 'Baja' else 'var(--color-primary)' }};"></div>
+                            <div class="flex flex-col gap-0.5 flex-1 min-w-0">
                                 <div class="flex items-center justify-between gap-4">
-                                    <span class="text-xs font-black text-primary truncate uppercase tracking-tighter">{{ r.user or 'Sistema' }}</span>
-                                    <span class="text-[9px] font-black text-label/30 uppercase shrink-0">{{ r.timestamp.strftime('%H:%M') if r.timestamp else '' }}</span>
+                                    <span class="text-[10px] font-black text-primary truncate uppercase tracking-tighter">{{ r.user or 'Sistema' }}</span>
+                                    <span class="text-[8px] font-black text-label/30 uppercase shrink-0">{{ r.timestamp.strftime('%H:%M') if r.timestamp else '' }}</span>
                                 </div>
-                                <p class="text-[12px] font-bold text-label leading-none">
+                                <p class="text-[11px] font-bold text-label truncate">
                                     {{ r.action }} <span class="text-primary italic">{{ r.target or '' }}</span>
                                 </p>
                             </div>
@@ -305,8 +315,7 @@
                         </div>
                         <h4 class="text-[11px] font-black text-label uppercase tracking-widest italic">Sin Señal Activa</h4>
                         <p class="text-[9px] text-label/30 font-bold uppercase tracking-[0.2em] mt-2 leading-relaxed">
-                            El flujo de auditoría está en espera. <br>
-                            <span class="text-primary font-black opacity-100 uppercase">Esperando Transmisión</span>
+                            Esperando Transmisión
                         </p>
                     </div>
                     {% endif %}
@@ -471,6 +480,28 @@
                     tooltip: { ...baseCfg.tooltip, y: { formatter: (v) => formatBytes(v, 2) } }
                 }).render();
             } else { drawEmpty('c-audit', 'Tendencia de Tráfico'); }
+        }
+
+        let currentPage = 1;
+        window.nextPage = function() {
+            if (currentPage >= 2) return;
+            currentPage++;
+            updatePagination();
+        };
+        window.prevPage = function() {
+            if (currentPage <= 1) return;
+            currentPage--;
+            updatePagination();
+        };
+        function updatePagination() {
+            document.querySelectorAll('.activity-item').forEach(el => {
+                el.classList.toggle('hidden', el.dataset.page != currentPage);
+            });
+            document.getElementById('page-indicator').innerText = `Página ${currentPage}/2`;
+            document.getElementById('btn-prev').classList.toggle('opacity-50', currentPage === 1);
+            document.getElementById('btn-prev').classList.toggle('cursor-not-allowed', currentPage === 1);
+            document.getElementById('btn-next').classList.toggle('opacity-50', currentPage === 2);
+            document.getElementById('btn-next').classList.toggle('cursor-not-allowed', currentPage === 2);
         }
 
         render();
