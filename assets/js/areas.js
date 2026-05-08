@@ -316,23 +316,37 @@ function renderAreasTable() {
 
 function renderGhostRows(columns) {
     const tbody = document.getElementById('areasTableBody');
+    if (!tbody) return;
+    
     const recordsPerPage = getPageLength();
     const currentRows = tbody.children.length;
     const ghostCount = recordsPerPage - currentRows;
+
+    // Calculate dynamic row height (Audit Style)
+    const container = tbody.closest('.dt-container');
+    if (container) {
+        const gridH = container.offsetHeight;
+        if (gridH > 0) {
+            // Header is ~52px, Footer is ~52px. We use 110px offset for safety and padding.
+            const rowH = Math.max(48, Math.floor((gridH - 110) / recordsPerPage));
+            container.style.setProperty('--row-h', rowH + 'px');
+        }
+    }
 
     if (ghostCount <= 0) return;
 
     for (let i = 0; i < ghostCount; i++) {
         const tr = document.createElement('tr');
-        tr.className = 'pointer-events-none select-none';
+        tr.className = 'ghost-row pointer-events-none select-none border-b border-panel-border/10';
+        tr.style.height = "var(--row-h, 60px)";
         tr.innerHTML = `
-            <td class="text-center" style="border-left:3px solid transparent;"></td>
-            <td class="text-center"></td>
-            <td class="text-left"></td>
-            <td class="text-left"></td>
-            <td class="text-center"></td>
-            <td class="text-center"></td>
-            <td class="text-center"></td>
+            <td class="text-center" style="border-left:3px solid transparent;"><div></div></td>
+            <td class="text-center"><div></div></td>
+            <td class="text-left"><div></div></td>
+            <td class="text-left"><div></div></td>
+            <td class="text-center"><div></div></td>
+            <td class="text-center"><div></div></td>
+            <td class="text-center"><div></div></td>
         `;
         tbody.appendChild(tr);
     }

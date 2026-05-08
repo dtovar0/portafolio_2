@@ -274,6 +274,17 @@ function renderGhostRows(columns) {
     const pageLen = getPageLength();
     const realRows = tbody.children.length;
     const ghostCount = pageLen - realRows;
+
+    // Calculate dynamic row height (Audit Style)
+    const container = tbody.closest('.dt-container');
+    if (container) {
+        const gridH = container.offsetHeight;
+        if (gridH > 0) {
+            // Header is ~52px, Footer is ~52px. We use 110px offset for safety and padding.
+            const rowH = Math.max(48, Math.floor((gridH - 110) / pageLen));
+            container.style.setProperty('--row-h', rowH + 'px');
+        }
+    }
     
     if (ghostCount <= 0) return;
 
@@ -1106,4 +1117,9 @@ document.addEventListener('click', (e) => {
     if (action === 'users-open-areas') openUserAreasModal();
     if (action === 'users-close-areas-modal') closeModal('userAreasModal');
     if (action === 'users-save-areas') saveUserAreas();
+});
+
+// Responsive Redraw Engine
+window.addEventListener('resize', () => {
+    if (typeof renderUsersTable === 'function') renderUsersTable();
 });
