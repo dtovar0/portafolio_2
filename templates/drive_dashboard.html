@@ -58,7 +58,7 @@
             </div>
             <div class="nx-kpi__value">{{ approved_areas|length }}</div>
             <div class="nx-kpi__footer">
-                <span class="nx-kpi__tag">Ecosistema</span>
+                <span class="nx-kpi__tag">Mis Áreas</span>
             </div>
         </div>
 
@@ -66,38 +66,38 @@
         <div class="nx-kpi" style="--kpi-color: #3b82f6; --kpi-color-alpha: rgba(59, 130, 246, 0.1);">
             <div class="nx-kpi__accent"></div>
             <div class="nx-kpi__header">
-                <span class="nx-kpi__label">Nodos Operativos</span>
+                <span class="nx-kpi__label">Plataformas Activas</span>
                 <div class="nx-kpi__icon"><i class="fas fa-server text-[11px]"></i></div>
             </div>
             <div class="nx-kpi__value">{{ total_platforms }}</div>
             <div class="nx-kpi__footer">
-                <span class="nx-kpi__tag">Capacidad</span>
+                <span class="nx-kpi__tag">Mis Accesos</span>
             </div>
         </div>
 
-        <!-- Usuarios -->
-        <div class="nx-kpi" style="--kpi-color: #10b981; --kpi-color-alpha: rgba(16, 185, 129, 0.1);">
+        <!-- Tráfico In -->
+        <div class="nx-kpi" style="--kpi-color: #ef4444; --kpi-color-alpha: rgba(239, 68, 68, 0.1);">
             <div class="nx-kpi__accent"></div>
             <div class="nx-kpi__header">
-                <span class="nx-kpi__label">Identidades</span>
-                <div class="nx-kpi__icon"><i class="fas fa-user-shield text-[11px]"></i></div>
+                <span class="nx-kpi__label">Data Inbound</span>
+                <div class="nx-kpi__icon"><i class="fas fa-cloud-arrow-up text-[11px]"></i></div>
             </div>
-            <div class="nx-kpi__value">{{ total_users }}</div>
+            <div class="nx-kpi__value text-2xl!">{{ user_traffic_in }}</div>
             <div class="nx-kpi__footer">
-                <span class="nx-kpi__tag">Usuarios</span>
+                <span class="nx-kpi__tag">Subidas</span>
             </div>
         </div>
 
-        <!-- Actividad Reciente -->
+        <!-- Tráfico Out -->
         <div class="nx-kpi" style="--kpi-color: #8b5cf6; --kpi-color-alpha: rgba(139, 92, 246, 0.1);">
             <div class="nx-kpi__accent"></div>
             <div class="nx-kpi__header">
-                <span class="nx-kpi__label">Eventos 24h</span>
-                <div class="nx-kpi__icon"><i class="fas fa-bolt text-[11px]"></i></div>
+                <span class="nx-kpi__label">Data Outbound</span>
+                <div class="nx-kpi__icon"><i class="fas fa-cloud-arrow-down text-[11px]"></i></div>
             </div>
-            <div class="nx-kpi__value">{{ recent_activity|length }}</div>
+            <div class="nx-kpi__value text-2xl!">{{ user_traffic_out }}</div>
             <div class="nx-kpi__footer">
-                <span class="nx-kpi__tag">Impacto</span>
+                <span class="nx-kpi__tag">Descargas</span>
             </div>
         </div>
     </div>

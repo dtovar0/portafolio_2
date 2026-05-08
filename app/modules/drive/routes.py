@@ -77,53 +77,71 @@ def dashboard():
             area_ids = [a.id for a in user.areas]
             recent_activity = DriveActivity.query.filter(DriveActivity.area_id.in_(area_ids)).order_by(DriveActivity.created_at.desc()).limit(12).all()
 
-        # --- TELEMETRÍA AVANZADA ---
+        # --- TELEMETRÍA PERSONALIZADA (SOLO USUARIO) ---
         from sqlalchemy import func, case
         from datetime import timedelta
         from app.modules.auth.models import user_platforms, user_areas
         
-        # 1. Distribución de Plataformas (Usuarios por Plataforma)
-        platforms_with_user_counts = db.session.query(
-            Platform.name, 
-            func.count(user_platforms.c.user_id).label('user_count')
-        ).join(user_platforms, Platform.id == user_platforms.c.platform_id)\
-         .group_by(Platform.id)\
-         .order_by(db.desc('user_count'))\
-         .limit(5).all()
-        
-        up_labels = [p[0] for p in platforms_with_user_counts]
-        up_values = [int(p[1]) for p in platforms_with_user_counts]
+        # 0. Definir alcances del usuario
+        user_area_ids = [a.id for a in user.areas]
+        user_platform_ids = [p.id for p in user.platforms]
 
-        # 2. Distribución de Áreas (Plataformas por Área)
+        # 1. Distribución de Plataformas (Filtrado por mis plataformas)
+        # Nota: Aquí mostramos visitas o algo similar si no hay otros usuarios, 
+        # pero seguiremos la estructura de 'distribución' solicitada.
+        up_stats = db.session.query(
+            Platform.name, 
+            func.count(DriveActivity.id).label('actividad')
+        ).join(DriveActivity, Platform.id == DriveActivity.platform_id)\
+         .filter(DriveActivity.user_id == user.id)\
+         .group_by(Platform.id).all()
+        
+        up_labels = [p[0] for p in up_stats]
+        up_values = [int(p[1]) for p in up_stats]
+
+        # 2. Distribución de Áreas (Mis Plataformas por Área)
         area_stats_raw = db.session.query(
             Area.name,
             func.count(func.distinct(Platform.id)).label('p_count'),
-            func.count(func.distinct(user_areas.c.user_id)).label('u_count')
-        ).outerjoin(Platform, Area.id == Platform.area_id)\
-         .outerjoin(user_areas, Area.id == user_areas.c.area_id)\
-         .group_by(Area.id)\
-         .order_by(db.desc('u_count'))\
-         .limit(5).all()
+            func.count(func.distinct(DriveActivity.id)).label('activity_count')
+        ).join(Platform, Area.id == Platform.area_id)\
+         .outerjoin(DriveActivity, Platform.id == DriveActivity.platform_id)\
+         .filter(Platform.id.in_(user_platform_ids))\
+         .group_by(Area.id).all()
         
         ua_labels = [r[0] for r in area_stats_raw]
         ua_platforms = [int(r[1]) for r in area_stats_raw]
-        ua_users = [int(r[2]) for r in area_stats_raw]
+        ua_activity = [int(r[2]) for r in area_stats_raw]
 
-        # 3. Tráfico Aplicativos (Alta vs Descarga por Plataforma)
+        # 3. Tráfico Personal (Inbound vs Outbound)
         traffic_raw = db.session.query(
             Platform.name,
             func.sum(case((DriveActivity.action == 'Alta', DriveActivity.file_size), else_=0)).label('up'),
             func.sum(case((DriveActivity.action == 'Descarga', DriveActivity.file_size), else_=0)).label('down')
         ).join(DriveActivity, Platform.id == DriveActivity.platform_id)\
-         .group_by(Platform.id)\
-         .order_by(db.desc(func.sum(DriveActivity.file_size)))\
-         .limit(5).all()
+         .filter(DriveActivity.user_id == user.id)\
+         .group_by(Platform.id).all()
 
         t_labels = [r[0] for r in traffic_raw]
         t_up = [float(r[1] or 0) for r in traffic_raw]
         t_down = [float(r[2] or 0) for r in traffic_raw]
 
-        # 4. Tendencia 7 Días
+        # KPIs de Tráfico para los Cards
+        total_in_bytes = sum(t_up)
+        total_out_bytes = sum(t_down)
+
+        def format_bytes_local(size_bytes):
+            if size_bytes == 0: return "0 B"
+            units = ("B", "KB", "MB", "GB", "TB")
+            i = int(math.floor(math.log(size_bytes, 1024)))
+            p = math.pow(1024, i)
+            s = round(size_bytes / p, 2)
+            return f"{s} {units[i]}"
+
+        user_traffic_in = format_bytes_local(total_in_bytes)
+        user_traffic_out = format_bytes_local(total_out_bytes)
+
+        # 4. Tendencia Personal (7 Días)
         today = datetime.now()
         dates = [(today - timedelta(days=i)).strftime('%Y-%m-%d') for i in range(6, -1, -1)]
         
@@ -131,18 +149,19 @@ def dashboard():
             func.date(DriveActivity.created_at).label('date'),
             func.sum(case((DriveActivity.action == 'Alta', DriveActivity.file_size), else_=0)).label('up'),
             func.sum(case((DriveActivity.action == 'Descarga', DriveActivity.file_size), else_=0)).label('down')
-        ).filter(DriveActivity.created_at >= (today - timedelta(days=7)))\
+        ).filter(DriveActivity.user_id == user.id)\
+         .filter(DriveActivity.created_at >= (today - timedelta(days=7)))\
          .group_by(func.date(DriveActivity.created_at)).all()
 
         trend_map = {r[0].strftime('%Y-%m-%d') if hasattr(r[0], 'strftime') else str(r[0]): (float(r[1] or 0), float(r[2] or 0)) for r in trend_raw}
         
-        trend_dates = [d[5:10].replace('-', '/') for d in dates] # MM/DD
+        trend_dates = [d[5:10].replace('-', '/') for d in dates]
         trend_up = [trend_map.get(d, (0, 0))[0] for d in dates]
         trend_down = [trend_map.get(d, (0, 0))[1] for d in dates]
 
         telemetry = {
             'up': {'l': up_labels, 'v': up_values},
-            'ua': {'l': ua_labels, 'up': ua_platforms, 'uu': ua_users},
+            'ua': {'l': ua_labels, 'up': ua_platforms, 'uu': ua_activity}, # Cambiamos uu por actividad para simetría
             't': {'l': t_labels, 'up': t_up, 'down': t_down},
             'trend': {'l': trend_dates, 'up': trend_up, 'down': trend_down}
         }
@@ -150,7 +169,8 @@ def dashboard():
         return render_template('drive_dashboard.html', 
                                approved_areas=approved_areas,
                                total_platforms=total_platforms,
-                               total_users=total_users,
+                               user_traffic_in=user_traffic_in,
+                               user_traffic_out=user_traffic_out,
                                recent_activity=recent_activity,
                                telemetry=telemetry)
     except Exception as e:
