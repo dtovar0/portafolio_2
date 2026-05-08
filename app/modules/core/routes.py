@@ -27,6 +27,21 @@ def index():
         users_total = User.query.count()
         visits_total = db.session.query(db.func.sum(Platform.visits)).scalar() or 0
 
+        # Traffic Stats (In/Out)
+        from app.modules.core.models import DriveActivity
+        t_in_bytes = db.session.query(db.func.sum(DriveActivity.file_size)).filter(DriveActivity.action == 'Alta').scalar() or 0
+        t_out_bytes = db.session.query(db.func.sum(DriveActivity.file_size)).filter(DriveActivity.action == 'Descarga').scalar() or 0
+
+        def format_size(size):
+            for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+                if size < 1024.0:
+                    return f"{size:.1f} {unit}"
+                size /= 1024.0
+            return f"{size:.1f} PB"
+
+        traffic_in = format_size(t_in_bytes)
+        traffic_out = format_size(t_out_bytes)
+
         # 2. Chart Data: Users per Platform
         platforms = Platform.query.all()
         up_labels = [p.name for p in platforms[:5]]
@@ -51,6 +66,8 @@ def index():
                              total=platforms_total,
                              total_users=users_total,
                              visits_total=visits_total,
+                             traffic_in=traffic_in,
+                             traffic_out=traffic_out,
                              users_platform_labels=up_labels,
                              users_platform_values=up_values,
                              users_area_labels=ua_labels,
