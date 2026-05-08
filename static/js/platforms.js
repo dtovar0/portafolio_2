@@ -322,7 +322,7 @@
             columns: [
                 { 
                     data: 'id', 
-                    width: '35px', 
+                    width: '3%', 
                     orderable: false,
                     className: 'text-center',
                     render: (data) => `
@@ -332,7 +332,7 @@
                 },
                 { 
                     data: null, 
-                    width: '45px',
+                    width: '5%',
                     orderable: false,
                     className: 'text-left pl-2',
                     render: (data) => {
@@ -349,7 +349,7 @@
                 },
                 { 
                     data: 'name', 
-                    width: '30%',
+                    width: '25%',
                     className: 'text-left',
                     render: (data) => `
                         <div class="flex flex-col">
@@ -360,11 +360,11 @@
                     data: 'description', 
                     width: '35%',
                     className: 'text-left',
-                    render: (data) => `<div class="text-[12px] text-label/60 font-bold line-clamp-2">${data || '-'}</div>` 
+                    render: (data) => `<div class="text-[12px] text-label/60 font-bold line-clamp-1">${data || '-'}</div>` 
                 },
                 { 
                     data: 'users_count', 
-                    width: '80px',
+                    width: '10%',
                     className: 'text-left pl-4',
                     render: (data) => `
                         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-surface-container text-label/60 font-black text-[10px] uppercase">
@@ -373,7 +373,7 @@
                 },
                 { 
                     data: 'status', 
-                    width: '100px',
+                    width: '10%',
                     className: 'text-left pl-4',
                     render: (data) => {
                         const cls = data === 'Activo' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500';
@@ -382,7 +382,7 @@
                 },
                 { 
                     data: null, 
-                    width: '120px',
+                    width: '12%',
                     orderable: false,
                     className: 'text-center',
                     render: (data) => {
@@ -427,6 +427,12 @@
             },
             drawCallback: function(settings) {
                 renderGhostRows(settings, 7);
+            },
+            initComplete: function() {
+                // Ensure table fits perfectly after initialization
+                setTimeout(() => {
+                    if (this.api()) this.api().columns.adjust();
+                }, 100);
             }
         });
 

@@ -161,10 +161,10 @@
     </div>
 
     <!-- Drill-down View Layer (Enterprise Style - Absolute Full Height) -->
-    <div id="drillDownView" class="hidden flex-1 flex flex-col p-0 m-0 animate-in slide-in-from-bottom-4 duration-500">
-        <div class="flex-1 bg-panel-fill border border-panel-border rounded-xl flex flex-col overflow-hidden">
-            <!-- Toolbar Integrada: Buscador + Botones -->
-            <div class="px-6 py-5 flex items-center justify-between gap-6 border-b border-panel-border/30 bg-panel-header/20">
+    <div id="drillDownView" class="hidden flex-1 min-h-0 flex flex-col p-6 animate-in slide-in-from-bottom-4 duration-500">
+        <div class="flex-1 min-h-0 bg-panel-fill border border-panel-border rounded-xl flex flex-col overflow-hidden shadow-2xl">
+            <!-- PANEL HEADER (Toolbar Integrada) -->
+            <header class="flex-shrink-0 px-6 py-5 flex items-center justify-between gap-6 border-b border-panel-border/30 bg-panel-header/20">
                 <div class="flex-1 relative group max-w-xl">
                     <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-label/30 group-focus-within:text-primary transition-colors"></i>
                     <input type="text" placeholder="Filtrar servicios digitales por nombre, estado o descripción..." id="platformSearchSub" 
@@ -186,23 +186,23 @@
                         <span>Drive</span>
                     </button>
                 </div>
-            </div>
+            </header>
 
-            <!-- Table Container: Zebra Striped & High Fidelity -->
-            <div class="flex-1 overflow-hidden flex flex-col">
-                <div class="w-full flex-1 min-h-0 flex flex-col overflow-x-auto custom-scrollbar">
-                    <table class="modern-table w-full text-left" id="modern-table">
+            <!-- PANEL BODY -->
+            <main class="flex-1 min-h-0 flex flex-col overflow-hidden p-4">
+                <div class="flex-1 min-h-0 flex flex-col">
+                    <table class="modern-table w-full text-left table-fixed" id="modern-table">
                         <thead>
                             <tr class="text-label border-b border-panel-border">
-                                <th class="w-[35px] py-4 bg-surface-container/80 text-center">
+                                <th class="w-[3%] py-4 bg-surface-container/80 text-center">
                                     <input type="checkbox" id="selectAllPlatforms" class="w-4 h-4 rounded border-panel-border bg-panel-fill text-primary cursor-pointer mx-auto">
                                 </th>
-                                <th class="w-[45px] text-[11px] font-black uppercase tracking-widest py-4 bg-surface-container/80 text-left pl-2">Icono</th>
-                                <th class="w-[30%] text-[11px] font-black uppercase tracking-widest py-4 bg-surface-container/80 text-left pl-4">Nombre</th>
+                                <th class="w-[5%] text-[11px] font-black uppercase tracking-widest py-4 bg-surface-container/80 text-left pl-2">Icono</th>
+                                <th class="w-[25%] text-[11px] font-black uppercase tracking-widest py-4 bg-surface-container/80 text-left pl-4">Nombre</th>
                                 <th class="w-[35%] text-[11px] font-black uppercase tracking-widest py-4 bg-surface-container/80 text-left pl-4">Descripción</th>
-                                <th class="w-[80px] text-[11px] font-black uppercase tracking-widest py-4 bg-surface-container/80 text-left pl-4">Usuarios</th>
-                                <th class="w-[100px] text-[11px] font-black uppercase tracking-widest py-4 bg-surface-container/80 text-left pl-4">Estado</th>
-                                <th class="w-[120px] text-[11px] font-black uppercase tracking-widest py-4 bg-surface-container/80 text-center">Acciones</th>
+                                <th class="w-[10%] text-[11px] font-black uppercase tracking-widest py-4 bg-surface-container/80 text-left pl-4">Usuarios</th>
+                                <th class="w-[10%] text-[11px] font-black uppercase tracking-widest py-4 bg-surface-container/80 text-left pl-4">Estado</th>
+                                <th class="w-[12%] text-[11px] font-black uppercase tracking-widest py-4 bg-surface-container/80 text-center">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="drillDownTableBody" class="divide-y divide-panel-border/20">
@@ -210,10 +210,9 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </main>
         </div>
     </div>
-</div>
 
 <!-- Modal: Registro de Unidad Drive (1:1 Areas Design) -->
 <div id="platformModal" class="nexus-modal hidden fixed inset-0 z-[110] items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" role="dialog" aria-modal="true">
