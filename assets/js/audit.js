@@ -3,8 +3,6 @@
  *   < 900px → 9 rows   >= 900px → 10 rows
  */
 function getPageLength() {
-    const h = window.innerHeight;
-    if (h < 900) return 9;
     return 10;
 }
 

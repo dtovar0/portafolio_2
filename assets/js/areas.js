@@ -56,8 +56,7 @@ const colorsPalette = [
 ];
 
 function getPageLength() {
-    const h = window.innerHeight;
-    return h < 900 ? 9 : 10;
+    return 10;
 }
 
 document.addEventListener('DOMContentLoaded', () => {

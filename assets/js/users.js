@@ -144,8 +144,6 @@ function updateUserAreasHiddenInput(prefix) {
 // ─── Search & Render ───
 
 function getPageLength() {
-    const h = window.innerHeight;
-    if (h < 900) return 9;
     return 10;
 }
 
