@@ -48,3 +48,16 @@ Cualquier intento de crear una ruta `/api/v1` o de importar servicios de ejecuci
 
 ### Impacto
 Arquitectura Global, Documentación Técnica, Estructura de Base de Datos.
+
+---
+
+## Gestión Organizacional
+
+### Regla: Segregación de Gestión de Accesos
+La gestión de usuarios vinculados a un área debe realizarse de forma independiente a la modificación de los datos básicos del área (nombre, descripción, imagen). Esto garantiza que los cambios en la identidad visual o funcional no afecten accidentalmente los permisos de acceso.
+
+### Ejemplo
+Al modificar un área, el paso de selección de usuarios ya no está presente. Para gestionar quién tiene acceso, se utiliza el botón "Accesos" que abre un modal dedicado con una picklist de usuarios.
+
+### Impacto
+UI (Módulo de Áreas), Backend (API de Accesos).

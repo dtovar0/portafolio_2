@@ -40,6 +40,10 @@
 
                     <!-- Botones de Acción Globales -->
                     <div class="flex items-center gap-2">
+                        <button id="btnAccessArea" class="nexus-btn nexus-btn-secondary !text-primary !border-primary/20 disabled:opacity-30 disabled:pointer-events-none" disabled>
+                            <i class="fas fa-user-shield"></i>
+                            <span>Accesos</span>
+                        </button>
                         <button id="btnEditArea" class="nexus-btn nexus-btn-secondary !text-label !border-panel-border disabled:opacity-30 disabled:pointer-events-none" disabled>
                             <i class="fas fa-edit"></i>
                             <span>Modificar</span>
@@ -263,11 +267,6 @@
                         <div class="w-10 h-10 rounded-full bg-panel-border text-label/40 flex items-center justify-center font-black text-sm ring-4 ring-panel-fill transition-all">2</div>
                         <span class="text-[9px] font-black uppercase tracking-widest text-label/40">Imagen</span>
                     </div>
-                    <!-- Step 3 -->
-                    <div class="edit-step-item flex flex-col items-center gap-2 z-10" data-step="3">
-                        <div class="w-10 h-10 rounded-full bg-panel-border text-label/40 flex items-center justify-center font-black text-sm ring-4 ring-panel-fill transition-all">3</div>
-                        <span class="text-[9px] font-black uppercase tracking-widest text-label/40">Usuarios</span>
-                    </div>
                 </div>
             </div>
 
@@ -314,40 +313,6 @@
                         <input type="hidden" id="editAreaColor" value="#6366f1">
                     </div>
                 </div>
-
-                <!-- STEP 3: USERS (PICKLIST) -->
-                <div id="editStepSection3" class="edit-step-section hidden">
-                    <div class="picklist-modern-container flex gap-4 h-[380px]">
-                        <!-- Available -->
-                        <div class="flex-1 flex flex-col border border-panel-border rounded-2xl overflow-hidden bg-surface-container/10">
-                            <div class="bg-surface-container/30 px-4 py-2 border-b border-panel-border flex items-center justify-between">
-                                <span class="text-[10px] font-black text-label/60 uppercase">Disponibles</span>
-                                <i class="fas fa-users text-xs text-label/30"></i>
-                            </div>
-                            <div id="editAvailableUsersList" class="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
-                                <!-- JS -->
-                            </div>
-                        </div>
-                        
-                        <!-- Divider -->
-                        <div class="flex flex-col justify-center items-center gap-2">
-                            <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs shadow-sm">
-                                <i class="fas fa-exchange-alt"></i>
-                            </div>
-                        </div>
-
-                        <!-- Selected -->
-                        <div class="flex-1 flex flex-col border border-primary/20 rounded-2xl overflow-hidden bg-primary/5">
-                            <div class="bg-primary/10 px-4 py-2 border-b border-primary/20 flex items-center justify-between">
-                                <span class="text-[10px] font-black text-primary uppercase">Asignados</span>
-                                <i class="fas fa-check-circle text-xs text-primary/60"></i>
-                            </div>
-                            <div id="editSelectedUsersList" class="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
-                                <!-- JS -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <footer class="modal-footer">
@@ -356,7 +321,7 @@
                     <button type="button" id="btnCancelEditArea" onclick="closeEditAreaModal()" class="nexus-btn nexus-btn-secondary">
                         Cancelar
                     </button>
-                    <!-- Anterior (Paso 2 y 3) -->
+                    <!-- Anterior (Paso 2) -->
                     <button type="button" id="btnEditPrevStep" onclick="changeEditStep(currentEditStep - 1)" class="nexus-btn nexus-btn-secondary hidden">
                         <i class="fas fa-chevron-left"></i>
                         <span>Anterior</span>
@@ -375,6 +340,69 @@
                 </div>
             </footer>
         </form>
+    </div>
+</div>
+
+<!-- Modal de Accesos (Picklist) -->
+<div id="accessModal" class="nexus-modal hidden fixed inset-0 z-[110] items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+    <div class="nexus-modal-content w-full max-w-2xl bg-panel-fill border border-panel-border rounded-xl shadow-2xl overflow-hidden shadow-black/50 ring-1 ring-white/10">
+        <div class="flex flex-col h-full overflow-hidden">
+            <input type="hidden" id="accessAreaId">
+            <div class="p-6 border-b border-panel-border flex items-center justify-between bg-surface-container/30">
+                <div>
+                    <h3 class="text-xl font-black text-primary uppercase tracking-tighter italic">Gestión de Accesos</h3>
+                    <p id="accessAreaNameLabel" class="text-[10px] text-label font-bold uppercase tracking-widest mt-0.5">Área: -</p>
+                </div>
+                <button type="button" onclick="closeAccessModal()" class="p-2 hover:bg-surface-container rounded-xl transition-all"><i class="fas fa-times text-label"></i></button>
+            </div>
+
+            <div class="p-8 min-h-[400px] flex flex-col overflow-hidden">
+                <div class="picklist-modern-container flex gap-4 flex-1 h-full min-h-[350px]">
+                    <!-- Available -->
+                    <div class="flex-1 flex flex-col border border-panel-border rounded-2xl overflow-hidden bg-surface-container/10">
+                        <div class="bg-surface-container/30 px-4 py-2 border-b border-panel-border flex items-center justify-between">
+                            <span class="text-[10px] font-black text-label/60 uppercase">Usuarios Disponibles</span>
+                            <i class="fas fa-users text-xs text-label/30"></i>
+                        </div>
+                        <div id="accessAvailableUsersList" class="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
+                            <!-- JS -->
+                        </div>
+                    </div>
+                    
+                    <!-- Divider -->
+                    <div class="flex flex-col justify-center items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs shadow-sm">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                    </div>
+
+                    <!-- Selected -->
+                    <div class="flex-1 flex flex-col border border-primary/20 rounded-2xl overflow-hidden bg-primary/5">
+                        <div class="bg-primary/10 px-4 py-2 border-b border-primary/20 flex items-center justify-between">
+                            <span class="text-[10px] font-black text-primary uppercase">Usuarios con Acceso</span>
+                            <i class="fas fa-check-circle text-xs text-primary/60"></i>
+                        </div>
+                        <div id="accessSelectedUsersList" class="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
+                            <!-- JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="modal-footer">
+                <div class="footer-left">
+                    <button type="button" onclick="closeAccessModal()" class="nexus-btn nexus-btn-secondary">
+                        Cerrar
+                    </button>
+                </div>
+                <div class="footer-right">
+                    <button type="button" onclick="saveAccessChanges()" class="nexus-btn nexus-btn-primary px-10 gap-3">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Guardar Accesos</span>
+                    </button>
+                </div>
+            </footer>
+        </div>
     </div>
 </div>
 {% endblock %}

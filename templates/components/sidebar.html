@@ -29,97 +29,75 @@
             <p class="text-[12px] font-black text-label/40 uppercase tracking-[0.2em] px-3 mb-2 sidebar-text">Inicio</p>
             <hr class="sidebar-divider">
 
-            {% if current_user.role == 'administrador' %}
-            <a href="{{ url_for('core.index') }}" title="Control Global" data-nx-tooltip="Dashboard de Gestión"
-               class="nav-item {% if request.endpoint == 'core.index' %}nav-item-active{% endif %} gap-4 px-4 py-3 text-label hover:text-primary hover:bg-primary/5 transition-all group">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                <span class="sidebar-text text-sm font-bold whitespace-nowrap">Dashboard Control</span>
-            </a>
-
-            <a href="{{ url_for('core.portal') }}" title="Portal de Catálogo" data-nx-tooltip="Vista del Usuario"
-               class="nav-item {% if request.endpoint == 'core.portal' %}nav-item-active{% endif %} gap-4 px-4 py-3 text-label hover:text-primary hover:bg-primary/5 transition-all group">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
-                <span class="sidebar-text text-sm font-bold whitespace-nowrap">Portal Aplicaciones</span>
-            </a>
-
-            {% else %}
             <a href="{{ url_for('core.index') }}" title="Dashboard" data-nx-tooltip="Dashboard"
                class="nav-item {% if request.endpoint == 'core.index' %}nav-item-active{% endif %} gap-4 px-4 py-3 text-label hover:text-primary hover:bg-primary/5 transition-all group">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                 <span class="sidebar-text text-sm font-bold whitespace-nowrap">Dashboard</span>
             </a>
-            {% endif %}
 
-            <a href="{{ url_for('platforms_module.platforms_list') }}" title="Plataformas" data-nx-tooltip="Plataformas"
-               class="nav-item {% if request.endpoint == 'platforms_module.platforms_list' %}nav-item-active{% endif %} gap-4 px-4 py-3 text-label hover:text-primary hover:bg-primary/5 transition-all group">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
-                <span class="sidebar-text text-sm font-bold whitespace-nowrap">Plataformas</span>
-            </a>
- 
-            <a href="{{ url_for('requests_module.requests_list') }}" title="Solicitudes" data-nx-tooltip="Solicitudes"
-               class="nav-item {% if request.endpoint == 'requests_module.requests_list' %}nav-item-active{% endif %} gap-4 px-4 py-3 text-label hover:text-primary hover:bg-primary/5 transition-all group">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                <span class="sidebar-text text-sm font-bold whitespace-nowrap">Solicitudes</span>
-            </a>
-
-            <a href="{{ url_for('drive.index') }}" title="Nexus Drive" data-nx-tooltip="Gestión de Archivos"
+            <!-- SECCIÓN DE PORTALES (NIVEL USUARIO) -->
+            <p class="text-[12px] font-black text-label/40 uppercase tracking-[0.2em] px-3 mb-2 mt-6 sidebar-text">Ecosistemas</p>
+            <hr class="sidebar-divider">
+            
+            <a href="{{ url_for('drive.index') }}" title="Nexus Drive" data-nx-tooltip="Portal de Archivos"
                class="nav-item {% if request.endpoint == 'drive.index' %}nav-item-active{% endif %} gap-4 px-4 py-3 text-label hover:text-primary hover:bg-primary/5 transition-all group">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
-                <span class="sidebar-text text-sm font-bold whitespace-nowrap">Nexus Drive</span>
+                <span class="sidebar-text text-sm font-bold whitespace-nowrap text-primary">Nexus Drive</span>
             </a>
 
-            <p class="text-[12px] font-black text-label/40 uppercase tracking-[0.2em] px-3 mb-2 mt-8 sidebar-text">Operaciones</p>
+
+            <!-- SECCIÓN ADMINISTRATIVA (SOLO ADMIN) -->
+            {% if current_user.role == 'administrador' %}
+            <p class="text-[12px] font-black text-label/40 uppercase tracking-[0.2em] px-3 mb-2 mt-8 sidebar-text">Gestión Master</p>
             <hr class="sidebar-divider">
 
-            <a href="{{ url_for('areas_module.areas_list') }}" title="Áreas" data-nx-tooltip="Áreas"
-               class="nav-item {% if request.endpoint == 'areas_module.areas_list' %}nav-item-active{% endif %} gap-4 px-4 py-3 text-label hover:text-primary hover:bg-primary/5 transition-all group">
+            <a href="{{ url_for('drive_platforms.index') }}" title="Gestión de Unidades" data-nx-tooltip="Configurar Almacenamiento"
+               class="nav-item {% if request.endpoint == 'drive_platforms.index' %}nav-item-active{% endif %} gap-4 px-4 py-3 text-label hover:text-primary hover:bg-primary/5 transition-all group">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                <span class="sidebar-text text-sm font-bold whitespace-nowrap">Áreas</span>
+                <span class="sidebar-text text-sm font-bold whitespace-nowrap">Unidades de Drive</span>
             </a>
 
 
+            <a href="{{ url_for('areas_module.areas_list') }}" title="Estructura de Áreas" data-nx-tooltip="Configurar Áreas"
+               class="nav-item {% if request.endpoint == 'areas_module.areas_list' %}nav-item-active{% endif %} gap-4 px-4 py-3 text-label hover:text-primary hover:bg-primary/5 transition-all group">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                <span class="sidebar-text text-sm font-bold whitespace-nowrap">Áreas Master</span>
+            </a>
 
-            <!-- Administrators Section -->
-            {% if current_user.role == 'administrador' %}
-            <a href="{{ url_for('users_module.users_list') }}" title="Usuarios" data-nx-tooltip="Directorio de Usuarios"
+            <a href="{{ url_for('users_module.users_list') }}" title="Directorio" data-nx-tooltip="Gestión de Usuarios"
                class="nav-item {% if request.endpoint == 'users_module.users_list' %}nav-item-active{% endif %} gap-4 px-4 py-3 text-label hover:text-primary hover:bg-primary/5 transition-all group">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                 <span class="sidebar-text text-sm font-bold whitespace-nowrap">Usuarios</span>
             </a>
 
-            <p class="text-[12px] font-black text-label/40 uppercase tracking-[0.2em] px-3 mb-2 mt-8 sidebar-text">Configuración</p>
+            <p class="text-[12px] font-black text-label/40 uppercase tracking-[0.2em] px-3 mb-2 mt-8 sidebar-text">Configuración Global</p>
             <hr class="sidebar-divider">
             
-            <a href="{{ url_for('settings.index') }}" title="Ajustes" data-nx-tooltip="Ajustes"
+            <a href="{{ url_for('settings.index') }}" title="Ajustes" data-nx-tooltip="Ajustes del Sistema"
                class="nav-item {% if request.endpoint == 'settings.index' %}nav-item-active{% endif %} gap-4 px-4 py-3 text-label hover:text-primary hover:bg-primary/5 transition-all group">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"></path></svg>
                 <span class="sidebar-text text-sm font-bold whitespace-nowrap">Ajustes</span>
             </a>
 
-            <a href="{{ url_for('auth.index') }}" title="Autenticación" data-nx-tooltip="Parámetros de Auth / LDAP"
+            <a href="{{ url_for('auth.index') }}" title="Seguridad" data-nx-tooltip="Autenticación y LDAP"
                class="nav-item {% if request.endpoint == 'auth.index' %}nav-item-active{% endif %} gap-4 px-4 py-3 text-label hover:text-primary hover:bg-primary/5 transition-all group">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                <span class="sidebar-text text-sm font-bold whitespace-nowrap">Autenticación</span>
+                <span class="sidebar-text text-sm font-bold whitespace-nowrap">Seguridad</span>
             </a>
 
-
-
-            <a href="{{ url_for('notifications.index') }}" title="Notificación" data-nx-tooltip="Notificaciones"
+            <a href="{{ url_for('notifications.index') }}" title="Notificaciones" data-nx-tooltip="Alertas y SMTP"
                class="nav-item {% if request.endpoint == 'notifications.index' %}nav-item-active{% endif %} gap-4 px-4 py-3 text-label hover:text-primary hover:bg-primary/5 transition-all group">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-                <span class="sidebar-text text-sm font-bold whitespace-nowrap">Notificación</span>
+                <span class="sidebar-text text-sm font-bold whitespace-nowrap">Notificaciones</span>
             </a>
 
-            <a href="{{ url_for('audit.index') }}" title="Historial" data-nx-tooltip="{{ 'Auditoría' if current_user.role == 'administrador' else 'Mi Historial' }}"
+            <a href="{{ url_for('audit.index') }}" title="Trazabilidad" data-nx-tooltip="Auditoría de Acciones"
                class="nav-item {% if request.endpoint == 'audit.index' %}nav-item-active{% endif %} gap-4 px-4 py-3 text-label hover:text-primary hover:bg-primary/5 transition-all group">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                <span class="sidebar-text text-sm font-bold whitespace-nowrap">
-                    {{ 'Auditoría' if current_user.role == 'administrador' else 'Mi Historial' }}
-                </span>
+                <span class="sidebar-text text-sm font-bold whitespace-nowrap">Auditoría</span>
             </a>
-
-
             {% endif %}
+
         </nav>
 
         <!-- Sidebar Footer: User Profile -->

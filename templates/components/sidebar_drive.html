@@ -1,0 +1,72 @@
+<aside id="sidebar" class="w-72 bg-panel-header/50 backdrop-blur-xl border-r border-panel-border h-full flex flex-col transition-all duration-300 relative z-40 group/sidebar">
+    <!-- Brand / Logo Section -->
+    <div class="h-16 flex-shrink-0 flex items-center px-6 gap-4 border-b border-panel-border/30 bg-surface-container/10">
+        <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 group-hover/sidebar:rotate-12 transition-transform duration-500">
+            <i class="fas fa-cloud text-white text-xl"></i>
+        </div>
+        <div class="flex flex-col sidebar-text">
+            <span class="text-lg font-black text-primary tracking-tighter leading-none italic">NEXUS<span class="text-label ml-1">DRIVE</span></span>
+            <span class="text-[9px] font-black text-label/40 uppercase tracking-[0.2em] mt-1">Asset Explorer</span>
+        </div>
+    </div>
+
+    <!-- Navigation Area -->
+    <nav class="flex-1 overflow-y-auto px-4 py-6 custom-scrollbar no-scrollbar flex flex-col gap-1">
+        
+        <!-- 1. DASHBOARD -->
+        <p class="text-[10px] font-black text-label/30 uppercase tracking-[0.2em] px-3 mb-2 sidebar-text">Resumen</p>
+        <a href="{{ url_for('drive.dashboard') }}" title="Dashboard"
+           class="nav-item {% if request.endpoint == 'drive.dashboard' %}nav-item-active{% endif %} gap-4 px-4 py-3 text-label hover:text-primary hover:bg-primary/5 transition-all group">
+            <i class="fas fa-th-large text-lg opacity-40 group-hover:opacity-100 transition-all"></i>
+            <span class="sidebar-text text-sm font-bold whitespace-nowrap">Dashboard</span>
+        </a>
+
+        <div class="my-4 sidebar-divider"></div>
+
+        <!-- 2. FAVORITOS -->
+        <p class="text-[10px] font-black text-label/30 uppercase tracking-[0.2em] px-3 mb-2 sidebar-text">Acceso Rápido</p>
+        <a href="{{ url_for('drive.favorites') }}" title="Favoritos"
+           class="nav-item {% if request.endpoint == 'drive.favorites' %}nav-item-active{% endif %} gap-4 px-4 py-3 text-label hover:text-primary hover:bg-primary/5 transition-all group">
+            <i class="fas fa-star text-lg opacity-40 group-hover:opacity-100 transition-all text-primary/60"></i>
+            <span class="sidebar-text text-sm font-bold whitespace-nowrap">Favoritos</span>
+        </a>
+
+        <div class="my-4 sidebar-divider"></div>
+
+        <!-- 3. MENU DINAMICO (ÁREAS DEL USUARIO) -->
+        <p class="text-[10px] font-black text-label/30 uppercase tracking-[0.2em] px-3 mb-2 sidebar-text">Explorador Áreas</p>
+        
+        <div class="flex flex-col gap-1">
+            {% for area in current_user.areas %}
+            <a href="{{ url_for('drive.explorer') }}?area={{ area.name }}"
+                    class="nav-item {% if request.args.get('area') == area.name %}nav-item-active{% endif %} gap-4 px-4 py-3 text-label/70 hover:text-primary hover:bg-primary/5 transition-all group text-left w-full">
+                <div class="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] transition-all group-hover:scale-110 shadow-sm" 
+                     style="background-color: {{ area.color or '#6366f1' }}15; color: {{ area.color or '#6366f1' }}; border: 1px solid {{ area.color or '#6366f1' }}20;">
+                    <i class="fas {{ area.icon if area.icon.startswith('fa-') else 'fa-' + area.icon }}"></i>
+                </div>
+                <span class="sidebar-text text-sm font-bold truncate">{{ area.name }}</span>
+            </a>
+            {% endfor %}
+
+            {% if current_user.areas|length == 0 %}
+            <div class="px-4 py-3 text-[10px] text-label/30 font-bold uppercase italic text-center">
+                Sin áreas asignadas
+            </div>
+            {% endif %}
+        </div>
+
+    </nav>
+
+    <!-- User Profile Footer -->
+    <div class="p-4 border-t border-panel-border/30 bg-surface-container/5">
+        <div class="flex items-center gap-4 px-3 py-3 rounded-2xl bg-surface-container/50 border border-panel-border">
+            <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-black">
+                {{ current_user.nombre[0]|upper if current_user.nombre else 'U' }}
+            </div>
+            <div class="flex flex-col min-w-0 sidebar-text">
+                <span class="text-xs font-black text-label truncate uppercase italic">{{ current_user.nombre or 'Usuario' }}</span>
+                <span class="text-[9px] font-bold text-label/40 truncate">{{ current_user.email }}</span>
+            </div>
+        </div>
+    </div>
+</aside>

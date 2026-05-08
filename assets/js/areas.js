@@ -10,7 +10,9 @@ let selectedUserIdList = [];
 
 // Wizard State (Edit)
 let currentEditStep = 1;
-let selectedEditUserIdList = [];
+
+// Access Modal State
+let selectedAccessUserIdList = [];
 
 // Configuration
 const iconsMap = {
@@ -87,11 +89,50 @@ function initAreasModule() {
         renderAreasTable();
     });
 
+    // --- GUARDIÁN DE INTEGRIDAD DE NOMBRES (ÁREAS) ---
+    const areaNameInput = document.getElementById('areaName');
+    if (areaNameInput) {
+        areaNameInput.addEventListener('input', function(e) {
+            const originalValue = this.value;
+            let sanitizedValue = originalValue.replace(/[/*?:"<>|#%&{}+@!`=]/g, '-');
+            sanitizedValue = sanitizedValue.replace(/\.\./g, '');
+            
+            if (originalValue !== sanitizedValue) {
+                this.value = sanitizedValue;
+                
+                // Notificación Toast de Seguridad
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+
+                Toast.fire({
+                    icon: 'warning',
+                    title: 'Seguridad Nexus',
+                    text: 'Nombre corregido por integridad de sistema.',
+                    background: 'rgba(15, 23, 42, 0.95)',
+                    color: '#fff'
+                });
+            }
+        });
+    }
+
     // Acción Global: Modificar
     document.getElementById('btnEditArea')?.addEventListener('click', () => {
         if (selectedAreas.length === 1) {
             const area = currentAreas.find(a => a.id === selectedAreas[0]);
             if (area) editArea(area.id);
+        }
+    });
+
+    // Acción Global: Accesos
+    document.getElementById('btnAccessArea')?.addEventListener('click', () => {
+        if (selectedAreas.length === 1) {
+            const area = currentAreas.find(a => a.id === selectedAreas[0]);
+            if (area) openAccessModal(area.id);
         }
     });
 
@@ -183,10 +224,12 @@ function initAreasModule() {
 
 function updateActionButtonsAreas() {
     const btnEdit = document.getElementById('btnEditArea');
+    const btnAccess = document.getElementById('btnAccessArea');
     const btnDelete = document.getElementById('btnDeleteArea');
     const count = selectedAreas.length;
 
     if (btnEdit) btnEdit.disabled = count !== 1;
+    if (btnAccess) btnAccess.disabled = count !== 1;
     if (btnDelete) btnDelete.disabled = count === 0;
 
     const selectAllCheckbox = document.getElementById('selectAllAreas');
@@ -223,7 +266,7 @@ function renderAreasTable() {
         
         tbody.innerHTML += `
             <tr class="group hover:bg-primary/5 transition-all cursor-pointer border-b border-panel-border/30 last:border-none ${isSelected ? 'bg-primary/5' : ''}" 
-                onclick="toggleAreaSelection(${area.id}, ${!isSelected})">
+                onclick="editArea(${area.id})">
                 <td class="text-center" style="border-left:3px solid ${isSelected ? 'rgb(var(--color-primary))' : 'transparent'};padding:0 0.5rem;" onclick="event.stopPropagation()">
                     <div class="flex items-center justify-center">
                         <input type="checkbox" class="area-checkbox w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" 
@@ -445,7 +488,7 @@ function changeStep(step) {
  * STEP NAVIGATION (EDIT)
  */
 function changeEditStep(step) {
-    if (step < 1 || step > 3) return;
+    if (step < 1 || step > 2) return;
     
     if (step > currentEditStep && currentEditStep === 1) {
         const name = document.getElementById('editAreaName').value.trim();
@@ -456,7 +499,7 @@ function changeEditStep(step) {
     document.querySelectorAll('.edit-step-section').forEach((s, idx) => s.classList.toggle('hidden', idx !== (step - 1)));
     
     const progress = document.getElementById('editStepProgress');
-    if (progress) progress.style.width = `${(step - 1) * 50}%`;
+    if (progress) progress.style.width = `${(step - 1) * 100}%`;
 
     document.querySelectorAll('.edit-step-item').forEach((item, idx) => {
         const itemStep = idx + 1;
@@ -488,17 +531,11 @@ function changeEditStep(step) {
         btnNext.classList.remove('hidden'); 
         btnSave.classList.add('hidden'); 
     }
-    else if (step === 3) { 
+    else if (step === 2) { 
         btnCancel.classList.add('hidden');
         btnPrev.classList.remove('hidden'); 
         btnNext.classList.add('hidden'); 
         btnSave.classList.remove('hidden'); 
-    }
-    else { 
-        btnCancel.classList.add('hidden');
-        btnPrev.classList.remove('hidden'); 
-        btnNext.classList.remove('hidden'); 
-        btnSave.classList.add('hidden'); 
     }
 }
 
@@ -617,18 +654,100 @@ function editArea(id) {
     document.getElementById('editAreaIcon').value = area.icon || 'box';
     document.getElementById('editAreaColor').value = area.color || '#6366f1';
 
-    selectedEditUserIdList = [];
+    changeEditStep(1);
+    renderPickers();
+}
+
+/**
+ * ACCESS MODAL LOGIC
+ */
+function openAccessModal(id) {
+    const area = currentAreas.find(a => a.id === id);
+    if (!area) return;
+
+    openModal('accessModal');
+    document.getElementById('accessAreaId').value = area.id;
+    document.getElementById('accessAreaNameLabel').textContent = `Área: ${area.name}`;
+    
+    selectedAccessUserIdList = [];
+    
+    // Fetch users for this area
     fetch(`/admin/areas/users/${id}`)
         .then(res => res.json())
         .then(data => {
             if (data.status === 'success') {
-                selectedEditUserIdList = data.selected_ids || [];
-                renderUserPicklist(true);
+                selectedAccessUserIdList = data.selected_ids || [];
+                renderAccessPicklist();
             }
         });
+}
 
-    changeEditStep(1);
-    renderPickers();
+function closeAccessModal() {
+    closeModal('accessModal');
+}
+
+function renderAccessPicklist() {
+    const availList = document.getElementById('accessAvailableUsersList');
+    const selList = document.getElementById('accessSelectedUsersList');
+    if (!availList || !selList) return;
+
+    availList.innerHTML = ''; selList.innerHTML = '';
+
+    ALL_USERS.forEach(user => {
+        const isSelected = selectedAccessUserIdList.includes(user.id);
+        const item = document.createElement('button'); item.type = 'button';
+        item.className = "w-full flex items-center justify-between p-3 rounded-xl transition-all group " + (isSelected ? "bg-primary/10 hover:bg-primary/20" : "bg-panel-fill/40 hover:bg-surface-container/60");
+        item.innerHTML = `
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg ${isSelected ? 'bg-primary text-white' : 'bg-label/10 text-label/60'} flex items-center justify-center text-xs">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="text-left font-black uppercase text-label leading-none">
+                    <div class="text-[11px] mb-1">${user.name}</div>
+                    <div class="text-[9px] text-label/40 tracking-tighter">${user.email}</div>
+                </div>
+            </div>
+            <i class="fas ${isSelected ? 'fa-minus-circle text-primary' : 'fa-plus-circle text-label/20 group-hover:text-primary'} text-sm transition-colors"></i>
+        `;
+        item.onclick = () => {
+            const idx = selectedAccessUserIdList.indexOf(user.id);
+            if (idx === -1) selectedAccessUserIdList.push(user.id); else selectedAccessUserIdList.splice(idx, 1);
+            renderAccessPicklist();
+        };
+        if (isSelected) selList.appendChild(item); else availList.appendChild(item);
+    });
+}
+
+async function saveAccessChanges() {
+    const id = document.getElementById('accessAreaId').value;
+    if (!id) return;
+
+    const procModal = document.getElementById('processingModal');
+    if (procModal) {
+        procModal.classList.remove('hidden');
+        procModal.classList.add('flex');
+        setTimeout(() => procModal.classList.add('show'), 50);
+    }
+
+    try {
+        const response = await fetch(`/admin/areas/users/update/${id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_ids: selectedAccessUserIdList })
+        });
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            startSuccessCountdown("Los accesos del área han sido actualizados exitosamente.");
+            closeAccessModal();
+        } else {
+            if (procModal) procModal.classList.add('hidden');
+            showToast(data.message, 'error');
+        }
+    } catch (error) {
+        if (procModal) procModal.classList.add('hidden');
+        showToast('Error de conexión con el servidor', 'error');
+    }
 }
 
 async function saveArea() {
@@ -648,7 +767,8 @@ async function saveArea() {
 
     const icon = document.getElementById(`${prefix}Icon`).value;
     const color = document.getElementById(`${prefix}Color`).value;
-    const user_ids = editId ? selectedEditUserIdList : selectedUserIdList;
+    // Only include user_ids if creating, as editing is now handled by the access modal
+    const user_ids = editId ? null : selectedUserIdList;
 
     const procModal = document.getElementById('processingModal');
     if (procModal) {

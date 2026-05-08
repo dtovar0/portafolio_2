@@ -43,6 +43,8 @@ def create_app():
     from datetime import timedelta
     from flask import session
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
+    app.config['SESSION_COOKIE_NAME'] = 'nexus_session'
+    app.config['WTF_CSRF_TIME_LIMIT'] = None # Evita expiración de tokens por tiempo en dev
     
     @app.before_request
     def make_session_permanent():
@@ -90,10 +92,8 @@ def create_app():
     from app.modules.auth.routes import auth_bp
     from app.modules.users.routes import users_bp
     from app.modules.areas.routes import areas_bp
-    from app.modules.platforms.routes import platforms_bp
-    from app.modules.requests.routes import requests_bp
-    from app.modules.portal.routes import portal_bp
     from app.modules.drive.routes import drive_bp
+    from app.modules.drive_platforms.routes import drive_platforms_bp
 
 
 
@@ -108,10 +108,8 @@ def create_app():
     app.register_blueprint(notifications_bp)
     app.register_blueprint(users_bp)
     app.register_blueprint(areas_bp)
-    app.register_blueprint(platforms_bp)
-    app.register_blueprint(requests_bp)
-    app.register_blueprint(portal_bp)
     app.register_blueprint(drive_bp)
+    app.register_blueprint(drive_platforms_bp)
 
 
 

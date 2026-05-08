@@ -35,8 +35,8 @@ class User(db.Model, UserMixin):
     last_login_at = db.Column(db.DateTime, nullable=True)
     
     # Relationships
-    areas = db.relationship('Area', secondary='user_areas', backref=db.backref('users', lazy=True))
-    platforms = db.relationship('Platform', secondary='user_platforms', backref=db.backref('users', lazy='dynamic'))
+    areas = db.relationship('Area', secondary='user_areas', backref=db.backref('area_users', lazy=True))
+    platforms = db.relationship('Platform', secondary='user_platforms', backref=db.backref('platform_users', lazy='dynamic'))
     favorites = db.relationship('Platform', secondary='user_favorites', backref=db.backref('favorited_by', lazy='dynamic'))
 
     # User Interface Preferences

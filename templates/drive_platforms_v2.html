@@ -1,0 +1,453 @@
+{% extends "base.html" %}
+
+{% block title %}Catálogo Drive | Nexus Premium{% endblock %}
+
+{% block breadcrumbs %}
+<span class="text-secondary cursor-pointer hover:text-primary transition-colors" onclick="window.location.href='/'">Inicio</span>
+<svg class="w-4 h-4 text-label/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+<span class="text-primary font-bold">Unidades Drive 2</span>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/platforms.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/portal.css') }}">
+<style>
+    /* Nexus Integration Fixes */
+    .drill-down-view.d-none { display: none !important; }
+    .area-catalog-view.d-none { display: none !important; }
+    
+    /* Ensure scrollability within the Nexus main container */
+    #gridView, #drillDownView {
+        height: 100%;
+        overflow-y: auto;
+        padding: 1.5rem;
+        scrollbar-width: thin;
+    }
+    .modern-table tbody tr.odd { background-color: var(--color-surface-container); }
+    .modern-table tbody tr:hover { background-color: var(--color-panel-border); }
+    .modern-table tbody tr.even { background-color: rgba(248, 250, 252, 0.8); }
+    .modern-table tbody tr:hover { background-color: rgba(99, 102, 241, 0.05); }
+    
+    /* Full Height fix for DataTables 2.0 */
+    .dt-container {
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100% !important;
+        min-height: 0;
+    }
+    
+    .dt-layout-row.dt-layout-table {
+        flex: 1;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .dt-layout-row.dt-layout-table > div {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .dt-layout-row:last-child {
+        margin-top: auto !important;
+        padding: 1rem 2rem !important;
+        background: var(--color-bg);
+        border-top: 1px solid var(--color-panel-border);
+    }
+
+    /* Remove standard DataTables padding */
+    .dt-layout-cell {
+        padding: 0 !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="h-full flex flex-col overflow-hidden">
+    <!-- CATÁLOGO PRINCIPAL (Portal Style) -->
+    <div id="gridView" class="flex-1 flex flex-col overflow-hidden animate-in fade-in duration-500 portal-entry">
+        <!-- HERO HEADER -->
+        <div class="portal-hero flex-shrink-0 relative overflow-hidden">
+            <div class="portal-hero-glow"></div>
+            <div class="portal-hero-grid"></div>
+            <div class="portal-hero-bottom-line"></div>
+
+            <div class="relative z-10 px-8 pt-6 pb-4 flex items-center justify-between gap-6">
+                <!-- Buscador (Izquierda) -->
+                <div class="w-[300px] relative group">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-[11px] text-label/30 group-focus-within:text-primary transition-colors z-10 pointer-events-none"></i>
+                    <input type="text" id="platformSearch" placeholder="Buscar área..."
+                           class="w-full bg-surface-container/50 border border-panel-border rounded-xl pl-10 pr-4 py-3 text-sm font-bold outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all shadow-inner" autocomplete="off">
+                </div>
+
+                <!-- KPI Card (Icono + Datos) -->
+                <div class="w-[160px] px-4 py-3 bg-surface-container/30 border border-panel-border rounded-xl flex items-center gap-4 ml-auto shadow-sm">
+                    <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary text-xs flex-shrink-0">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <div class="flex flex-col items-center flex-1">
+                        <span id="totalPlatformsCount" class="text-xl font-black text-primary leading-none">—</span>
+                        <span class="text-[9px] font-bold text-label/40 uppercase tracking-widest mt-1">Áreas</span>
+                    </div>
+                </div>
+            </div>
+            <div class="portal-hero-bottom-line"></div>
+        </div>
+
+        <!-- GRID DE PLATAFORMAS (Portal Layout) -->
+        <main class="flex-1 overflow-hidden px-8 py-6">
+            <div id="platformGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-2 gap-6 h-full">
+                <!-- Inyección dinámica con Tailwind en platforms.js -->
+            </div>
+            
+            <div id="emptyState" class="hidden flex-col items-center justify-center py-32 text-center">
+                <div class="w-16 h-16 rounded-2xl bg-surface-container border border-panel-border flex items-center justify-center text-label/20 mb-4">
+                    <i class="fas fa-search text-2xl"></i>
+                </div>
+                <p class="text-sm font-black text-label/30 uppercase tracking-widest">Sin resultados</p>
+                <p class="text-[11px] text-label/20 font-medium">No se encontraron plataformas bajo este criterio</p>
+            </div>
+        </main>
+
+        <!-- FOOTER PAGINACIÓN (Portal 1:1) -->
+        <footer class="portal-footer flex-shrink-0 flex flex-col sm:flex-row items-center justify-between px-8 py-4 sm:py-3 bg-panel-header/20 border-t border-panel-border gap-4 sm:gap-0">
+            <div class="flex items-center gap-2">
+                <span class="text-[10px] font-black text-label/30 uppercase tracking-widest">Mostrando</span>
+                <span id="itemsShown" class="text-[11px] font-black text-primary">0</span>
+                <span class="text-[10px] font-black text-label/20">—</span>
+                <span id="totalItemsCount" class="text-[11px] font-black text-primary">0</span>
+                <span class="text-[10px] font-black text-label/30 uppercase tracking-widest ml-1">áreas</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="prevPageBtn" class="portal-page-btn" title="Anterior" disabled>
+                    <i class="fas fa-chevron-left text-[9px]"></i>
+                </button>
+                <div class="portal-page-indicator">
+                    <span id="currentPageNum" class="text-[10px] font-black text-label/50">1</span>
+                    <span class="text-[8px] text-label/20 mx-1">/</span>
+                    <span id="totalPagesNum" class="text-[10px] font-black text-label/30">1</span>
+                </div>
+                <button id="nextPageBtn" class="portal-page-btn" title="Siguiente">
+                    <i class="fas fa-chevron-right text-[9px]"></i>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Drill-down View Layer (Enterprise Style - Absolute Full Height) -->
+    <div id="drillDownView" class="hidden flex-1 flex flex-col p-0 m-0 animate-in slide-in-from-bottom-4 duration-500">
+        <div class="flex-1 bg-panel-fill border border-panel-border rounded-xl flex flex-col overflow-hidden">
+            <!-- Toolbar Integrada: Buscador + Botones -->
+            <div class="px-6 py-5 flex items-center justify-between gap-6 border-b border-panel-border/30 bg-panel-header/20">
+                <div class="flex-1 relative group max-w-xl">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-label/30 group-focus-within:text-primary transition-colors"></i>
+                    <input type="text" placeholder="Filtrar servicios digitales por nombre, estado o descripción..." id="platformSearchSub" 
+                           class="w-full h-12 bg-input-bg border-2 border-panel-border/50 rounded-xl pl-10 pr-4 text-sm font-bold text-label outline-none focus:border-input-focus focus:ring-4 focus:ring-primary/10 transition-all">
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <button class="nexus-btn nexus-btn-secondary" id="btnEditPlatform" data-action="platforms-edit-selected" disabled>
+                        <i class="fas fa-edit"></i>
+                        <span>Modificar</span>
+                    </button>
+                    <button class="nexus-btn nexus-btn-error" id="btnDeletePlatform" data-action="platforms-delete-selected" disabled>
+                        <i class="fas fa-trash-alt"></i>
+                        <span>Eliminar</span>
+                    </button>
+                    <div class="w-px h-8 bg-panel-border mx-2"></div>
+                    <button class="nexus-btn nexus-btn-primary" data-action="platforms-open-create-modal">
+                        <i class="fas fa-plus"></i>
+                        <span>Drive</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table Container: Zebra Striped & High Fidelity -->
+            <div class="flex-1 overflow-hidden flex flex-col items-start">
+                <div class="w-full overflow-x-auto custom-scrollbar px-2">
+                    <table class="modern-table w-full text-left" id="modern-table">
+                        <thead>
+                            <tr class="text-label border-b border-panel-border">
+                                <th class="w-[35px] py-4 bg-surface-container/80 text-center">
+                                    <input type="checkbox" id="selectAllPlatforms" class="w-4 h-4 rounded border-panel-border bg-panel-fill text-primary cursor-pointer mx-auto">
+                                </th>
+                                <th class="w-[45px] text-[11px] font-black uppercase tracking-widest py-4 bg-surface-container/80 text-left pl-2">Icono</th>
+                                <th class="w-[30%] text-[11px] font-black uppercase tracking-widest py-4 bg-surface-container/80 text-left pl-4">Nombre</th>
+                                <th class="w-[35%] text-[11px] font-black uppercase tracking-widest py-4 bg-surface-container/80 text-left pl-4">Descripción</th>
+                                <th class="w-[80px] text-[11px] font-black uppercase tracking-widest py-4 bg-surface-container/80 text-left pl-4">Usuarios</th>
+                                <th class="w-[100px] text-[11px] font-black uppercase tracking-widest py-4 bg-surface-container/80 text-left pl-4">Estado</th>
+                                <th class="w-[120px] text-[11px] font-black uppercase tracking-widest py-4 bg-surface-container/80 text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="drillDownTableBody" class="divide-y divide-panel-border/20">
+                            <!-- DataTables Logic with Zebra Striping -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Registro de Unidad Drive (1:1 Areas Design) -->
+<div id="platformModal" class="nexus-modal hidden fixed inset-0 z-[110] items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" role="dialog" aria-modal="true">
+    <div class="nexus-modal-content w-full max-w-2xl bg-panel-fill border border-panel-border rounded-xl shadow-2xl overflow-hidden shadow-black/50 ring-1 ring-white/10">
+        <form id="createPlatformForm" class="flex flex-col h-full overflow-hidden">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="drive_context" value="true">
+            <input type="hidden" name="icon" id="selectedIconInput" value="box">
+            <input type="hidden" name="bg_color" id="bgColorInput" value="#6366f1">
+            <input type="hidden" name="text_color" id="textColorInput" value="#ffffff">
+
+            <!-- Header (1:1 Areas) -->
+            <div class="p-6 border-b border-panel-border flex items-center justify-between bg-surface-container/30">
+                <div>
+                    <h3 id="platformModalTitle" class="text-xl font-black text-primary uppercase tracking-tighter italic">Nueva Unidad Drive</h3>
+                    <p class="text-[10px] text-label font-bold uppercase tracking-widest mt-0.5">Infraestructura / Almacenamiento Seguro</p>
+                </div>
+                <button type="button" data-action="platforms-close-modal" class="p-2 hover:bg-surface-container rounded-xl transition-all">
+                    <i class="fas fa-times text-label"></i>
+                </button>
+            </div>
+
+            <!-- Step Indicator (1:1 Areas) -->
+            <div id="platformStepIndicator" class="px-8 pt-6 pb-2">
+                <div class="flex items-center justify-between relative">
+                    <!-- Progress Line -->
+                    <div class="absolute top-5 left-0 w-full h-0.5 bg-panel-border z-0">
+                        <div id="platformStepProgress" class="h-full bg-primary transition-all duration-500" style="width: 0%;"></div>
+                    </div>
+                    
+                    <!-- Step 1 -->
+                    <div class="step-item flex flex-col items-center gap-2 z-10" data-step="1">
+                        <div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-black text-sm shadow-lg shadow-primary/20 ring-4 ring-panel-fill transition-all">1</div>
+                        <span class="text-[9px] font-black uppercase tracking-widest text-primary">Datos</span>
+                    </div>
+                    <!-- Step 2 -->
+                    <div class="step-item flex flex-col items-center gap-2 z-10" data-step="2">
+                        <div class="w-10 h-10 rounded-full bg-panel-border text-label/40 flex items-center justify-center font-black text-sm ring-4 ring-panel-fill transition-all">2</div>
+                        <span class="text-[9px] font-black uppercase tracking-widest text-label/40">Imagen</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-8 min-h-[480px] overflow-y-auto custom-scrollbar">
+                <!-- STEP 1: DATOS (Adaptado al estilo Áreas) -->
+                <div id="step1" class="modal-step space-y-6">
+                    <div class="space-y-2 group">
+                        <label class="text-[11px] font-black text-label/40 uppercase tracking-widest ml-1 group-focus-within:text-primary transition-colors">Identidad del Recurso</label>
+                        <input type="text" name="name" id="unitNameInput" placeholder="EJ: RESPALDOS_CONTABILIDAD" 
+                               class="w-full h-12 bg-input-bg border-2 border-panel-border rounded-xl px-6 text-sm font-bold text-input outline-none focus:border-primary/40 focus:ring-4 focus:ring-primary/10 transition-all" required>
+                    </div>
+
+                    <div class="space-y-2 group">
+                        <label class="text-[11px] font-black text-label/40 uppercase tracking-widest ml-1 group-focus-within:text-primary transition-colors">Descripción Operativa</label>
+                        <textarea name="description" placeholder="DESCRIPCIÓN DEL SERVICIO O RECURSO..." rows="3"
+                               class="w-full bg-input-bg border-2 border-panel-border rounded-xl px-6 py-4 text-sm font-bold text-input outline-none focus:border-primary/40 focus:ring-4 focus:ring-primary/10 transition-all resize-none"></textarea>
+                    </div>
+
+                    <!-- Platform fields (conditional) -->
+                    <div class="platform-only-fields space-y-6">
+                    </div>
+
+                    <!-- Drive fields (conditional) -->
+                    <div class="drive-only-fields space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="flex items-center px-6 h-14 bg-surface-container/20 border border-panel-border rounded-2xl justify-between">
+                                <span class="text-[10px] font-black text-label/40 uppercase tracking-widest">Subida</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" name="can_upload" id="can_upload" checked class="sr-only peer">
+                                    <div class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                </label>
+                            </div>
+                            <div class="flex items-center px-6 h-14 bg-surface-container/20 border border-panel-border rounded-2xl justify-between">
+                                <span class="text-[10px] font-black text-label/40 uppercase tracking-widest">Descarga</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" name="can_download" id="can_download" checked class="sr-only peer">
+                                    <div class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Encryption Setting (High Fidelity) -->
+                        <div class="p-4 bg-amber-500/5 border border-amber-500/10 rounded-2xl flex items-center justify-between group">
+                            <div class="flex flex-col">
+                                <span class="text-[9px] font-black text-amber-600/40 uppercase tracking-widest">Protección</span>
+                                <span class="text-[11px] font-black text-amber-600 uppercase italic">Cifrado de Unidad</span>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" name="is_encrypted" id="is_encrypted" class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                            </label>
+                        </div>
+
+                        <div id="passwordContainer" class="hidden animate-in fade-in slide-in-from-top-2 duration-300">
+                            <div class="space-y-2 group">
+                                <label class="text-[11px] font-black text-amber-600 uppercase tracking-widest ml-1 opacity-60">Clave de Cifrado</label>
+                                <input type="password" name="password" id="encryptionPasswordField" placeholder="INGRESE CLAVE MAESTRA..." 
+                                       class="w-full h-12 bg-amber-500/5 border-2 border-amber-500/10 rounded-xl px-6 text-sm font-bold text-amber-900 outline-none focus:border-amber-500/40 focus:ring-4 focus:ring-amber-500/10 transition-all">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 2: IMAGEN (1:1 Áreas) -->
+                <div id="step2" class="modal-step hidden space-y-6">
+                    <div class="space-y-3">
+                        <label class="text-[11px] font-black text-label/40 uppercase tracking-widest ml-1">Seleccionar Iconografía</label>
+                        <div id="platformIconGrid" class="grid grid-cols-10 gap-0 border border-panel-border rounded-xl overflow-hidden bg-surface-container/10">
+                            <!-- JS Render Icons -->
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <label class="text-[11px] font-black text-label/40 uppercase tracking-widest ml-1">Identidad Visual (Color)</label>
+                        <div id="colorIdentityGrid" class="grid grid-cols-10 gap-0 border border-panel-border rounded-xl overflow-hidden">
+                            <!-- JS Render Colors -->
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Footer (1:1 Areas) -->
+            <footer class="modal-footer">
+                <div class="footer-left">
+                    <!-- Cancelar (Solo Paso 1) -->
+                    <button type="button" id="btnCancel" data-action="platforms-close-modal" class="nexus-btn nexus-btn-secondary">
+                        Cancelar
+                    </button>
+                    <!-- Anterior (Paso 2) -->
+                    <button type="button" id="btnBack" data-action="platforms-step-back" class="nexus-btn nexus-btn-secondary hidden">
+                        <i class="fas fa-chevron-left"></i>
+                        <span>Anterior</span>
+                    </button>
+                </div>
+                <div class="footer-right">
+                    <!-- Acción Principal -->
+                    <button type="button" id="btnNext" data-action="platforms-step-next" class="nexus-btn nexus-btn-primary">
+                        <span>Continuar</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <button type="submit" id="btnSubmit" class="nexus-btn nexus-btn-success hidden">
+                        <i class="fas fa-save"></i>
+                        <span>Finalizar</span>
+                    </button>
+                </div>
+            </footer>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+    // Hybrid Data Bridge for Legacy 1:1 Implementation
+    window.__platformData = {{ grouped_platforms|tojson | safe }};
+    window.__areaData = {{ area_list|tojson | safe }};
+    window.__allUsers = {{ all_users|tojson | safe }};
+    window.__urls = { index: "{{ url_for('drive_platforms.index') }}" };
+    
+    // Global references for platforms.js
+    const platformData = window.__platformData;
+    const areaData = window.__areaData;
+    const allUsers = window.__allUsers;
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log("DOM Ready - Forcing Catalog Render");
+        if (typeof renderPlatformGrid === 'function') {
+            renderPlatformGrid();
+        } else {
+            setTimeout(() => {
+                if (typeof renderPlatformGrid === 'function') renderPlatformGrid();
+            }, 500);
+        }
+
+        // FORCE TOGGLES ON (Bypassing cache)
+        $(document).on('click', '[data-action="platforms-open-create-modal"]', function() {
+            setTimeout(() => {
+                const up = document.getElementById('can_upload');
+                const dw = document.getElementById('can_download');
+                const enc = document.getElementById('is_encrypted');
+                if (up) up.checked = true;
+                if (dw) dw.checked = true;
+                if (enc) enc.checked = false;
+                console.log("Nexus Force: Toggles initialized (U/D: ON, E: OFF)");
+            }, 50);
+        });
+
+        // OVERRIDE GLOBAL SUCCESS HANDLER TO PREVENT RELOAD
+        window.startSuccessCountdown = function(msg, onFinish) {
+            console.log("Nexus Local Success Handler Intercepted");
+            const procModal = document.getElementById('processingModal');
+            const successModal = document.getElementById('successManagementModal');
+            const messageEl = document.getElementById('successModalMessage');
+            const textEl = document.getElementById('successCountdownText');
+            
+            // 1. Close creation/edit modal
+            document.querySelectorAll('.nexus-modal').forEach(m => {
+                if (m.id !== 'successManagementModal' && m.id !== 'processingModal') {
+                    m.classList.add('hidden');
+                    m.classList.remove('flex', 'show');
+                }
+            });
+
+            // 2. STAGE: SPINNER -> SUCCESS CASCADE
+            if (procModal) {
+                // Ensure spinner is visible briefly if not already
+                if (procModal.classList.contains('hidden')) {
+                    procModal.classList.remove('hidden');
+                    procModal.classList.add('flex', 'show');
+                }
+
+                setTimeout(() => {
+                    procModal.classList.remove('show');
+                    setTimeout(() => {
+                        procModal.classList.add('hidden');
+                        procModal.classList.remove('flex');
+
+                        // 3. SHOW SUCCESS HUD
+                        if (successModal) {
+                            if (msg && messageEl) messageEl.textContent = msg;
+                            successModal.classList.remove('hidden');
+                            successModal.classList.add('flex');
+                            void successModal.offsetWidth;
+                            successModal.classList.add('show');
+
+                            let seconds = 3;
+                            if (textEl) textEl.textContent = `(${seconds}s)`;
+                            
+                            const interval = setInterval(() => {
+                                seconds--;
+                                if (textEl) textEl.textContent = `(${seconds}s)`;
+                                if (seconds <= 0) {
+                                    clearInterval(interval);
+                                    successModal.classList.remove('show');
+                                    setTimeout(() => {
+                                        successModal.classList.add('hidden');
+                                        successModal.classList.remove('flex');
+                                        if (typeof refreshPlatforms === 'function') {
+                                            refreshPlatforms();
+                                        } else if (typeof onFinish === 'function') {
+                                            onFinish();
+                                        }
+                                    }, 300);
+                                }
+                            }, 1000);
+                        }
+                    }, 300);
+                }, 800);
+            } else if (successModal) {
+                // Fallback if no procModal
+                if (msg && messageEl) messageEl.textContent = msg;
+                successModal.classList.remove('hidden');
+                successModal.classList.add('flex');
+                setTimeout(() => successModal.classList.add('show'), 50);
+            }
+        };
+    });
+</script>
+<script src="{{ url_for('static', filename='js/platforms.js') }}"></script>
+{% endblock %}

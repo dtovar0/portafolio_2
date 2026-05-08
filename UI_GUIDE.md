@@ -133,3 +133,13 @@ Para garantizar una experiencia de control robusta y evitar acciones accidentale
 - **Clic para Seleccionar**: Al hacer clic en cualquier parte de una fila de la tabla, el sistema debe conmutar la selección de dicha fila (marcar/desmarcar checkbox y resaltar fondo).
 - **No Clic para Editar**: Se prohíbe que el clic simple en una fila abra directamente un modal de edición. El flujo oficial debe ser: **Seleccionar → Visualizar botón habilitado → Click en botón de acción**.
 - **Retroalimentación Visual**: Las filas seleccionadas deben usar la clase `.bg-primary/5` y mostrar el indicador lateral de color de la marca para confirmar la selección.
+## 🧩 Patrón de Gestión de Accesos (Picklist)
+
+Para la gestión de relaciones Muchos-a-Muchos (como Usuarios en un Área), se debe utilizar el componente de **Dual Picklist Moderno**:
+
+- **Estructura**: Dos paneles verticales (Available vs Assigned) divididos por un icono de intercambio central.
+- **Interacción**:
+  - Un clic en un elemento lo mueve automáticamente al panel opuesto.
+  - El panel de "Asignados" debe tener un fondo sutil del color de la marca (`bg-primary/5`) y bordes más definidos para denotar importancia.
+- **Ubicación**: Este componente debe vivir en un modal dedicado accesible mediante un botón "Accesos" en la toolbar principal.
+- **Estado de Botones**: Al igual que el botón "Modificar", el botón "Accesos" solo se habilita cuando hay **exactamente 1** registro seleccionado en la tabla.

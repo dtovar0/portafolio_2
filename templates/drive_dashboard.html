@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | Nexus Drive Premium{% endblock %}
+
+{% block topbar_search %}{% endblock %}
+
+{% block sidebar %}
+{% include 'components/sidebar_drive.html' %}
+{% endblock %}
+
+{% block breadcrumbs %}
+<span class="text-secondary cursor-pointer hover:text-primary transition-colors" onclick="window.location.href='/drive/dashboard'">Nexus Drive</span>
+<svg class="w-4 h-4 text-label/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+<span class="text-primary font-bold">Dashboard</span>
+{% endblock %}
+
+{% block content %}
+<div id="dashboardWrapper" class="w-full h-full p-8 overflow-y-auto custom-scrollbar animate-in fade-in duration-700">
+    <!-- Header Hero Section -->
+    <header class="mb-10">
+        <h1 class="text-4xl font-black text-label tracking-tighter italic uppercase italic leading-none mb-2">Bienvenido, <span class="text-primary">{{ current_user.nombre or 'Usuario' }}</span></h1>
+        <p class="text-label/40 font-bold uppercase tracking-[0.3em] text-xs">Sistema de Gestión de Activos Digitales / Nexus Ecosystem</p>
+    </header>
+
+    <!-- Grid de KPIs Estratégicos -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+        <!-- Áreas con Acceso -->
+        <div class="relative overflow-hidden bg-surface-container/30 border border-panel-border p-8 rounded-3xl group hover:border-primary/50 transition-all shadow-2xl shadow-black/20">
+            <div class="absolute -right-4 -top-4 w-32 h-32 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-all"></div>
+            <div class="relative z-10 flex items-center gap-6">
+                <div class="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center text-3xl shadow-inner border border-primary/20 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-sitemap"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-black text-label tracking-tighter">{{ approved_areas|length }}</p>
+                    <p class="text-[10px] font-black text-label/40 uppercase tracking-widest mt-1">Áreas Asignadas</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Almacenamiento -->
+        <div class="relative overflow-hidden bg-surface-container/30 border border-panel-border p-8 rounded-3xl group hover:border-amber-500/50 transition-all shadow-2xl shadow-black/20">
+            <div class="absolute -right-4 -top-4 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl group-hover:bg-amber-500/10 transition-all"></div>
+            <div class="relative z-10 flex items-center gap-6">
+                <div class="w-16 h-16 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center text-3xl shadow-inner border border-amber-500/20 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-database"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-black text-label tracking-tighter">Ilimitado</p>
+                    <p class="text-[10px] font-black text-label/40 uppercase tracking-widest mt-1">Capacidad Nexus</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seguridad -->
+        <div class="relative overflow-hidden bg-surface-container/30 border border-panel-border p-8 rounded-3xl group hover:border-emerald-500/50 transition-all shadow-2xl shadow-black/20">
+            <div class="absolute -right-4 -top-4 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl group-hover:bg-emerald-500/10 transition-all"></div>
+            <div class="relative z-10 flex items-center gap-6">
+                <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center text-3xl shadow-inner border border-emerald-500/20 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-black text-label tracking-tighter">Activo</p>
+                    <p class="text-[10px] font-black text-label/40 uppercase tracking-widest mt-1">Encriptación AES-256</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- Selector de Áreas Rápido -->
+        <div class="lg:col-span-8 space-y-6">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-lg font-black text-label uppercase italic tracking-tighter">Tus Áreas de Trabajo</h3>
+                <a href="{{ url_for('drive.explorer') }}" class="text-[10px] font-black text-primary uppercase hover:underline">Ver Explorador Completo</a>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for area in approved_areas %}
+                <a href="{{ url_for('drive.explorer') }}?area={{ area.name }}" 
+                   class="group relative bg-panel-fill/40 border border-panel-border p-6 rounded-3xl overflow-hidden hover:border-primary/40 transition-all active:scale-[0.98]">
+                    <div class="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    
+                    <div class="flex items-center gap-5">
+                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-lg transition-all group-hover:rotate-6"
+                             style="background: {{ area.color }}15; color: {{ area.color }}; border: 1px solid {{ area.color }}30;">
+                            <i class="fas fa-{{ area.icon or 'sitemap' }}"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <h4 class="text-sm font-black text-label uppercase tracking-tight truncate">{{ area.name }}</h4>
+                            <p class="text-[10px] text-label/40 font-bold uppercase tracking-widest mt-0.5">Entorno Activo</p>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Activity Feed Lateral -->
+        <div class="lg:col-span-4 flex flex-col">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-black text-label uppercase italic tracking-tighter">Actividad Reciente</h3>
+            </div>
+            <div class="flex-1 bg-surface-container/20 border border-panel-border rounded-3xl p-6 min-h-[400px]">
+                <div class="space-y-6">
+                    <!-- Placeholder de actividad si está vacía -->
+                    <div class="flex flex-col items-center justify-center py-12 opacity-20">
+                        <i class="fas fa-stream text-4xl mb-4"></i>
+                        <p class="text-[10px] font-black uppercase tracking-widest">Sincronizando logs...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -49,19 +49,66 @@
         'video': '<i class="fas fa-video"></i>',
         'camera': '<i class="fas fa-camera"></i>',
         'image': '<i class="fas fa-image"></i>',
-        'folder': '<i class="fas fa-folder"></i>',
-        'briefcase': '<i class="fas fa-briefcase"></i>',
-        'bookmark': '<i class="fas fa-bookmark"></i>',
-        'tag': '<i class="fas fa-tag"></i>',
-        'heart': '<i class="fas fa-heart"></i>',
-        'star': '<i class="fas fa-star"></i>',
-        'bell': '<i class="fas fa-bell"></i>',
-        'calendar': '<i class="fas fa-calendar-alt"></i>',
-        'clock': '<i class="fas fa-clock"></i>',
-        'mobile': '<i class="fas fa-mobile-alt"></i>',
-        'tablet': '<i class="fas fa-tablet-alt"></i>',
-        'laptop': '<i class="fas fa-laptop"></i>'
+        'folder': '<i class="fas fa-folder"></i>'
     };
+
+    const colorsPalette = [
+        '#6366f1', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6',
+        '#ec4899', '#14b8a6', '#f97316', '#475569', '#065f46', '#7c2d12',
+        '#1e3a8a', '#581c87', '#991b1b', '#166534', '#115e59', '#4c1d95',
+        '#134e4a', '#0f172a'
+    ];
+
+    function renderPlatformColors() {
+        const grid = document.getElementById('colorIdentityGrid');
+        if (!grid) return;
+        
+        grid.innerHTML = '';
+        colorsPalette.forEach(color => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'w-full aspect-square border-r border-b border-panel-border transition-all hover:scale-110 active:scale-95';
+            btn.style.backgroundColor = color;
+            
+            if (document.getElementById('bgColorInput').value === color) {
+                btn.classList.add('ring-2', 'ring-inset', 'ring-white/40', 'shadow-inner');
+            }
+            
+            btn.onclick = () => {
+                grid.querySelectorAll('button').forEach(b => b.classList.remove('ring-2', 'ring-inset', 'ring-white/40', 'shadow-inner'));
+                btn.classList.add('ring-2', 'ring-inset', 'ring-white/40', 'shadow-inner');
+                document.getElementById('bgColorInput').value = color;
+                updateLivePreview();
+            };
+            grid.appendChild(btn);
+        });
+    }
+
+    function renderPlatformIcons() {
+        const grid = document.getElementById('platformIconGrid');
+        if (!grid) return;
+        
+        grid.innerHTML = '';
+        Object.keys(iconsMap).forEach(key => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'flex items-center justify-center h-12 hover:bg-primary/10 text-label transition-all border-r border-b border-panel-border';
+            btn.dataset.icon = key;
+            btn.innerHTML = iconsMap[key];
+            
+            if (document.getElementById('selectedIconInput').value === key) {
+                btn.classList.add('bg-primary', 'text-white');
+            }
+            
+            btn.onclick = () => {
+                document.getElementById('platformIconGrid').querySelectorAll('button').forEach(b => b.classList.remove('bg-primary', 'text-white'));
+                btn.classList.add('bg-primary', 'text-white');
+                document.getElementById('selectedIconInput').value = key;
+                updateLivePreview();
+            };
+            grid.appendChild(btn);
+        });
+    }
 
     let currentFilterArea = 'all';
     let searchQuery = '';
@@ -162,7 +209,7 @@
             const statusColor = status === 'Activo' ? 'emerald' : 'rose';
             const areaIcon = iconsMap[area.icon] || '<i class="fas fa-folder"></i>';
             
-            card.className = "group relative flex flex-col h-full bg-panel-fill border border-panel-border rounded-2xl overflow-hidden transition-all duration-300 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 p-5";
+            card.className = "group relative flex flex-col h-full bg-panel-fill border border-panel-border rounded-2xl overflow-hidden transition-all duration-300 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 p-8";
             
             card.innerHTML = `
                 <!-- Sobrio Top Border -->
@@ -170,46 +217,46 @@
                     <div class="h-full bg-primary/40 opacity-0 group-hover:opacity-100 transition-all duration-500" style="width: 100%"></div>
                 </div>
 
-                <div class="relative z-10 flex items-center gap-4 mb-5">
+                <div class="relative z-10 flex items-center gap-6 mb-8">
                     <!-- Icon with Subtle Area Accent -->
-                    <div class="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center text-lg transition-all duration-500 group-hover:scale-110 shadow-sm" 
+                    <div class="w-16 h-16 rounded-2xl flex-shrink-0 flex items-center justify-center text-3xl transition-all duration-500 group-hover:scale-110 shadow-sm" 
                          style="background: ${areaColor}10; color: ${areaColor}; border: 1px solid ${areaColor}20">
                         ${areaIcon}
                     </div>
                     <div class="flex-1 min-w-0">
-                        <h3 class="text-sm font-black text-label uppercase tracking-tighter group-hover:text-primary transition-colors leading-tight truncate">
+                        <h3 class="text-xl font-black text-label uppercase tracking-tighter group-hover:text-primary transition-colors leading-tight truncate">
                             ${area.name}
                         </h3>
-                        <div class="flex items-center gap-2 mt-0.5">
-                            <span class="w-1.5 h-1.5 rounded-full bg-${statusColor}-500"></span>
-                            <span class="text-[8px] font-black uppercase tracking-widest text-label/40">${status}</span>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="w-2.5 h-2.5 rounded-full bg-${statusColor}-500"></span>
+                            <span class="text-[11px] font-black uppercase tracking-widest text-label/70">${status}</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="relative z-10 flex-1 space-y-4">
-                    <!-- Metrics Badges (Sobrios) -->
-                    <div class="flex items-center gap-2">
-                        <div class="px-2 py-1 rounded-lg bg-surface-container/50 border border-panel-border flex items-center gap-2">
-                            <i class="fas fa-layer-group text-[9px] text-primary/40"></i>
-                            <span class="text-[9px] font-bold uppercase tracking-widest text-label/50">${platCount} <span class="opacity-40">Plataformas</span></span>
+                <div class="relative z-10 flex-1 space-y-6">
+                    <!-- Metrics Badges -->
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div class="flex-1 min-w-[130px] px-3 py-2 rounded-xl bg-surface-container/50 border border-panel-border flex items-center gap-2">
+                            <i class="fas fa-layer-group text-[10px] text-primary/60"></i>
+                            <span class="text-[11px] font-bold uppercase tracking-tight text-label/80">${platCount} <span class="opacity-60">Unidades</span></span>
                         </div>
-                        <div class="px-2 py-1 rounded-lg bg-surface-container/50 border border-panel-border flex items-center gap-2">
-                            <i class="fas fa-users text-[9px] text-primary/40"></i>
-                            <span class="text-[9px] font-bold uppercase tracking-widest text-label/50">${userCount} <span class="opacity-40">Usuarios</span></span>
+                        <div class="flex-1 min-w-[130px] px-3 py-2 rounded-xl bg-surface-container/50 border border-panel-border flex items-center gap-2">
+                            <i class="fas fa-users text-[10px] text-primary/60"></i>
+                            <span class="text-[11px] font-bold uppercase tracking-tight text-label/80">${userCount} <span class="opacity-60">Usuarios</span></span>
                         </div>
                     </div>
                     
-                    <p class="text-[10px] text-label/40 leading-relaxed font-medium line-clamp-2 italic border-l-2 border-panel-border/30 pl-3">
+                    <p class="text-base text-label/80 leading-relaxed font-bold line-clamp-2 italic border-l-4 border-panel-border/50 pl-5">
                         ${area.description || 'Gestión centralizada de servicios digitales.'}
                     </p>
                 </div>
 
-                <div class="relative z-10 mt-5 pt-4 border-t border-panel-border/30">
-                    <button class="w-full h-10 rounded-xl flex items-center justify-center gap-3 text-[9px] font-black uppercase tracking-[0.2em] bg-surface-container/40 border border-panel-border text-label/40 hover:bg-primary hover:text-white hover:border-primary hover:shadow-lg hover:shadow-primary/20 transition-all duration-300" 
+                <div class="relative z-10 mt-8 pt-6 border-t border-panel-border/30">
+                    <button class="w-full h-14 rounded-xl flex items-center justify-center gap-4 text-xs font-black uppercase tracking-[0.2em] bg-surface-container/40 border border-panel-border text-label/60 hover:bg-primary hover:text-white hover:border-primary hover:shadow-lg hover:shadow-primary/20 transition-all duration-300" 
                             onclick="drillDown('${area.name}', ${area.id})">
                         <span>Gestionar Área</span>
-                        <i class="fas fa-chevron-right text-[8px] opacity-30 group-hover:translate-x-1 transition-transform"></i>
+                        <i class="fas fa-chevron-right text-xs opacity-50 group-hover:translate-x-1 transition-transform"></i>
                     </button>
                 </div>
             `;
@@ -271,7 +318,7 @@
             columns: [
                 { 
                     data: 'id', 
-                    width: '50px', 
+                    width: '35px', 
                     orderable: false,
                     className: 'text-center',
                     render: (data) => `
@@ -281,9 +328,9 @@
                 },
                 { 
                     data: null, 
-                    width: '80px',
+                    width: '45px',
                     orderable: false,
-                    className: 'text-center',
+                    className: 'text-left pl-2',
                     render: (data) => {
                         const style = `background: ${data.bg_color || '#6366f1'}; color: ${data.text_color || '#ffffff'}`;
                         return `
@@ -298,7 +345,7 @@
                 },
                 { 
                     data: 'name', 
-                    width: '20%',
+                    width: '30%',
                     className: 'text-left',
                     render: (data) => `
                         <div class="flex flex-col">
@@ -306,24 +353,15 @@
                         </div>` 
                 },
                 { 
-                    data: 'direct_link', 
-                    width: '230px',
-                    render: (data) => `
-                        <div class="flex items-center gap-2">
-                            <i class="fas fa-link text-[10px] text-label/20"></i>
-                            <span class="text-[10px] text-label/40 font-bold truncate max-w-[200px]">${data || 'SIN ENLACE'}</span>
-                        </div>` 
-                },
-                { 
                     data: 'description', 
                     width: '35%',
                     className: 'text-left',
-                    render: (data) => `<div class="text-[12px] text-label/60 font-bold line-clamp-2 pr-8">${data || '-'}</div>` 
+                    render: (data) => `<div class="text-[12px] text-label/60 font-bold line-clamp-2">${data || '-'}</div>` 
                 },
                 { 
                     data: 'users_count', 
-                    width: '100px',
-                    className: 'text-center',
+                    width: '80px',
+                    className: 'text-left pl-4',
                     render: (data) => `
                         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-surface-container text-label/60 font-black text-[10px] uppercase">
                             <i class="fas fa-users opacity-40"></i> ${data || 0}
@@ -331,8 +369,8 @@
                 },
                 { 
                     data: 'status', 
-                    width: '110px',
-                    className: 'text-center',
+                    width: '100px',
+                    className: 'text-left pl-4',
                     render: (data) => {
                         const cls = data === 'Activo' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500';
                         return `<span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${cls}">${data}</span>`;
@@ -340,9 +378,28 @@
                 },
                 { 
                     data: null, 
-                    width: '100px',
+                    width: '120px',
+                    orderable: false,
                     className: 'text-center',
-                    render: () => `<span class="font-mono text-[10px] font-bold text-label/40">0 VISITAS</span>` 
+                    render: (data) => {
+                        const iconCls = "w-7 h-7 rounded-lg flex items-center justify-center transition-all";
+                        const activeD = data.can_download ? 'bg-primary/10 text-primary' : 'text-label/20';
+                        const activeU = data.can_upload ? 'bg-primary/10 text-primary' : 'text-label/20';
+                        const activeE = data.is_encrypted ? 'bg-amber-500/10 text-amber-500' : 'text-label/20';
+
+                        return `
+                        <div class="flex items-center justify-center gap-1.5">
+                            <div class="${iconCls} ${activeD}" title="Descarga: ${data.can_download ? 'Habilitada' : 'Restringida'}">
+                                <i class="fas fa-cloud-arrow-down text-[10px]"></i>
+                            </div>
+                            <div class="${iconCls} ${activeU}" title="Subida: ${data.can_upload ? 'Habilitada' : 'Restringida'}">
+                                <i class="fas fa-cloud-arrow-up text-[10px]"></i>
+                            </div>
+                            <div class="${iconCls} ${activeE}" title="Cifrado: ${data.is_encrypted ? 'Activo' : 'Inactivo'}">
+                                <i class="fas fa-shield-halved text-[10px]"></i>
+                            </div>
+                        </div>`;
+                    }
                 }
             ],
             autoWidth: false,
@@ -365,8 +422,29 @@
                 }
             },
             drawCallback: function(settings) {
-                renderGhostRows(settings, 8);
+                renderGhostRows(settings, 7);
             }
+        });
+
+        // Event listeners for inline actions
+        $('#modern-table tbody').on('click', '.btn-edit-row', function(e) {
+            e.stopPropagation();
+            const id = $(this).data('id');
+            const cb = $(`.platform-checkbox[data-id="${id}"]`);
+            $('.platform-checkbox').prop('checked', false);
+            cb.prop('checked', true);
+            updateActionButtons();
+            $('[data-action="platforms-edit-selected"]').trigger('click');
+        });
+
+        $('#modern-table tbody').on('click', '.btn-delete-row', function(e) {
+            e.stopPropagation();
+            const id = $(this).data('id');
+            const cb = $(`.platform-checkbox[data-id="${id}"]`);
+            $('.platform-checkbox').prop('checked', false);
+            cb.prop('checked', true);
+            updateActionButtons();
+            $('[data-action="platforms-delete-selected"]').trigger('click');
         });
 
         // Row Click Edit Integration
@@ -436,7 +514,6 @@
                     <td class="py-5 text-center"><div></div></td>
                     <td class="py-5 text-left"><div></div></td>
                     <td class="py-5 text-left"><div></div></td>
-                    <td class="py-5 text-left"><div></div></td>
                     <td class="py-5 text-center"><div></div></td>
                     <td class="py-5 text-center"><div></div></td>
                     <td class="py-5 text-center"><div></div></td>
@@ -478,46 +555,51 @@
 
     // Modal Wizard Logic
     function changeStep(step) {
+        const form = document.getElementById('createPlatformForm');
         currentStep = step;
-        const progress = document.getElementById('stepProgress');
-        const btnNext = document.getElementById('btnNext');
-        const btnSubmit = document.getElementById('btnSubmit');
-        const btnBack = document.getElementById('btnBack');
-        const btnCancel = document.getElementById('btnCancel');
-
+        const totalSteps = 2;
+        
+        // Sections
         document.querySelectorAll('.modal-step').forEach(s => s.classList.add('hidden'));
-        const targetStep = document.getElementById(`step${step}`);
-        if (targetStep) targetStep.classList.remove('hidden');
-
-        if (step === 1) {
-            if (progress) progress.style.width = '0%';
-            if (btnNext) { btnNext.style.display = 'flex'; btnNext.classList.remove('hidden'); }
-            if (btnSubmit) { btnSubmit.style.display = 'none'; btnSubmit.classList.add('hidden'); }
-            if (btnBack) { btnBack.style.display = 'none'; btnBack.classList.add('hidden'); }
-        } else if (step === 2) {
-            if (progress) progress.style.width = '50%';
-            if (btnNext) { btnNext.style.display = 'flex'; btnNext.classList.remove('hidden'); }
-            if (btnSubmit) { btnSubmit.style.display = 'none'; btnSubmit.classList.add('hidden'); }
-            if (btnBack) { btnBack.style.display = 'flex'; btnBack.classList.remove('hidden'); }
-        } else {
-            if (progress) progress.style.width = '100%';
-            if (btnNext) { btnNext.style.display = 'none'; btnNext.classList.add('hidden'); }
-            if (btnSubmit) { btnSubmit.style.display = 'flex'; btnSubmit.classList.remove('hidden'); }
-            if (btnBack) { btnBack.style.display = 'flex'; btnBack.classList.remove('hidden'); }
-        }
+        document.getElementById(`step${step}`).classList.remove('hidden');
         
-        updateLivePreview();
-        
-        // Cancel button visibility
-        if (btnCancel) {
-            if (step === 1) {
-                btnCancel.style.display = 'flex';
-                btnCancel.classList.remove('hidden');
+        // Indicator
+        document.getElementById('platformStepIndicator').classList.remove('hidden');
+        document.querySelectorAll('#platformStepIndicator .step-item').forEach(item => {
+            const s = parseInt(item.dataset.step);
+            const dot = item.querySelector('div');
+            const label = item.querySelector('span');
+            
+            if (s < step) {
+                dot.className = 'w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center font-black text-sm ring-4 ring-panel-fill transition-all';
+                dot.innerHTML = '✓';
+                label.className = 'text-[9px] font-black uppercase tracking-widest text-emerald-500';
+            } else if (s === step) {
+                dot.className = 'w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-black text-sm shadow-lg shadow-primary/20 ring-4 ring-panel-fill transition-all';
+                dot.innerHTML = s;
+                label.className = 'text-[9px] font-black uppercase tracking-widest text-primary';
             } else {
-                btnCancel.style.display = 'none';
-                btnCancel.classList.add('hidden');
+                dot.className = 'w-10 h-10 rounded-full bg-panel-border text-label/40 flex items-center justify-center font-black text-sm ring-4 ring-panel-fill transition-all';
+                dot.innerHTML = s;
+                label.className = 'text-[9px] font-black uppercase tracking-widest text-label/40';
             }
+        });
+        
+        const progress = ((step - 1) / (totalSteps - 1)) * 100;
+        const progressEl = document.getElementById('platformStepProgress');
+        if (progressEl) progressEl.style.width = `${progress}%`;
+        
+        // Buttons
+        document.getElementById('btnCancel').classList.toggle('hidden', step !== 1);
+        document.getElementById('btnBack').classList.toggle('hidden', step === 1);
+        document.getElementById('btnNext').classList.toggle('hidden', step === totalSteps);
+        document.getElementById('btnSubmit').classList.toggle('hidden', step !== totalSteps);
+
+        if (step === 2) {
+            renderPlatformIcons();
+            renderPlatformColors();
         }
+        updateLivePreview();
     }
 
     // URL Premium Validation
@@ -535,80 +617,24 @@
     });
 
     window.handleStepNext = function() {
-        const Toast = Swal.mixin({
-            toast: true,
-            position: 'bottom-end',
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true
-        });
-
         const nameInp = document.querySelector('input[name="name"]');
-        const descInp = document.querySelector('textarea[name="description"]');
-        const linkInp = document.getElementById('directLinkInput');
-        const form = document.getElementById('createPlatformForm');
-        const isEdit = form.dataset.mode === 'edit';
-        const editId = form.dataset.editId;
-
         if (currentStep === 1) {
-            let hasError = false;
-            
-            // Basic required validation
-            [nameInp, descInp, linkInp].forEach(inp => {
-                if (!inp || !inp.value.trim()) {
-                    if (inp) inp.classList.add('border-rose-500', 'bg-rose-50', 'animate-shake');
-                    hasError = true;
-                } else {
-                    inp.classList.remove('border-rose-500', 'bg-rose-50', 'animate-shake');
-                }
-            });
-
-            // Premium URL Validation
-            const urlPattern = /^(https?:\/\/)/;
-            if (linkInp && linkInp.value.trim() && !urlPattern.test(linkInp.value.trim())) {
-                linkInp.classList.add('border-rose-500', 'bg-rose-50', 'animate-shake');
-                Toast.fire({ icon: 'warning', title: 'URL inválida', text: 'Debe iniciar con http:// o https://' });
-                hasError = true;
-            }
-
-            // DUPLICATE NAME VALIDATION (Within same Area)
-            if (nameInp && nameInp.value.trim()) {
-                const newName = nameInp.value.trim().toLowerCase();
-                const existingPlatforms = window.__platformData[currentAreaId] || window.__platformData[String(currentAreaId)] || [];
-                
-                const isDuplicate = existingPlatforms.some(p => {
-                    // If editing, skip the current record by ID
-                    if (isEdit && p.id == editId) return false;
-                    return p.name.toLowerCase() === newName;
+            if (!nameInp || !nameInp.value.trim()) {
+                nameInp?.classList.add('border-rose-500', 'bg-rose-50', 'animate-shake');
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'bottom-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
                 });
-
-                if (isDuplicate) {
-                    nameInp.classList.add('border-rose-500', 'bg-rose-50', 'animate-shake');
-                    Toast.fire({ 
-                        icon: 'error', 
-                        title: 'Nombre Duplicado', 
-                        text: `El servicio "${nameInp.value}" ya existe en esta área.` 
-                    });
-                    hasError = true;
-                }
+                Toast.fire({ icon: 'error', title: 'Campo Requerido', text: 'Por favor, ingrese el nombre del recurso.' });
+                return;
+            } else {
+                nameInp?.classList.remove('border-rose-500', 'bg-rose-50', 'animate-shake');
             }
-
-            if (hasError) return;
+            changeStep(2);
         }
-
-        if (currentStep === 2) {
-            const mode = document.getElementById('logoUploadZone')?.classList.contains('hidden') ? 'icon' : 'image';
-            if (mode === 'image') {
-                const logoInput = document.getElementById('logoInput');
-                const hasPreview = document.querySelector('#logoUploadZone img');
-                if (!logoInput?.files[0] && !hasPreview) {
-                    Toast.fire({ icon: 'warning', title: 'Identidad Requerida', text: 'Debe subir un logo o elegir un icono' });
-                    return;
-                }
-            }
-        }
-
-        if (currentStep < 3) changeStep(currentStep + 1);
     };
 
     window.handleStepBack = function() {
@@ -688,31 +714,26 @@
         if (bgColorText) bgColorText.value = color.toUpperCase();
         if (textColorText) textColorText.value = textColor.toUpperCase();
 
-        const logoUploadZone = document.getElementById('logoUploadZone');
+        const logoPreview = document.getElementById('logoPreview');
         const logoInput = document.getElementById('logoInput');
 
-        if (logoUploadZone && logoInput && logoInput.files && logoInput.files[0]) {
+        if (logoPreview && logoInput && logoInput.files && logoInput.files[0]) {
             const reader = new FileReader();
             reader.onload = (e) => {
-                logoUploadZone.innerHTML = `
-                    <div class="relative w-full h-full flex flex-col items-center justify-center p-4 group">
-                        <img src="${e.target.result}" class="max-w-full max-h-[140px] object-contain rounded-xl shadow-lg">
-                        <button type="button" onclick="document.getElementById('logoInput').click()" 
-                                class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-black uppercase tracking-widest transition-all">
-                            Cambiar Logo
-                        </button>
-                    </div>
-                `;
+                logoPreview.classList.remove('hidden');
+                logoPreview.querySelector('img').src = e.target.result;
             };
             reader.readAsDataURL(logoInput.files[0]);
         }
-
-        const selectedBtn = document.querySelector('#iconSelectorZone button.bg-primary');
-        if (selectedBtn) {
-            selectedBtn.style.backgroundColor = color;
-            selectedBtn.style.color = textColor;
-        }
     }
+
+    window.resetLogo = function() {
+        const logoInput = document.getElementById('logoInput');
+        const logoPreview = document.getElementById('logoPreview');
+        if (logoInput) logoInput.value = '';
+        if (logoPreview) logoPreview.classList.add('hidden');
+        updateLivePreview();
+    };
 
     // Hex sync listeners
     ['bgColor', 'textColor'].forEach(prefix => {
@@ -736,6 +757,8 @@
     function updatePicklist() {
         const availableList = document.getElementById('availableList');
         const assignedList = document.getElementById('assignedList');
+        if (!availableList || !assignedList) return;
+        
         availableList.innerHTML = '';
         assignedList.innerHTML = '';
         
@@ -802,16 +825,38 @@
             form.reset();
             resetIdentity();
             form.dataset.mode = 'create';
-            document.getElementById('platformModalTitle').textContent = "Registrar Nueva Plataforma";
+            $('#createPlatformForm [name="name"]').prop('readonly', false).removeClass('bg-surface-container/50 opacity-60');
+            console.log("Nexus Creation Mode - Identity Unlocked");
             
+            const isDrive = !!form.querySelector('[name="drive_context"]');
+            document.getElementById('platformModalTitle').textContent = isDrive ? "Registrar Nueva Unidad Drive" : "Registrar Nueva Plataforma";
+            
+            // Reset Drive Checkboxes with default states
+            if (document.getElementById('can_upload')) document.getElementById('can_upload').checked = true;
+            if (document.getElementById('can_download')) document.getElementById('can_download').checked = true;
+            if (document.getElementById('is_encrypted')) document.getElementById('is_encrypted').checked = false;
+
+            const passCont = document.getElementById('passwordContainer');
+            if (passCont) passCont.classList.add('hidden');
+            const passField = document.getElementById('encryptionPasswordField');
+            if (passField) passField.value = '';
+
             const areaSelect = document.getElementById('modalAreaSelect');
             if (areaSelect) {
                 areaSelect.value = currentAreaId || "";
             }
             
             selectedUserIds = [];
+            
+            if (isDrive) {
+                document.querySelectorAll('.platform-only-fields').forEach(el => el.classList.add('hidden'));
+                document.querySelectorAll('.drive-only-fields').forEach(el => el.classList.remove('hidden'));
+            } else {
+                document.querySelectorAll('.platform-only-fields').forEach(el => el.classList.remove('hidden'));
+                document.querySelectorAll('.drive-only-fields').forEach(el => el.classList.add('hidden'));
+            }
+
             changeStep(1);
-            updatePicklist();
             window.openModal('platformModal');
         });
 
@@ -840,8 +885,10 @@
             const form = document.getElementById('createPlatformForm');
             if (!form) return;
             
+            const isDrive = !!form.querySelector('[name="drive_context"]');
+
             // TITULO INMEDIATO
-            document.getElementById('platformModalTitle').textContent = "Modificar Plataforma";
+            document.getElementById('platformModalTitle').textContent = isDrive ? "Modificar Unidad Drive" : "Modificar Plataforma";
             
             form.reset();
             resetIdentity();
@@ -852,9 +899,9 @@
             setTimeout(() => {
                 console.log("Nexus Population - Data:", palt);
                 
-                $('#createPlatformForm [name="name"]').val(palt.name || '');
+                $('#createPlatformForm [name="name"]').val(palt.name || '').prop('readonly', true).addClass('bg-surface-container/50 opacity-60');
+                console.log("Nexus Edit Mode - Identity Locked (Readonly)");
                 $('#createPlatformForm [name="description"]').val(palt.description || '');
-                $('#createPlatformForm [name="direct_link"]').val(palt.direct_link || '');
                 $('#createPlatformForm [name="area_id"]').val(palt.area_id || currentAreaId);
 
                 const statusToggle = document.getElementById('platformStatusToggle');
@@ -863,16 +910,36 @@
                     statusToggle.dispatchEvent(new Event('change'));
                 }
 
+                // Drive Specific Fields
+                const upToggle = document.getElementById('can_upload');
+                if (upToggle) upToggle.checked = !!palt.can_upload;
+                
+                const downToggle = document.getElementById('can_download');
+                if (downToggle) downToggle.checked = !!palt.can_download;
+
+                const encToggle = document.getElementById('is_encrypted');
+                if (encToggle) encToggle.checked = !!palt.is_encrypted;
+
                 // Identity Sync
                 $('#bgColorInput').val(palt.bg_color || '#000000');
                 $('#textColorInput').val(palt.text_color || '#ffffff');
                 $('#selectedIconInput').val(palt.icon || 'box');
                 
+                const passCont = document.getElementById('passwordContainer');
+                if (passCont) passCont.classList.toggle('hidden', !palt.is_encrypted);
+
                 if (palt.logo_url) setVisualMode('image');
                 else setVisualMode('icon');
 
-                selectedUserIds = palt.user_ids || [];
-                updatePicklist();
+                if (isDrive) {
+                    document.querySelectorAll('.platform-only-fields').forEach(el => el.classList.add('hidden'));
+                    document.querySelectorAll('.drive-only-fields').forEach(el => el.classList.remove('hidden'));
+                } else {
+                    document.querySelectorAll('.platform-only-fields').forEach(el => el.classList.remove('hidden'));
+                    document.querySelectorAll('.drive-only-fields').forEach(el => el.classList.add('hidden'));
+                    selectedUserIds = palt.user_ids || [];
+                    updatePicklist();
+                }
                 updateLivePreview();
                 console.log("Nexus Population - Complete");
             }, 50);
@@ -881,10 +948,26 @@
             window.openModal('platformModal');
         });
 
+        // Encryption Password Toggle
+        $(document).on('change', '#is_encrypted', function() {
+            const container = document.getElementById('passwordContainer');
+            if (container) {
+                container.classList.toggle('hidden', !this.checked);
+                if (this.checked) {
+                    document.getElementById('encryptionPasswordField')?.focus();
+                }
+            }
+        });
+
         // Global Delegation for Delete with Block Validation
         $(document).on('click', '[data-action="platforms-delete-selected"]', async function() {
             const selected = document.querySelectorAll('.platform-checkbox:checked');
             if (selected.length === 0) return;
+
+            // Detect Context: Drive vs Platforms
+            const form = document.getElementById('createPlatformForm');
+            const isDrive = form && !!form.querySelector('[name="drive_context"]');
+            const deleteBaseUrl = isDrive ? '/admin/drive-platforms/delete' : '/admin/platforms/delete';
 
             let totalUsersAffected = 0;
             selected.forEach(cb => {
@@ -897,7 +980,7 @@
                 return Swal.fire({
                     title: '<span class="text-rose-500 uppercase italic font-black tracking-tighter">Acción Bloqueada</span>',
                     html: `<div class="text-xs font-bold text-slate-300 leading-relaxed uppercase tracking-widest">
-                            No es posible eliminar plataformas con usuarios activos.<br><br>
+                            No es posible eliminar ${isDrive ? 'unidades' : 'plataformas'} con usuarios activos.<br><br>
                             Se detectaron <span class="text-rose-500 font-black">${totalUsersAffected} accesos vinculados</span>.<br>
                             Por favor, remueva los accesos de los usuarios antes de intentar dar de baja el servicio.
                            </div>`,
@@ -912,8 +995,8 @@
 
             // Standard Confirmation for empty platforms
             const confirm = await Swal.fire({
-                title: '<span class="text-white uppercase italic font-black tracking-tighter">¿Confirmar Baja?</span>',
-                html: `<div class="text-xs font-bold text-slate-300 uppercase tracking-widest">Se eliminarán ${selected.length} servicios de forma permanente.</div>`,
+                title: `<span class="text-white uppercase italic font-black tracking-tighter">¿Confirmar Baja?</span>`,
+                html: `<div class="text-xs font-bold text-slate-300 uppercase tracking-widest">Se eliminarán ${selected.length} ${isDrive ? 'unidades' : 'servicios'} de forma permanente.</div>`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#f43f5e',
@@ -933,8 +1016,10 @@
                 }
 
                 try {
-                    await Promise.all(Array.from(selected).map(cb => fetch(`/admin/platforms/delete/${cb.dataset.id}`, { method: 'GET' })));
-                    startSuccessCountdown("Los servicios han sido purgados permanentemente del catálogo.");
+                    // Drive uses POST, platforms uses GET (based on existing logic)
+                    const method = isDrive ? 'POST' : 'GET';
+                    await Promise.all(Array.from(selected).map(cb => fetch(`${deleteBaseUrl}/${cb.dataset.id}`, { method: method })));
+                    startSuccessCountdown(isDrive ? "Las unidades han sido desconectadas del sistema." : "Los servicios han sido purgados permanentemente del catálogo.", refreshPlatforms);
                 } catch (e) {
                     if (procModal) procModal.classList.add('hidden');
                     Swal.fire('Error', 'Fallo técnico al procesar la baja.', 'error');
@@ -954,14 +1039,9 @@
             window.setVisualMode(this.dataset.mode);
         });
 
-        document.getElementById('logoInput').addEventListener('change', updateLivePreview);
-        document.querySelector('input[name="name"]').addEventListener('input', updateLivePreview);
-        document.querySelectorAll('.js-sync-color').forEach(p => p.addEventListener('input', (e) => {
-            document.getElementById(e.target.dataset.textInputId).value = e.target.value.toUpperCase();
-            document.getElementById(e.target.dataset.swatchId).style.background = e.target.value;
-            updateLivePreview();
-        }));
-
+        document.getElementById('logoInput')?.addEventListener('change', updateLivePreview);
+        document.querySelector('input[name="name"]')?.addEventListener('input', updateLivePreview);
+        
         // Status Toggle Handler
         document.getElementById('platformStatusToggle')?.addEventListener('change', function() {
             const label = document.getElementById('platformStatusLabel');
@@ -978,7 +1058,16 @@
             e.preventDefault();
             const form = e.target;
             const isEdit = form.dataset.mode === 'edit';
-            const url = isEdit ? `/admin/platforms/edit-platform/${form.dataset.editId}` : '/admin/platforms/add-platform';
+            
+            // Context Detection
+            const isDrive = !!form.querySelector('[name="drive_context"]');
+            let url = '';
+            
+            if (isDrive) {
+                url = isEdit ? `/admin/drive-platforms/edit/${form.dataset.editId}` : '/admin/drive-platforms/add';
+            } else {
+                url = isEdit ? `/admin/platforms/edit-platform/${form.dataset.editId}` : '/admin/platforms/add-platform';
+            }
             
             const formData = new FormData(form);
             
@@ -992,10 +1081,19 @@
                 return;
             }
 
-            formData.append('users', JSON.stringify(selectedUserIds));
+            if (!isDrive) {
+                formData.append('users', JSON.stringify(selectedUserIds));
+            }
             
-            const isChecked = document.getElementById('platformStatusToggle').checked;
-            formData.append('status', isChecked ? 'Activo' : 'Inactivo');
+            if (isDrive) {
+                // Correct boolean strings for Drive Backend
+                formData.set('can_upload', document.getElementById('can_upload').checked ? 'true' : 'false');
+                formData.set('can_download', document.getElementById('can_download').checked ? 'true' : 'false');
+                formData.set('is_encrypted', document.getElementById('is_encrypted').checked ? 'true' : 'false');
+            } else {
+                const isChecked = document.getElementById('platformStatusToggle').checked;
+                formData.append('status', isChecked ? 'Activo' : 'Inactivo');
+            }
 
             const procModal = document.getElementById('processingModal');
             if (procModal) {
@@ -1017,7 +1115,7 @@
                 });
 
                 if (result.success) {
-                    startSuccessCountdown("La plataforma y sus parámetros de acceso han sido actualizados correctamente.");
+                    startSuccessCountdown("La plataforma y sus parámetros de acceso han sido actualizados correctamente.", refreshPlatforms);
                 } else {
                     console.error("Backend Error:", result.error);
                     Toast.fire({ 
@@ -1043,15 +1141,20 @@
         async function refreshPlatforms() {
             if (!currentAreaId) return;
             try {
-                const res = await fetch(`/admin/platforms/api/list/${currentAreaId}`);
+                const res = await fetch(`/admin/drive-platforms/api/list/${currentAreaId}`);
                 const result = await res.json();
                 if (result.success) {
                     // Update Global State
                     if (!window.__platformData) window.__platformData = {};
                     window.__platformData[currentAreaId] = result.platforms;
                     
-                    // Force Table Refresh
+                    // Force Table Refresh (for drill-down)
                     renderPlatformsTable(result.platforms);
+
+                    // Force Grid Refresh (for areas view)
+                    if (typeof renderPlatformGrid === 'function') {
+                        renderPlatformGrid();
+                    }
                 }
             } catch (e) {
                 console.error("Error refreshing platforms:", e);
@@ -1080,6 +1183,43 @@
         if (txI) txI.value = '#ffffff';
         if (bgT) bgT.value = '#000000';
         if (txT) txT.value = '#FFFFFF';
+
+        // --- GUARDIÁN DE INTEGRIDAD DE NOMBRES (SEGURIDAD DE ARCHIVOS) ---
+        const unitNameInput = document.getElementById('unitNameInput');
+        if (unitNameInput) {
+            unitNameInput.addEventListener('input', function(e) {
+                const originalValue = this.value;
+                // Regex estricta: Solo alfanuméricos, guiones, guiones bajos y espacios (que luego se limpian)
+                // Prohibidos: / \ . * ? : " < > | # % & { } + @ ! ` =
+                let sanitizedValue = originalValue.replace(/[/*?:"<>|#%&{}+@!`=]/g, '-');
+                sanitizedValue = sanitizedValue.replace(/\.\./g, ''); // Evitar Path Traversal
+                
+                if (originalValue !== sanitizedValue) {
+                    this.value = sanitizedValue;
+                    
+                    // Notificación Toast de Seguridad (Nexus Style)
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', Swal.stopTimer)
+                            toast.addEventListener('mouseleave', Swal.resumeTimer)
+                        }
+                    });
+
+                    Toast.fire({
+                        icon: 'warning',
+                        title: 'Seguridad Nexus',
+                        text: 'Caracteres prohibidos detectados. El nombre ha sido corregido para mantener la integridad del sistema.',
+                        background: 'rgba(15, 23, 42, 0.95)',
+                        color: '#fff'
+                    });
+                }
+            });
+        }
 
         // Initial state
         setVisualMode('image');

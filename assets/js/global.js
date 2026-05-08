@@ -525,7 +525,7 @@ function closeModal(modalId) {
  * START SUCCESS COUNTDOWN (3s)
  * Centralized handler for successful management operations with cascading effect
  */
-function startSuccessCountdown(customMessage = null) {
+function startSuccessCountdown(customMessage = null, onFinish = null) {
     const procModal = document.getElementById('processingModal');
     const successModal = document.getElementById('successManagementModal');
     const messageEl = document.getElementById('successModalMessage');
@@ -534,8 +534,10 @@ function startSuccessCountdown(customMessage = null) {
     // ─── STAGE 1: CLEANUP & SPINNER ───
     // Close any active modal
     document.querySelectorAll('.nexus-modal').forEach(m => {
-        m.classList.add('hidden');
-        m.classList.remove('flex', 'show');
+        if (m.id !== 'successManagementModal' && m.id !== 'processingModal') {
+            m.classList.add('hidden');
+            m.classList.remove('flex', 'show');
+        }
     });
 
     // Show Spinner immediately
@@ -577,7 +579,18 @@ function startSuccessCountdown(customMessage = null) {
                         
                         if (seconds <= 0) {
                             clearInterval(interval);
-                            location.reload();
+                            
+                            // SILENT REFRESH OR RELOAD
+                            if (typeof onFinish === 'function') {
+                                successModal.classList.remove('show');
+                                setTimeout(() => {
+                                    successModal.classList.add('hidden');
+                                    successModal.classList.remove('flex');
+                                    onFinish(); // Execute local refresh logic
+                                }, 300);
+                            } else {
+                                location.reload();
+                            }
                         }
                     }, 1000);
                 }
