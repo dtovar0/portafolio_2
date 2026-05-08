@@ -70,12 +70,10 @@ def dashboard():
             total_platforms = Platform.query.filter(Platform.area_id.in_(area_ids)).count()
             total_users = 1 # El usuario mismo
             
-        # Recent activity (Global for admin, filtered for users)
-        if user.role.lower() == 'administrador':
-            recent_activity = DriveActivity.query.order_by(DriveActivity.created_at.desc()).limit(12).all()
-        else:
-            area_ids = [a.id for a in user.areas]
-            recent_activity = DriveActivity.query.filter(DriveActivity.area_id.in_(area_ids)).order_by(DriveActivity.created_at.desc()).limit(12).all()
+        # Recent activity (Strictly filtered by current user for this dashboard)
+        recent_activity = DriveActivity.query.filter_by(user_id=user.id)\
+                                     .order_by(DriveActivity.created_at.desc())\
+                                     .limit(12).all()
 
         # --- TELEMETRÍA PERSONALIZADA (SOLO USUARIO) ---
         from sqlalchemy import func, case
