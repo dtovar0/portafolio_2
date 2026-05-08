@@ -405,7 +405,7 @@
                     ...baseCfg, chart: { ...baseCfg.chart, type: 'bar', height: '100%' },
                     series: [{ name: 'Usuarios', data: data.up.v }],
                     xaxis: { ...baseCfg.xaxis, categories: data.up.l },
-                    plotOptions: { bar: { borderRadius: 4, columnWidth: '30%', distributed: true } },
+                    plotOptions: { bar: { borderRadius: 4, columnWidth: '50%', distributed: true } },
                     colors: [accent, '#8b5cf6', '#10b981', '#f59e0b', '#3b82f6']
                 }).render();
             } else { drawEmpty('c-platform', 'Distribución Plataformas'); }
@@ -418,7 +418,7 @@
                         { name: 'Usuarios', data: data.ua.uu }
                     ],
                     xaxis: { ...baseCfg.xaxis, categories: data.ua.l },
-                    plotOptions: { bar: { borderRadius: 4, columnWidth: '60%' } },
+                    plotOptions: { bar: { borderRadius: 4, columnWidth: '50%' } },
                     colors: ['#8b5cf6', '#10b981']
                 }).render();
             } else { drawEmpty('c-area', 'Densidad por Áreas'); }
