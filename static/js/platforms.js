@@ -391,21 +391,21 @@
                     orderable: false,
                     className: 'text-center',
                     render: (data) => {
-                        const iconCls = "w-8 h-8 rounded-lg flex items-center justify-center transition-all border border-current/10 shadow-sm";
+                        const iconCls = "w-9 h-9 rounded-xl flex items-center justify-center transition-all border border-current/10 shadow-sm";
                         const activeD = data.can_download ? 'bg-primary/10 text-primary' : 'text-label/10 bg-label/5 border-transparent';
                         const activeU = data.can_upload ? 'bg-primary/10 text-primary' : 'text-label/10 bg-label/5 border-transparent';
                         const activeE = data.is_encrypted ? 'bg-amber-500/10 text-amber-500' : 'text-label/10 bg-label/5 border-transparent';
 
                         return `
-                        <div class="flex items-center justify-center h-full gap-1.5">
+                        <div class="flex items-center justify-center h-full gap-2">
                             <div class="${iconCls} ${activeD}" title="Descarga: ${data.can_download ? 'Habilitada' : 'Restringida'}">
-                                <i class="fas fa-fw fa-cloud-arrow-down text-[14px]"></i>
+                                <i class="fas fa-fw fa-cloud-arrow-down text-[18px]"></i>
                             </div>
                             <div class="${iconCls} ${activeU}" title="Subida: ${data.can_upload ? 'Habilitada' : 'Restringida'}">
-                                <i class="fas fa-fw fa-cloud-arrow-up text-[14px]"></i>
+                                <i class="fas fa-fw fa-cloud-arrow-up text-[18px]"></i>
                             </div>
                             <div class="${iconCls} ${activeE}" title="Cifrado: ${data.is_encrypted ? 'Activo' : 'Inactivo'}">
-                                <i class="fas fa-fw fa-shield-halved text-[14px]"></i>
+                                <i class="fas fa-fw fa-shield-halved text-[18px]"></i>
                             </div>
                         </div>`;
                     }
