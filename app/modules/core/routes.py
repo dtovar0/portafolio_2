@@ -80,9 +80,26 @@ def index():
             ua_platforms = [0] * len(ua_labels)
             ua_users = [0] * len(ua_labels)
 
-        # 4. Chart Data: Most Visited
-        most_visited = Platform.query.order_by(Platform.visits.desc()).limit(5).all()
+        # 4. Chart Data: Platform Traffic (Top 5 by Volume)
+        from app.modules.core.models import DriveActivity
+        traffic_stats = db.session.query(
+            Platform.name,
+            db.func.sum(db.case((DriveActivity.action == 'Alta', DriveActivity.file_size), else_=0)).label('traffic_in'),
+            db.func.sum(db.case((DriveActivity.action == 'Descarga', DriveActivity.file_size), else_=0)).label('traffic_out')
+        ).join(DriveActivity, Platform.id == DriveActivity.platform_id)\
+         .group_by(Platform.id)\
+         .order_by(db.desc(db.func.sum(DriveActivity.file_size)))\
+         .limit(5).all()
 
+        mv_labels = [p[0] for p in traffic_stats]
+        mv_in = [round(p[1] / (1024 * 1024), 2) for p in traffic_stats] # MB
+        mv_out = [round(p[2] / (1024 * 1024), 2) for p in traffic_stats] # MB
+
+        if not mv_labels:
+            mv_labels = [p.name for p in Platform.query.limit(5).all()]
+            mv_in = [0] * len(mv_labels)
+            mv_out = [0] * len(mv_labels)
+        
         # 5. Chart Data: Audit Actions
         audit_stats = db.session.query(AuditLog.action, db.func.count(AuditLog.id))\
                                 .group_by(AuditLog.action).limit(5).all()
@@ -106,7 +123,9 @@ def index():
                              users_area_labels=ua_labels,
                              users_area_platforms=ua_platforms,
                              users_area_users=ua_users,
-                             most_visited=most_visited,
+                             traffic_mv_labels=mv_labels,
+                             traffic_mv_in=mv_in,
+                             traffic_mv_out=mv_out,
                              audit_labels=audit_labels,
                              audit_values=audit_values,
                              log_list=pagination.items)

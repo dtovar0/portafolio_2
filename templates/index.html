@@ -327,7 +327,11 @@
                 up: {{ users_area_platforms|tojson if users_area_platforms else '[]' }}, 
                 uu: {{ users_area_users|tojson if users_area_users else '[]' }} 
             },
-            mv: { l: {{ most_visited|map(attribute='name')|list|tojson if most_visited else '[]' }}, v: {{ most_visited|map(attribute='visits')|list|tojson if most_visited else '[]' }} },
+            mv: { 
+                l: {{ traffic_mv_labels|tojson if traffic_mv_labels else '[]' }}, 
+                vin: {{ traffic_mv_in|tojson if traffic_mv_in else '[]' }},
+                vout: {{ traffic_mv_out|tojson if traffic_mv_out else '[]' }}
+            },
             au: { l: {{ audit_labels|tojson if audit_labels else '[]' }}, v: {{ audit_values|tojson if audit_values else '[]' }} }
         };
 
@@ -405,13 +409,23 @@
                 }).render();
             } else { drawEmpty('c-area', 'Densidad por Áreas'); }
 
-            if (data.mv.v.length > 0 && !data.mv.v.every(v => v === 0)) {
+            if (data.mv.l.length > 0) {
                 new ApexCharts(document.querySelector("#c-visits"), {
                     ...baseCfg, chart: { ...baseCfg.chart, type: 'bar', height: '100%' },
-                    series: [{ name: 'Visitas', data: data.mv.v }],
+                    series: [
+                        { name: 'Subidas (MB)', data: data.mv.vin },
+                        { name: 'Descargas (MB)', data: data.mv.vout }
+                    ],
                     xaxis: { ...baseCfg.xaxis, categories: data.mv.l },
-                    plotOptions: { bar: { borderRadius: 8, columnWidth: '35%' } },
-                    colors: ['#ef4444']
+                    plotOptions: { 
+                        bar: { 
+                            borderRadius: 6, 
+                            columnWidth: '55%',
+                            dataLabels: { position: 'top' }
+                        } 
+                    },
+                    colors: ['#ef4444', '#f59e0b'],
+                    legend: { show: true, position: 'top', labels: { colors: 'var(--color-label-muted)' } }
                 }).render();
             } else { drawEmpty('c-visits', 'Análisis de Tráfico'); }
 
