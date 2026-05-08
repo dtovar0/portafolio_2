@@ -25,6 +25,7 @@ def index():
         areas_count = Area.query.count()
         platforms_total = Platform.query.count()
         users_total = User.query.count()
+        
         visits_total = db.session.query(db.func.sum(Platform.visits)).scalar() or 0
 
         # Traffic Stats (In/Out)
@@ -33,6 +34,8 @@ def index():
         t_out_bytes = db.session.query(db.func.sum(DriveActivity.file_size)).filter(DriveActivity.action == 'Descarga').scalar() or 0
 
         def format_size(size):
+            if size is None: return "0.0 B"
+            size = float(size)
             for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
                 if size < 1024.0:
                     return f"{size:.1f} {unit}"
