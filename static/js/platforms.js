@@ -423,17 +423,24 @@
             },
             language: {
                 zeroRecords: "No se encontraron registros",
-                info: "Mostrando _START_-_END_ de _TOTAL_",
-                infoEmpty: "Mostrando 0-0 de 0",
+                info: "Mostrando _START_-_END_ de _TOTAL_ registros",
+                infoEmpty: "Mostrando 0-0 de 0 registros",
+                infoFiltered: "(filtrado de _MAX_ registros totales)",
                 paginate: {
-                    previous: '<i class="fas fa-chevron-left text-[10px]"></i>',
-                    next: '<i class="fas fa-chevron-right text-[10px]"></i>'
+                    previous: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>',
+                    next: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>'
                 }
             },
             drawCallback: function(settings) {
                 renderGhostRows(settings, 7);
             },
             initComplete: function() {
+                const cell = $(this.api().table().container()).find('.dt-layout-row.dt-layout-table .dt-layout-cell');
+                const tbl  = cell.children('table');
+                if (tbl.length && !cell.children('.nx-table-scroll').length) {
+                    tbl.wrap('<div class="nx-table-scroll"></div>');
+                }
+                
                 // Ensure table fits perfectly after initialization
                 setTimeout(() => {
                     if (this.api()) this.api().columns.adjust();
