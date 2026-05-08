@@ -421,7 +421,7 @@
                     series: [{ name: 'Usuarios', data: data.up.v }],
                     xaxis: { ...baseCfg.xaxis, categories: data.up.l },
                     plotOptions: { bar: { borderRadius: 4, columnWidth: '50%', distributed: true } },
-                    colors: [accent, '#8b5cf6', '#10b981', '#f59e0b', '#3b82f6']
+                    colors: [accent, '#8b5cf6', '#10b981', '#f59e0b', '#3b82f6', '#ef4444', '#6366f1']
                 }).render();
             } else { drawEmpty('c-platform', 'Distribución Plataformas'); }
 
@@ -431,7 +431,7 @@
                     series: [{ name: 'Plataformas', data: data.ua.up }],
                     xaxis: { ...baseCfg.xaxis, categories: data.ua.l },
                     plotOptions: { bar: { borderRadius: 4, columnWidth: '50%', distributed: true } },
-                    colors: ['#10b981', '#8b5cf6', '#3b82f6', '#f59e0b', '#ef4444']
+                    colors: [accent, '#8b5cf6', '#10b981', '#f59e0b', '#3b82f6', '#ef4444', '#6366f1']
                 }).render();
             } else { drawEmpty('c-area', 'Densidad por Áreas'); }
 
