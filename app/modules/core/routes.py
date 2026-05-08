@@ -42,10 +42,22 @@ def index():
         traffic_in = format_size(t_in_bytes)
         traffic_out = format_size(t_out_bytes)
 
-        # 2. Chart Data: Users per Platform
-        platforms = Platform.query.all()
-        up_labels = [p.name for p in platforms[:5]]
-        up_values = [p.visits for p in platforms[:5]] # Using visits as proxy for demo
+        # 2. Chart Data: Users per Platform (Top 5)
+        from app.modules.auth.models import user_platforms
+        platforms_with_user_counts = db.session.query(
+            Platform.name, 
+            db.func.count(user_platforms.c.user_id).label('user_count')
+        ).join(user_platforms, Platform.id == user_platforms.c.platform_id)\
+         .group_by(Platform.id)\
+         .order_by(db.desc('user_count'))\
+         .limit(5).all()
+        
+        up_labels = [p[0] for p in platforms_with_user_counts]
+        up_values = [p[1] for p in platforms_with_user_counts]
+        
+        if not up_labels: # Fallback for demo/empty state
+            up_labels = [p.name for p in Platform.query.limit(5).all()]
+            up_values = [0] * len(up_labels)
 
         # 3. Chart Data: Users per Area
         areas = Area.query.all()
