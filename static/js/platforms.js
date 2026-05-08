@@ -352,21 +352,21 @@
                     width: '25%',
                     className: 'text-left',
                     render: (data) => `
-                        <div class="flex items-center h-full text-primary font-black uppercase italic truncate">${data}</div>` 
+                        <div class="flex items-center h-full text-primary font-black uppercase italic truncate text-sm">${data}</div>` 
                 },
                 { 
                     data: 'description', 
                     width: '35%',
                     className: 'text-left',
-                    render: (data) => `<div class="flex items-center h-full font-bold text-label/60 text-[12px] truncate">${data || '-'}</div>` 
+                    render: (data) => `<div class="flex items-center h-full font-bold text-label/70 text-[13px] truncate">${data || '-'}</div>` 
                 },
                 { 
                     data: 'users_count', 
                     width: '10%',
                     className: 'text-left',
                     render: (data) => `
-                        <div class="flex items-center h-full font-black text-label/60 text-[12px]">
-                            <i class="fas fa-users mr-2 opacity-30 text-[13px]"></i> ${data || 0}
+                        <div class="flex items-center h-full font-black text-label/60 text-[13px]">
+                            <i class="fas fa-fw fa-users mr-2 opacity-30 text-[14px]"></i> ${data || 0}
                         </div>` 
                 },
                 { 
@@ -378,8 +378,8 @@
                         const cls = status === 'activo' ? 'nx-badge-success' : 'nx-badge-error';
                         return `
                             <div class="flex items-center h-full">
-                                <span class="nx-badge ${cls} flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black tracking-widest border border-current/10 shadow-sm">
-                                    <i class="fas ${status === 'activo' ? 'fa-check-circle' : 'fa-times-circle'} text-[10px] opacity-70"></i>
+                                <span class="nx-badge ${cls} flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-black tracking-widest border border-current/10 shadow-sm">
+                                    <i class="fas fa-fw ${status === 'activo' ? 'fa-check-circle' : 'fa-times-circle'} text-[11px] opacity-70"></i>
                                     ${String(data).toUpperCase()}
                                 </span>
                             </div>`;
@@ -399,13 +399,13 @@
                         return `
                         <div class="flex items-center justify-center h-full gap-1.5">
                             <div class="${iconCls} ${activeD}" title="Descarga: ${data.can_download ? 'Habilitada' : 'Restringida'}">
-                                <i class="fas fa-cloud-arrow-down text-[13px]"></i>
+                                <i class="fas fa-fw fa-cloud-arrow-down text-[14px]"></i>
                             </div>
                             <div class="${iconCls} ${activeU}" title="Subida: ${data.can_upload ? 'Habilitada' : 'Restringida'}">
-                                <i class="fas fa-cloud-arrow-up text-[13px]"></i>
+                                <i class="fas fa-fw fa-cloud-arrow-up text-[14px]"></i>
                             </div>
                             <div class="${iconCls} ${activeE}" title="Cifrado: ${data.is_encrypted ? 'Activo' : 'Inactivo'}">
-                                <i class="fas fa-shield-halved text-[13px]"></i>
+                                <i class="fas fa-fw fa-shield-halved text-[14px]"></i>
                             </div>
                         </div>`;
                     }
