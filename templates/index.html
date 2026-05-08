@@ -322,7 +322,11 @@
     (function() {
         const data = {
             up: { l: {{ users_platform_labels|tojson if users_platform_labels else '[]' }}, v: {{ users_platform_values|tojson if users_platform_values else '[]' }} },
-            ua: { l: {{ users_area_labels|tojson if users_area_labels else '[]' }}, v: {{ users_area_values|tojson if users_area_values else '[]' }} },
+            ua: { 
+                l: {{ users_area_labels|tojson if users_area_labels else '[]' }}, 
+                up: {{ users_area_platforms|tojson if users_area_platforms else '[]' }}, 
+                uu: {{ users_area_users|tojson if users_area_users else '[]' }} 
+            },
             mv: { l: {{ most_visited|map(attribute='name')|list|tojson if most_visited else '[]' }}, v: {{ most_visited|map(attribute='visits')|list|tojson if most_visited else '[]' }} },
             au: { l: {{ audit_labels|tojson if audit_labels else '[]' }}, v: {{ audit_values|tojson if audit_values else '[]' }} }
         };
@@ -380,13 +384,24 @@
                 }).render();
             } else { drawEmpty('c-platform', 'Distribución Plataformas'); }
 
-            if (data.ua.v.length > 0 && !data.ua.v.every(v => v === 0)) {
+            if (data.ua.l.length > 0) {
                 new ApexCharts(document.querySelector("#c-area"), {
                     ...baseCfg, chart: { ...baseCfg.chart, type: 'bar', height: '100%' },
-                    series: [{ name: 'Densidad', data: data.ua.v }],
+                    series: [
+                        { name: 'Plataformas', data: data.ua.up },
+                        { name: 'Usuarios', data: data.ua.uu }
+                    ],
                     xaxis: { ...baseCfg.xaxis, categories: data.ua.l },
-                    plotOptions: { bar: { borderRadius: 10, horizontal: true, barHeight: '35%' } },
-                    colors: ['#8b5cf6']
+                    plotOptions: { 
+                        bar: { 
+                            borderRadius: 6, 
+                            horizontal: false, 
+                            columnWidth: '55%',
+                            dataLabels: { position: 'top' }
+                        } 
+                    },
+                    colors: ['#8b5cf6', '#10b981'],
+                    legend: { show: true, position: 'top', labels: { colors: 'var(--color-label-muted)' } }
                 }).render();
             } else { drawEmpty('c-area', 'Densidad por Áreas'); }
 

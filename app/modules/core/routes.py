@@ -59,11 +59,26 @@ def index():
             up_labels = [p.name for p in Platform.query.limit(5).all()]
             up_values = [0] * len(up_labels)
 
-        # 3. Chart Data: Users per Area
-        areas = Area.query.all()
-        ua_labels = [a.name for a in areas[:5]]
-        ua_values = [len(a.platforms) for a in areas[:5]] # Density proxy
-        ua_colors = [a.color or '#6366f1' for a in areas[:5]]
+        # 3. Chart Data: Areas Population (Top 5 by Users)
+        from app.modules.auth.models import user_areas
+        areas_stats = db.session.query(
+            Area.name,
+            db.func.count(db.distinct(Platform.id)).label('platform_count'),
+            db.func.count(db.distinct(user_areas.c.user_id)).label('user_count')
+        ).outerjoin(Platform, Area.id == Platform.area_id)\
+         .outerjoin(user_areas, Area.id == user_areas.c.area_id)\
+         .group_by(Area.id)\
+         .order_by(db.desc('user_count'))\
+         .limit(5).all()
+
+        ua_labels = [a[0] for a in areas_stats]
+        ua_platforms = [a[1] for a in areas_stats]
+        ua_users = [a[2] for a in areas_stats]
+
+        if not ua_labels:
+            ua_labels = [a.name for a in Area.query.limit(5).all()]
+            ua_platforms = [0] * len(ua_labels)
+            ua_users = [0] * len(ua_labels)
 
         # 4. Chart Data: Most Visited
         most_visited = Platform.query.order_by(Platform.visits.desc()).limit(5).all()
@@ -89,8 +104,8 @@ def index():
                              users_platform_labels=up_labels,
                              users_platform_values=up_values,
                              users_area_labels=ua_labels,
-                             users_area_values=ua_values,
-                             users_area_colors=ua_colors,
+                             users_area_platforms=ua_platforms,
+                             users_area_users=ua_users,
                              most_visited=most_visited,
                              audit_labels=audit_labels,
                              audit_values=audit_values,
