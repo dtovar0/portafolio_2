@@ -378,13 +378,14 @@
             },
             dataLabels: { enabled: false },
             stroke: { curve: 'smooth', width: 2 },
-            grid: { borderColor: 'var(--color-panel-border)', strokeDashArray: 4, padding: { left: 20, right: 20, bottom: 40, top: 10 } },
+            grid: { borderColor: 'var(--color-panel-border)', strokeDashArray: 4, padding: { left: 30, right: 30, bottom: 40, top: 10 } },
             xaxis: {
                 axisBorder: { show: false }, axisTicks: { show: false },
+                tickPlacement: 'between',
                 labels: { 
                     style: { colors: 'var(--color-label-muted)', fontSize: '8px', fontWeight: 800 },
                     rotate: 0,
-                    offsetY: 5,
+                    offsetY: 0,
                     formatter: (v) => v && v.length > 8 ? v.substring(0, 8) + '..' : v
                 }
             },
