@@ -365,8 +365,8 @@
                     width: '10%',
                     className: 'text-left',
                     render: (data) => `
-                        <div class="flex items-center h-full font-black text-label/40 text-[11px]">
-                            <i class="fas fa-users mr-2 opacity-30"></i> ${data || 0}
+                        <div class="flex items-center h-full font-black text-label/60 text-[12px]">
+                            <i class="fas fa-users mr-2 opacity-30 text-[13px]"></i> ${data || 0}
                         </div>` 
                 },
                 { 
@@ -378,8 +378,8 @@
                         const cls = status === 'activo' ? 'nx-badge-success' : 'nx-badge-error';
                         return `
                             <div class="flex items-center h-full">
-                                <span class="nx-badge ${cls} flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-black tracking-widest border border-current/10 shadow-sm">
-                                    <i class="fas ${status === 'activo' ? 'fa-check-circle' : 'fa-times-circle'} text-[8px] opacity-70"></i>
+                                <span class="nx-badge ${cls} flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black tracking-widest border border-current/10 shadow-sm">
+                                    <i class="fas ${status === 'activo' ? 'fa-check-circle' : 'fa-times-circle'} text-[10px] opacity-70"></i>
                                     ${String(data).toUpperCase()}
                                 </span>
                             </div>`;
@@ -391,7 +391,7 @@
                     orderable: false,
                     className: 'text-center',
                     render: (data) => {
-                        const iconCls = "w-7 h-7 rounded-lg flex items-center justify-center transition-all border border-current/10 shadow-sm";
+                        const iconCls = "w-8 h-8 rounded-lg flex items-center justify-center transition-all border border-current/10 shadow-sm";
                         const activeD = data.can_download ? 'bg-primary/10 text-primary' : 'text-label/10 bg-label/5 border-transparent';
                         const activeU = data.can_upload ? 'bg-primary/10 text-primary' : 'text-label/10 bg-label/5 border-transparent';
                         const activeE = data.is_encrypted ? 'bg-amber-500/10 text-amber-500' : 'text-label/10 bg-label/5 border-transparent';
@@ -399,13 +399,13 @@
                         return `
                         <div class="flex items-center justify-center h-full gap-1.5">
                             <div class="${iconCls} ${activeD}" title="Descarga: ${data.can_download ? 'Habilitada' : 'Restringida'}">
-                                <i class="fas fa-cloud-arrow-down text-[10px]"></i>
+                                <i class="fas fa-cloud-arrow-down text-[13px]"></i>
                             </div>
                             <div class="${iconCls} ${activeU}" title="Subida: ${data.can_upload ? 'Habilitada' : 'Restringida'}">
-                                <i class="fas fa-cloud-arrow-up text-[10px]"></i>
+                                <i class="fas fa-cloud-arrow-up text-[13px]"></i>
                             </div>
                             <div class="${iconCls} ${activeE}" title="Cifrado: ${data.is_encrypted ? 'Activo' : 'Inactivo'}">
-                                <i class="fas fa-shield-halved text-[10px]"></i>
+                                <i class="fas fa-shield-halved text-[13px]"></i>
                             </div>
                         </div>`;
                     }
