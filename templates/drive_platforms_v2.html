@@ -60,6 +60,21 @@
     .dt-layout-cell {
         padding: 0 !important;
     }
+
+    /* High-Density Row Scaling */
+    .modern-table tbody tr td {
+        height: var(--row-h, 52px);
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        vertical-align: middle;
+    }
+
+    /* Ensure action buttons and icons don't break the density */
+    .modern-table tbody tr td div {
+        display: flex;
+        align-items: center;
+        height: 100%;
+    }
 </style>
 {% endblock %}
 

@@ -293,7 +293,11 @@
         if (breadcrumb) breadcrumb.classList.remove('hidden');
         if (breadcrumbArea) breadcrumbArea.textContent = areaName;
 
-        renderPlatformsTable(platforms);
+        // Force a micro-tick to ensure the container is visible and has height before rendering
+        setTimeout(() => {
+            renderPlatformsTable(platforms);
+        }, 50);
+        
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -498,11 +502,11 @@
         // Calculate dynamic row height (Audit Style)
         const container = api.table().container();
         const gridH = $(container).height();
-        let rowH = 48;
+        let rowH = 52;
         
         if (gridH > 0) {
-            // Header ~52px, Footer ~52px
-            rowH = Math.max(48, Math.floor((gridH - 110) / pageLen));
+            // Header ~52px, Footer ~52px, Compensate for borders
+            rowH = Math.max(48, Math.floor((gridH - 60) / (pageLen + 1)));
         }
         $(container).css('--row-h', rowH + 'px');
 
@@ -520,13 +524,13 @@
             
             ghostHtml += `
                 <tr class="ghost-row pointer-events-none select-none ${bgClass}">
-                    <td class="py-0 text-center" style="height: var(--row-h, 52px)"><div></div></td>
-                    <td class="py-0 text-center"><div></div></td>
-                    <td class="py-0 text-left"><div></div></td>
-                    <td class="py-0 text-left"><div></div></td>
-                    <td class="py-0 text-center"><div></div></td>
-                    <td class="py-0 text-center"><div></div></td>
-                    <td class="py-0 text-center"><div></div></td>
+                    <td class="text-center"><div></div></td>
+                    <td class="text-center"><div></div></td>
+                    <td class="text-left"><div></div></td>
+                    <td class="text-left"><div></div></td>
+                    <td class="text-center"><div></div></td>
+                    <td class="text-center"><div></div></td>
+                    <td class="text-center"><div></div></td>
                 </tr>`;
         }
         tbody.append(ghostHtml);
