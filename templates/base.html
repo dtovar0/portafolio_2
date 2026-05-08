@@ -177,15 +177,26 @@
                         </div>
 
                         <!-- Refresh Interval -->
-                        <div class="p-5 bg-surface-container/20 rounded-2xl border border-panel-border/40 group">
-                            <div class="flex justify-between items-center mb-4">
-                                <div>
-                                    <h4 class="text-sm font-black text-label uppercase tracking-tight group-focus-within:text-primary transition-colors">Frecuencia de Refresco</h4>
-                                    <p class="text-[11px] text-label/40 font-bold uppercase tracking-tighter mt-1">Actualización automática (segundos)</p>
+                        <div class="p-6 bg-surface-container/30 backdrop-blur-md rounded-[2rem] border border-panel-border/50 group transition-all hover:border-primary/30">
+                            <div class="flex justify-between items-center mb-6">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/10">
+                                        <i class="fas fa-history text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-black text-label uppercase tracking-tight group-focus-within:text-primary transition-colors">Frecuencia de Refresco</h4>
+                                        <p class="text-[10px] text-label/40 font-black uppercase tracking-widest mt-1">Sincronización Automática</p>
+                                    </div>
                                 </div>
-                                <span id="refreshValueDisplay" class="px-3 py-1 bg-primary text-white text-[11px] font-black rounded-lg shadow-lg shadow-primary/20">{{ current_user.pref_refresh_interval or 60 }}s</span>
+                                <span id="refreshValueDisplay" class="px-4 py-1.5 bg-primary text-white text-[11px] font-black rounded-full shadow-xl shadow-primary/20 border border-white/20">{{ current_user.pref_refresh_interval or 60 }}s</span>
                             </div>
-                            <input type="range" id="settingRefreshRange" min="10" max="300" step="10" value="{{ current_user.pref_refresh_interval or 60 }}" class="w-full h-1.5 bg-panel-border rounded-lg appearance-none cursor-pointer accent-primary">
+                            <div class="px-2">
+                                <input type="range" id="settingRefreshRange" min="10" max="300" step="10" value="{{ current_user.pref_refresh_interval or 60 }}" class="w-full h-1.5 cursor-pointer">
+                                <div class="flex justify-between mt-3 px-1 text-[9px] font-black text-label/20 uppercase tracking-widest">
+                                    <span>10s</span>
+                                    <span>300s</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 

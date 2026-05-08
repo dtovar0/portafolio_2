@@ -1677,3 +1677,65 @@ input[id*="Search"],
     padding-top: 0 !important;
     padding-bottom: 0 !important;
 }
+
+/* === NEXUS PREMIUM RANGE SLIDER — v1.0 === */
+input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    background: transparent;
+    cursor: pointer;
+}
+
+input[type="range"]:focus {
+    outline: none;
+}
+
+/* Track Styling */
+input[type="range"]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 12px;
+    background: linear-gradient(to right, rgb(var(--color-primary) / 0.1), rgb(var(--color-primary) / 0.3));
+    border: 1px solid rgb(var(--color-panel-border) / 0.4);
+    border-radius: 99px;
+    transition: all 0.3s ease;
+}
+
+input[type="range"]:hover::-webkit-slider-runnable-track {
+    border-color: rgb(var(--color-primary) / 0.4);
+    background: linear-gradient(to right, rgb(var(--color-primary) / 0.15), rgb(var(--color-primary) / 0.4));
+}
+
+/* Thumb Styling */
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 24px;
+    width: 24px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 4px solid rgb(var(--color-primary));
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 0 0 0px rgb(var(--color-primary) / 0.2);
+    margin-top: -7px; /* Centers thumb on track */
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+input[type="range"]:active::-webkit-slider-thumb {
+    transform: scale(1.15);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2), 0 0 0 8px rgb(var(--color-primary) / 0.1);
+}
+
+/* Firefox Support */
+input[type="range"]::-moz-range-track {
+    width: 100%;
+    height: 12px;
+    background: linear-gradient(to right, rgb(var(--color-primary) / 0.1), rgb(var(--color-primary) / 0.3));
+    border-radius: 99px;
+}
+
+input[type="range"]::-moz-range-thumb {
+    height: 18px;
+    width: 18px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 4px solid rgb(var(--color-primary));
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
