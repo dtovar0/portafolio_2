@@ -80,22 +80,30 @@ def dashboard():
         # --- TELEMETRÍA AVANZADA ---
         from sqlalchemy import func, case
         from datetime import timedelta
+        from app.modules.auth.models import user_platforms, user_areas
         
         # 1. Distribución de Plataformas (Usuarios por Plataforma)
-        platform_stats = db.session.query(
-            Platform.name,
-            func.count(User.id).label('total')
-        ).join(Platform.users).group_by(Platform.id).all()
+        platforms_with_user_counts = db.session.query(
+            Platform.name, 
+            func.count(user_platforms.c.user_id).label('user_count')
+        ).join(user_platforms, Platform.id == user_platforms.c.platform_id)\
+         .group_by(Platform.id)\
+         .order_by(db.desc('user_count'))\
+         .limit(5).all()
         
-        up_labels = [r[0] for r in platform_stats]
-        up_values = [int(r[1]) for r in platform_stats]
+        up_labels = [p[0] for p in platforms_with_user_counts]
+        up_values = [int(p[1]) for p in platforms_with_user_counts]
 
         # 2. Distribución de Áreas (Plataformas por Área)
         area_stats_raw = db.session.query(
             Area.name,
-            func.count(Platform.id).label('p_count'),
-            func.count(User.id).label('u_count')
-        ).outerjoin(Area.platforms).outerjoin(Area.users).group_by(Area.id).all()
+            func.count(func.distinct(Platform.id)).label('p_count'),
+            func.count(func.distinct(user_areas.c.user_id)).label('u_count')
+        ).outerjoin(Platform, Area.id == Platform.area_id)\
+         .outerjoin(user_areas, Area.id == user_areas.c.area_id)\
+         .group_by(Area.id)\
+         .order_by(db.desc('u_count'))\
+         .limit(5).all()
         
         ua_labels = [r[0] for r in area_stats_raw]
         ua_platforms = [int(r[1]) for r in area_stats_raw]
@@ -106,7 +114,10 @@ def dashboard():
             Platform.name,
             func.sum(case((DriveActivity.action == 'Alta', DriveActivity.file_size), else_=0)).label('up'),
             func.sum(case((DriveActivity.action == 'Descarga', DriveActivity.file_size), else_=0)).label('down')
-        ).join(DriveActivity, Platform.id == DriveActivity.platform_id).group_by(Platform.id).all()
+        ).join(DriveActivity, Platform.id == DriveActivity.platform_id)\
+         .group_by(Platform.id)\
+         .order_by(db.desc(func.sum(DriveActivity.file_size)))\
+         .limit(5).all()
 
         t_labels = [r[0] for r in traffic_raw]
         t_up = [float(r[1] or 0) for r in traffic_raw]
