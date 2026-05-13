@@ -18,6 +18,8 @@ services:
     volumes:
       - ./storage:/app/storage
       - ./logs:/app/logs
+      - ./.env:/app/.env
+
 
   db:
     image: mariadb:10.11
