@@ -1,0 +1,14 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+.git
+.gitignore
+*.log
+storage/
+instance/
+.pytest_cache/
+secret.key
+scratch/

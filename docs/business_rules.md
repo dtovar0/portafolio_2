@@ -61,3 +61,17 @@ Al modificar un área, el paso de selección de usuarios ya no está presente. P
 
 ### Impacto
 UI (Módulo de Áreas), Backend (API de Accesos).
+
+---
+
+## Infraestructura y Despliegue
+
+### Regla: Estandarización de Contenedores
+El despliegue de la plataforma debe realizarse obligatoriamente mediante Docker. El entorno productivo debe utilizar Gunicorn como servidor de aplicaciones y MariaDB/Redis como servicios externos orquestados.
+
+### Ejemplo
+El archivo `docker-compose.yml` define los servicios `app`, `db` y `redis`, asegurando que la aplicación sea portable y fácil de escalar.
+
+### Impacto
+DevOps, Proceso de Despliegue, CI/CD.
+
