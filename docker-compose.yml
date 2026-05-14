@@ -6,7 +6,7 @@ services:
     container_name: nexus_app_dev
     restart: always
     ports:
-      - "${PORT_APP:-5000}:5000"
+      - "${PORT_APP:-5001}:5000"
     env_file:
       - .env
     environment:
