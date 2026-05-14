@@ -204,7 +204,10 @@ class NexusDrive {
 
     hideContextMenu() {
         const menu = document.getElementById('drive-context-menu');
-        if (menu) menu.classList.add('hidden');
+        if (menu) {
+            menu.classList.add('hidden');
+            menu.style.display = 'none';
+        }
     }
 
     async loadStats() {
@@ -726,6 +729,7 @@ class NexusDrive {
 
     async downloadSelected() {
         if (!this.selectedFile) return;
+        this.hideContextMenu();
         
         // 1. Validar Permisos Primero
         if (!this.checkPermissions('download')) return;
@@ -771,6 +775,7 @@ class NexusDrive {
     async downloadFolder(path = null) {
         const targetPath = path || this.selectedFile?.path;
         if (!targetPath) return;
+        this.hideContextMenu();
 
         // 1. Validar Permisos Primero
         if (!this.checkPermissions('download')) return;
@@ -810,6 +815,7 @@ class NexusDrive {
 
     async deleteSelected() {
         if (!this.selectedFile) return;
+        this.hideContextMenu();
         
         // 1. Validar Permisos Primero
         if (!this.checkPermissions('delete')) return;
@@ -817,12 +823,12 @@ class NexusDrive {
         const item = this.selectedFile;
 
         const result = await Swal.fire({
-            title: '¿Confirmar eliminación?',
-            text: `Se borrará permanentemente: ${item.name}`,
+            title: '¿Enviar a la papelera?',
+            text: `El elemento "${item.name}" se moverá a la carpeta de seguridad .trash`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#f43f5e',
-            confirmButtonText: 'Sí, eliminar',
+            confirmButtonText: 'Sí, mover a papelera',
             cancelButtonText: 'Cancelar',
             background: document.documentElement.classList.contains('dark') ? '#1e293b' : '#ffffff',
             color: document.documentElement.classList.contains('dark') ? '#f8fafc' : '#1e293b'
@@ -839,7 +845,7 @@ class NexusDrive {
                     password: password || '' 
                 });
                 if (data.success) {
-                    UI.showToast('Elemento eliminado');
+                    UI.showToast('Elemento movido a la papelera');
                     this.loadFiles(this.currentPath);
                     this.loadStats();
                 } else {
