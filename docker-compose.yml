@@ -17,6 +17,7 @@ services:
     volumes:
       - .:/app
       - ./logs:/app/logs
+      - /home/ftp_packet:/app/storage/fortigate
     depends_on:
       - redis
     networks:
