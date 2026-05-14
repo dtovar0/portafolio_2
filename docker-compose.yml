@@ -27,7 +27,7 @@ services:
     container_name: nexus_redis_dev
     restart: always
     ports:
-      - "6379:6379"
+      - "6381:6379"
     networks:
       - nexus_net
 
