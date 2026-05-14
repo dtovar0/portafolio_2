@@ -280,7 +280,7 @@ def list_files_api():
 
         items = []
         for entry in os.scandir(path):
-            if entry.name == '.nexus_lock': continue
+            if entry.name in ['.nexus_lock', '.trash']: continue
             try:
                 stats = entry.stat()
                 items.append({
@@ -399,13 +399,23 @@ def delete_item():
         target_platform = _resolve_platform_access(path)
         _validate_platform_password(target_platform, password)
             
-        if os.path.isdir(path):
-            import shutil
-            shutil.rmtree(path)
-        else:
-            os.remove(path)
+        # Implementación de Papelera (Trash)
+        trash_base = os.path.join(StorageManager.ROOT_STORAGE, '.trash')
+        os.makedirs(trash_base, exist_ok=True)
         
-        log_drive_activity(os.path.basename(path), os.path.dirname(path), 'Baja', current_user.id, 0, target_platform.area_id if target_platform else None, target_platform.id if target_platform else None)
+        # Evitar borrar la propia papelera
+        if path == trash_base:
+            return jsonify({'success': False, 'error': 'No se puede eliminar la papelera del sistema.'}), 403
+
+        # Crear nombre único en papelera (nombre_timestamp)
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        trash_name = f"{timestamp}_{os.path.basename(path)}"
+        trash_path = os.path.join(trash_base, trash_name)
+
+        import shutil
+        shutil.move(path, trash_path)
+        
+        log_drive_activity(os.path.basename(path), os.path.dirname(path), 'Trash', current_user.id, 0, target_platform.area_id if target_platform else None, target_platform.id if target_platform else None)
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
