@@ -356,7 +356,7 @@
                 },
                 { 
                     data: 'description', 
-                    width: '35%',
+                    width: '32%',
                     className: 'text-left',
                     render: (data) => `<div class="flex items-center h-full font-bold text-label/70 text-[13px] truncate">${data || '-'}</div>` 
                 },
@@ -387,13 +387,14 @@
                 },
                 { 
                     data: null, 
-                    width: '12%',
+                    width: '15%',
                     orderable: false,
                     className: 'text-center',
                     render: (data) => {
                         const iconCls = "w-9 h-9 rounded-xl flex items-center justify-center transition-all border border-current/10 shadow-sm";
                         const activeD = data.can_download ? 'bg-primary/10 text-primary' : 'text-label/10 bg-label/5 border-transparent';
                         const activeU = data.can_upload ? 'bg-primary/10 text-primary' : 'text-label/10 bg-label/5 border-transparent';
+                        const activeDel = data.can_delete ? 'bg-rose-500/10 text-rose-500' : 'text-label/10 bg-label/5 border-transparent';
                         const activeE = data.is_encrypted ? 'bg-amber-500/10 text-amber-500' : 'text-label/10 bg-label/5 border-transparent';
 
                         return `
@@ -403,6 +404,9 @@
                             </div>
                             <div class="${iconCls} ${activeU}" title="Subida: ${data.can_upload ? 'Habilitada' : 'Restringida'}">
                                 <i class="fas fa-fw fa-cloud-arrow-up text-[18px]"></i>
+                            </div>
+                            <div class="${iconCls} ${activeDel}" title="Eliminación: ${data.can_delete ? 'Habilitada' : 'Restringida'}">
+                                <i class="fas fa-fw fa-trash-can text-[18px]"></i>
                             </div>
                             <div class="${iconCls} ${activeE}" title="Cifrado: ${data.is_encrypted ? 'Activo' : 'Inactivo'}">
                                 <i class="fas fa-fw fa-shield-halved text-[18px]"></i>
