@@ -213,7 +213,7 @@
 
                     <!-- Drive fields (conditional) -->
                     <div class="drive-only-fields space-y-4">
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="flex items-center px-6 h-14 bg-surface-container/20 border border-panel-border rounded-2xl justify-between">
                                 <span class="text-[10px] font-black text-label/40 uppercase tracking-widest">Subida</span>
                                 <label class="relative inline-flex items-center cursor-pointer">
@@ -226,6 +226,13 @@
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input type="checkbox" name="can_download" id="can_download" checked class="sr-only peer">
                                     <div class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                </label>
+                            </div>
+                            <div class="flex items-center px-6 h-14 bg-surface-container/20 border border-panel-border rounded-2xl justify-between">
+                                <span class="text-[10px] font-black text-label/40 uppercase tracking-widest">Eliminación</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" name="can_delete" id="can_delete" checked class="sr-only peer">
+                                    <div class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-500"></div>
                                 </label>
                             </div>
                         </div>
@@ -330,11 +337,13 @@
             setTimeout(() => {
                 const up = document.getElementById('can_upload');
                 const dw = document.getElementById('can_download');
+                const del = document.getElementById('can_delete');
                 const enc = document.getElementById('is_encrypted');
                 if (up) up.checked = true;
                 if (dw) dw.checked = true;
+                if (del) del.checked = true;
                 if (enc) enc.checked = false;
-                console.log("Nexus Force: Toggles initialized (U/D: ON, E: OFF)");
+                console.log("Nexus Force: Toggles initialized (U/D/Del: ON, E: OFF)");
             }, 50);
         });
 

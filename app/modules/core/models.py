@@ -51,6 +51,7 @@ class Platform(db.Model):
     storage_path = db.Column(db.String(255))
     can_download = db.Column(db.Boolean, default=False)
     can_upload = db.Column(db.Boolean, default=False)
+    can_delete = db.Column(db.Boolean, default=False)
     is_encrypted = db.Column(db.Boolean, default=False)
     password = db.Column(db.String(255)) # Encrypted platform password
     created_at = db.Column(db.DateTime, default=db.func.now())
@@ -73,6 +74,7 @@ class Platform(db.Model):
             'storage_path': self.storage_path,
             'can_download': self.can_download,
             'can_upload': self.can_upload,
+            'can_delete': self.can_delete,
             'is_encrypted': self.is_encrypted,
             'area_name': self.area.name if self.area else 'Sin Área',
             'area_color': self.area.color if self.area else '#6366f1',

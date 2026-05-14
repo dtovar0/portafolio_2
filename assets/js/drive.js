@@ -687,10 +687,10 @@ class NexusDrive {
             });
             return false;
         }
-        if (action === 'delete' && !this.currentPerms?.can_download) {
+        if (action === 'delete' && !this.currentPerms?.can_delete) {
             Swal.fire({
                 title: 'Acceso Restringido',
-                text: 'No tienes permisos para eliminar elementos en esta ubicación (Modo Lectura).',
+                text: 'La eliminación de elementos está deshabilitada en esta unidad.',
                 icon: 'warning',
                 confirmButtonColor: '#6366f1'
             });

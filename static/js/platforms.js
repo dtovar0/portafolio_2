@@ -946,6 +946,9 @@
                 const downToggle = document.getElementById('can_download');
                 if (downToggle) downToggle.checked = !!palt.can_download;
 
+                const deleteToggle = document.getElementById('can_delete');
+                if (deleteToggle) deleteToggle.checked = !!palt.can_delete;
+
                 const encToggle = document.getElementById('is_encrypted');
                 if (encToggle) encToggle.checked = !!palt.is_encrypted;
 
@@ -1118,6 +1121,7 @@
                 // Correct boolean strings for Drive Backend
                 formData.set('can_upload', document.getElementById('can_upload').checked ? 'true' : 'false');
                 formData.set('can_download', document.getElementById('can_download').checked ? 'true' : 'false');
+                formData.set('can_delete', document.getElementById('can_delete').checked ? 'true' : 'false');
                 formData.set('is_encrypted', document.getElementById('is_encrypted').checked ? 'true' : 'false');
             } else {
                 const isChecked = document.getElementById('platformStatusToggle').checked;

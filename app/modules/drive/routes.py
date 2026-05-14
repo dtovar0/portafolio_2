@@ -302,7 +302,8 @@ def list_files_api():
             'current_path': requested_path,
             'permissions': {
                 'can_download': target_platform.can_download if target_platform else True,
-                'can_upload': target_platform.can_upload if target_platform else True
+                'can_upload': target_platform.can_upload if target_platform else True,
+                'can_delete': target_platform.can_delete if target_platform else True
             },
             'context': {
                 'kind': 'area_root' if area_root and not target_platform else 'platform',
@@ -397,7 +398,11 @@ def delete_item():
         password = data.get('password')
         
         target_platform = _resolve_platform_access(path)
-        _validate_platform_password(target_platform, password)
+        
+        if target_platform:
+            if not target_platform.can_delete:
+                return jsonify({'success': False, 'error': 'Eliminación deshabilitada para esta ubicación'}), 403
+            _validate_platform_password(target_platform, password)
             
         # Implementación de Papelera (Trash)
         trash_base = os.path.join(StorageManager.ROOT_STORAGE, '.trash')

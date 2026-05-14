@@ -32,6 +32,7 @@ def index():
             'storage_path': u.storage_path,
             'can_download': u.can_download,
             'can_upload': u.can_upload,
+            'can_delete': u.can_delete,
             'is_encrypted': u.is_encrypted,
             'status': u.status,
             'users_count': u.platform_users.count() if hasattr(u.platform_users, 'count') else len(u.platform_users)
@@ -84,6 +85,7 @@ def add_unit():
             icon=data.get('icon', 'fa-folder'),
             can_download=data.get('can_download') == 'true',
             can_upload=data.get('can_upload') == 'true',
+            can_delete=data.get('can_delete') == 'true',
             is_encrypted=data.get('is_encrypted') == 'true',
             status='Activo'
         )
@@ -141,6 +143,7 @@ def edit_unit(unit_id):
         unit.icon = data.get('icon', 'fa-folder')
         unit.can_download = data.get('can_download') == 'true'
         unit.can_upload = data.get('can_upload') == 'true'
+        unit.can_delete = data.get('can_delete') == 'true'
         unit.is_encrypted = data.get('is_encrypted') == 'true'
         
         password = data.get('password')
@@ -206,6 +209,7 @@ def list_units_api(area_id):
             'storage_path': u.storage_path,
             'can_download': u.can_download,
             'can_upload': u.can_upload,
+            'can_delete': u.can_delete,
             'is_encrypted': u.is_encrypted,
             'status': u.status,
             'users_count': u.platform_users.count() if hasattr(u.platform_users, 'count') else len(u.platform_users)
