@@ -86,16 +86,31 @@ class StorageManager:
             return cls.ROOT_STORAGE
             
         if not os.path.exists(cls.ROOT_STORAGE):
-            os.makedirs(cls.ROOT_STORAGE)
+            os.makedirs(cls.ROOT_STORAGE, exist_ok=True)
 
         clean_req = requested_path.replace('..', '').replace('\\', '/')
-        # Si la ruta ya es absoluta y está dentro de ROOT_STORAGE, la usamos
+        
+        # 1. Intentar Path Exacto (Prioridad)
         if os.path.isabs(clean_req) and clean_req.startswith(cls.ROOT_STORAGE):
             abs_requested = os.path.normpath(clean_req)
         else:
-            # Si no, la unimos a ROOT_STORAGE
             abs_requested = os.path.normpath(os.path.join(cls.ROOT_STORAGE, clean_req.lstrip('/')))
 
+        # 2. Resiliencia de Casing (Solo si el exacto falla)
+        if not os.path.exists(abs_requested):
+            # Buscar si existe una carpeta con nombre similar ignorando mayúsculas/minúsculas
+            parent_dir = os.path.dirname(abs_requested)
+            target_name = os.path.basename(abs_requested).lower()
+            
+            if os.path.exists(parent_dir):
+                try:
+                    for entry in os.scandir(parent_dir):
+                        if entry.name.lower() == target_name:
+                            abs_requested = entry.path
+                            break
+                except: pass
+
+        # 3. Validación de Seguridad (Common Path)
         common = os.path.commonpath([cls.ROOT_STORAGE, abs_requested])
         if common != cls.ROOT_STORAGE:
             raise PermissionError("Acceso a ubicación no autorizada.")
