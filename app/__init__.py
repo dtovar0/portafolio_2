@@ -24,9 +24,11 @@ login_manager = LoginManager()
 csrf = CSRFProtect()
 
 def create_app():
-    app = Flask(__name__, 
-                template_folder='../templates', 
-                static_folder='../static')
+    # Flask es solo API: no sirve frontend. `static_folder=None` desactiva la
+    # ruta /static, que ya no tiene contenido. Las plantillas se conservan
+    # únicamente para las páginas de error.
+    # Flask es solo API: ni plantillas ni estáticos.
+    app = Flask(__name__, template_folder=None, static_folder=None)
 
     # Configuración de base de datos y seguridad
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'nexus-premium-secret-key')
@@ -160,6 +162,17 @@ def create_app():
         except Exception as e:
             print(f"❌ Error al sincronizar base de datos: {e}")
 
+
+    # Flask es API: los errores se responden en JSON. Las páginas de error de
+    # la interfaz las sirve el frontend.
+    @app.errorhandler(404)
+    def not_found(error):
+        return jsonify({'status': 'error', 'message': 'Recurso no encontrado.'}), 404
+
+    @app.errorhandler(500)
+    def server_error(error):
+        app.logger.error(f"Error interno: {error}")
+        return jsonify({'status': 'error', 'message': 'Error interno del servidor.'}), 500
 
     @app.context_processor
     def inject_global_data():

@@ -10,7 +10,7 @@ import { Button, Checkbox, Field, Select, TextArea, TextInput } from './form';
 import { useSession } from './session-provider';
 import { Card, EmptyNote, ErrorNote, Spinner } from './ui';
 
-type Tab = 'portal' | 'smtp' | 'templates' | 'ldap' | 'preferences';
+type Tab = 'portal' | 'smtp' | 'templates' | 'ldap' | 'backup' | 'preferences';
 
 function Saved({ show }: { show: boolean }) {
   if (!show) return null;
@@ -33,7 +33,27 @@ function PortalTab() {
     portal_name: data.portal_name ?? '',
     bg_color: data.bg_color ?? '#0f172a',
     text_color: data.text_color ?? '#ffffff',
+    portal_identity_type: data.portal_identity_type ?? 'icon',
+    portal_icon: data.portal_icon ?? '',
   };
+
+  /** Convierte la imagen elegida en data URI: el logo se guarda en la base de
+   *  datos, no como archivo en el servidor. */
+  function pickLogo(file: File) {
+    if (file.size > 512 * 1024) {
+      setState({ ...state, error: 'La imagen supera 512 KB.' });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setForm({
+        ...value,
+        portal_identity_type: 'image',
+        portal_icon: String(reader.result),
+      });
+    };
+    reader.readAsDataURL(file);
+  }
 
   async function save() {
     setState({ saving: true, saved: false, error: null });
@@ -77,11 +97,125 @@ function PortalTab() {
         </Field>
       </div>
 
+      <Field
+        label="Logo del portal"
+        hint="PNG, JPEG, GIF, WebP o SVG, hasta 512 KB. Se guarda en la base de datos."
+      >
+        <div className="flex flex-wrap items-center gap-3">
+          {value.portal_identity_type === 'image' && value.portal_icon ? (
+            <img
+              src={value.portal_icon}
+              alt="Logo actual"
+              className="h-10 w-10 rounded border border-border object-contain"
+            />
+          ) : null}
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) pickLogo(file);
+            }}
+            className="text-sm text-muted"
+          />
+          {value.portal_identity_type === 'image' ? (
+            <Button
+              variant="ghost"
+              onClick={() =>
+                setForm({ ...value, portal_identity_type: 'icon', portal_icon: '' })
+              }
+            >
+              Quitar
+            </Button>
+          ) : null}
+        </div>
+      </Field>
+
       <div className="flex items-center gap-3">
         <Button onClick={save} disabled={state.saving}>
           {state.saving ? 'Guardando…' : 'Guardar'}
         </Button>
         <Saved show={state.saved} />
+      </div>
+    </Card>
+  );
+}
+
+/** Respaldo y restauración de la configuración. */
+function BackupTab() {
+  const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function download() {
+    setBusy(true);
+    setError(null);
+    setDone(null);
+    try {
+      const blob = await api.downloadBackup();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      const stamp = new Date().toISOString().slice(0, 10);
+      link.download = `nexus_backup_${stamp}.zip`;
+      link.click();
+      URL.revokeObjectURL(url);
+      setDone('Respaldo descargado.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo descargar');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function restore(file: File) {
+    setBusy(true);
+    setError(null);
+    setDone(null);
+    try {
+      const result = await api.uploadBackup(file);
+      setDone(`Restaurado: ${result.restored.join(', ') || 'nada'}.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo restaurar');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Card className="space-y-5">
+      {error ? <ErrorNote message={error} /> : null}
+      {done ? (
+        <p className="text-sm text-emerald-600 dark:text-emerald-300">{done}</p>
+      ) : null}
+
+      <div>
+        <h2 className="text-sm font-medium">Descargar respaldo</h2>
+        <p className="mt-1 text-sm text-muted">
+          Incluye la identidad del portal, el directorio, el correo, las
+          plantillas y las cuentas locales.
+        </p>
+        <Button onClick={download} disabled={busy} className="mt-3">
+          {busy ? 'Preparando…' : 'Descargar ZIP'}
+        </Button>
+      </div>
+
+      <div className="border-t border-border pt-5">
+        <h2 className="text-sm font-medium">Restaurar</h2>
+        <p className="mt-1 text-sm text-muted">
+          Sobrescribe la configuración con la del paquete. Las cuentas que ya
+          existan no se modifican.
+        </p>
+        <input
+          type="file"
+          accept=".zip,application/zip"
+          disabled={busy}
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) restore(file);
+          }}
+          className="mt-3 block text-sm text-muted"
+        />
       </div>
     </Card>
   );
@@ -542,6 +676,7 @@ export function SettingsPanel() {
           { id: 'smtp', label: 'Correo' },
           { id: 'templates', label: 'Plantillas' },
           { id: 'ldap', label: 'Directorio' },
+          { id: 'backup', label: 'Respaldo' },
         ] as { id: Tab; label: string }[])
       : []),
     { id: 'preferences', label: 'Mis preferencias' },
@@ -581,6 +716,7 @@ export function SettingsPanel() {
       {tab === 'smtp' ? <SmtpTab /> : null}
       {tab === 'templates' ? <TemplatesTab /> : null}
       {tab === 'ldap' ? <LdapTab /> : null}
+      {tab === 'backup' ? <BackupTab /> : null}
       {tab === 'preferences' ? <PreferencesTab /> : null}
     </div>
   );

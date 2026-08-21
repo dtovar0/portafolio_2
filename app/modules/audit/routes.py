@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, jsonify, current_app
+from flask import Blueprint, jsonify, current_app
 from flask import redirect
 from flask_login import login_required, current_user
 from app.authz import is_admin, is_area_admin, scoped_users
@@ -20,7 +20,8 @@ def index():
         return redirect(_frontend('/audit'))
     except Exception as e:
         current_app.logger.error(f"Error en audit.index: {e}")
-        return render_template('errors/500.html'), 500
+        return jsonify({'status': 'error',
+                        'message': 'No se pudo cargar la auditoría.'}), 500
 
 @audit_bp.route('/api/list')
 @login_required

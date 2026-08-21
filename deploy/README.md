@@ -61,5 +61,17 @@ Rellenar `server_name` y las rutas de los certificados.
   recrearlo en el servidor.
 - `EnvironmentFile=/opt/nexus/.env` debe existir y contener las credenciales de
   MySQL. No está en el repositorio.
-- Mientras convivan los dos frontends, `/static/` sigue apuntando a Flask para
-  las vistas Jinja que quedan.
+- El backend no sirve ningún archivo estático: ni plantillas, ni CSS, ni
+  imágenes. El logo del portal se guarda como data URI en la base de datos, así
+  que no hace falta directorio de subidas ni volumen persistente aparte de la
+  BD.
+- `FRONTEND_URL` indica al backend dónde redirigir las rutas heredadas. Tras
+  Nginx puede quedar vacío (mismo dominio); en desarrollo, apuntar al puerto de
+  Next.js.
+
+## Seguridad
+
+Los puertos de ambos servicios deben escuchar **solo en loopback**. El backend
+deduce la identidad SSO de las cabeceras `Remote-*`, y solo las acepta si la
+petición viene de un proxy declarado en `TRUSTED_PROXIES` (por defecto
+loopback). Nginx, además, borra esas cabeceras si las envía el cliente.

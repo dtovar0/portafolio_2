@@ -13,28 +13,39 @@ NEXUS es una plataforma de gestión centralizada diseñada para el monitoreo y a
 
 ## 🛠️ Stack Tecnológico
 
-*   **Backend**: Python 3.x, Flask (Modular con Blueprints).
-*   **Frontend**: Tailwind CSS, Vanilla JS, Design Tokens (Consistencia Visual).
+*   **Backend**: Python 3.x, Flask como API JSON (`/api/v1`), modular con Blueprints.
+*   **Frontend**: Next.js 15 (App Router), TypeScript, Tailwind CSS.
 *   **Base de Datos**: SQLAlchemy (Soporte para SQLite y MySQL).
+*   **Autenticación**: Flask-Login, con soporte para LDAP y SSO vía Authelia.
 *   **Entorno**: Soporte nativo para variables `.env`.
+
+Son **dos servicios** tras un reverse proxy: Flask no sirve interfaz, solo
+datos; Next.js no accede a la base de datos, solo consume la API. Ver
+[deploy/README.md](deploy/README.md).
 
 ## 📂 Estructura del Proyecto
 
 ```text
 /
-├── app/                  # Núcleo de la aplicación Flask
-│   ├── modules/          # Módulos independientes (Blueprints)
-│   │   ├── auth/         # Autenticación y Usuarios
-│   │   ├── areas/        # Gestión de Departamentos
-│   │   ├── platforms/    # Gestión de Sistemas/Plataformas
-│   │   ├── portal/       # Catálogo de Usuario Final
-│   │   ├── notifications/# SMTP y Plantillas
-│   │   ├── audit/        # Logs de Auditoría
-│   │   └── settings/     # Configuración de Sistema
+├── app/                  # Backend Flask (solo API)
+│   ├── authz.py          # Autorización y alcance multitenant
+│   ├── modules/
+│   │   ├── api/          # API v1: lectura, escritura, admin y auth
+│   │   ├── auth/         # Sesión, LDAP y SSO
+│   │   ├── areas/        # Áreas (tenants)
+│   │   ├── notifications/# SMTP y plantillas
+│   │   ├── audit/        # Auditoría
+│   │   └── settings/     # Configuración del sistema
 │   └── utils/            # Utilidades compartidas
-├── static/               # Activos estáticos (CSS/JS/Design Tokens)
-├── templates/            # Plantillas Jinja2
-└── run.py                # Punto de entrada de la aplicación
+├── frontend/             # Frontend Next.js
+│   └── src/
+│       ├── app/          # Rutas (App Router)
+│       ├── components/   # Componentes
+│       └── lib/          # Cliente de API y tipos
+├── assets/img/           # Imágenes subidas desde los ajustes
+├── templates/errors/     # Páginas de error de Flask
+├── deploy/               # systemd y Nginx
+└── run.py                # Punto de entrada del backend
 ```
 
 ## ⚙️ Configuración Rápida
@@ -46,11 +57,13 @@ NEXUS es una plataforma de gestión centralizada diseñada para el monitoreo y a
     ```
 2.  **Instalar dependencias**:
     ```bash
-    pip install -r requirements.txt
+    pip install -r requirements.txt          # backend
+    cd frontend && npm ci && npm run build   # frontend
     ```
-3.  **Iniciar Aplicación**:
+3.  **Iniciar los dos servicios**:
     ```bash
-    python run.py
+    python run.py                    # API en :5001
+    cd frontend && npm run dev       # interfaz en :3000
     ```
 
 ## 📚 Documentación Adicional

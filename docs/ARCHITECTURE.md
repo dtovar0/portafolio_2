@@ -1,7 +1,29 @@
 # 🏗️ ARQUITECTURA TÉCNICA - NEXUS
 
 ## 🧩 Patrón de Diseño
-NEXUS utiliza una arquitectura modular basada en **Flask Blueprints**. Cada módulo es independiente y maneja su propia lógica de negocio, modelos de base de datos y rutas, permitiendo un escalado horizontal del código.
+NEXUS separa frontend y backend en dos servicios:
+
+*   **Backend Flask** — solo API JSON bajo `/api/v1`. Modular por Blueprints;
+    cada módulo maneja su lógica, modelos y rutas. No sirve interfaz.
+*   **Frontend Next.js** — toda la interfaz. Consume la API con la cookie de
+    sesión que emite Flask, sin acceso directo a la base de datos.
+
+Ambos se sirven bajo el mismo dominio tras Nginx, de modo que la cookie viaja
+sin CORS y Authelia sigue siendo la autoridad de autenticación.
+
+## 🏢 Multitenant
+El **Área** es la unidad de aislamiento. Tres niveles, resueltos en
+`app/authz.py`:
+
+| Rol | Alcance |
+|---|---|
+| `administrador` | Todo el sistema y su configuración |
+| `admin_area` | Solo las áreas que administra (`area_admins`) |
+| `usuario` | Solo consulta las plataformas de sus áreas |
+
+El aislamiento se aplica por fila: las funciones `scoped_*` filtran cada
+consulta según el alcance de quien la hace. La interfaz oculta lo que el rol no
+permite, pero el backend vuelve a comprobarlo en cada endpoint.
 
 ## 💾 Modelado de Datos
 El sistema utiliza SQLAlchemy para la persistencia de datos con un enfoque en la gestión de accesos:

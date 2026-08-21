@@ -180,6 +180,31 @@ export const api = {
     request<{ status: string; redirect: string | null }>(
       '/auth/logout', { method: 'POST' }),
 
+  /** Descarga el respaldo. Devuelve el Blob para que el navegador lo guarde. */
+  downloadBackup: async () => {
+    const response = await fetch(`${BASE}/api/v1/backup`, {
+      credentials: 'include',
+      headers: { Accept: 'application/zip' },
+    });
+    if (!response.ok) throw new ApiError(response.status, 'No se pudo generar el respaldo');
+    return response.blob();
+  },
+
+  /** Restaura desde un ZIP exportado. */
+  uploadBackup: async (file: File) => {
+    const body = new FormData();
+    body.append('file', file);
+    // Sin Content-Type: el navegador añade el boundary del multipart.
+    const response = await fetch(`${BASE}/api/v1/backup`, {
+      method: 'POST', credentials: 'include', body,
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      throw new ApiError(response.status, data?.message ?? 'No se pudo restaurar');
+    }
+    return data as { status: string; restored: string[] };
+  },
+
   authConfig: () => request<AuthConfig>('/auth-config'),
   saveAuthConfig: (input: Partial<AuthConfig> & { ldap_pass?: string }) =>
     request<{ status: string; config: AuthConfig }>(
