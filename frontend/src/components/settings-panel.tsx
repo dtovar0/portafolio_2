@@ -235,6 +235,10 @@ function SmtpTab() {
   if (error) return <ErrorNote message={error} />;
   if (!data) return null;
 
+  // Con SMTP_FORCE_ENV el servidor ignora lo que se guarde aquí, así que los
+  // campos se muestran en solo lectura en lugar de fingir que se pueden editar.
+  const locked = data.editable === false;
+
   const value = form ?? {
     server: data.server ?? '',
     port: data.port ?? 587,
@@ -276,10 +280,20 @@ function SmtpTab() {
   return (
     <Card className="space-y-4">
       {state.error ? <ErrorNote message={state.error} /> : null}
+      {data.warning ? <ErrorNote message={data.warning} /> : null}
+
+      {locked ? (
+        <div className="rounded-card border border-accent/40 bg-accent/10 p-3 text-sm">
+          Estos valores vienen del <code>.env</code> del servidor
+          (<code>SMTP_FORCE_ENV</code>) y no se pueden cambiar desde aquí. Para
+          modificarlos, edita el archivo y reinicia el servicio.
+        </div>
+      ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Servidor">
           <TextInput
+            disabled={locked}
             value={String(value.server)}
             onChange={(e) => setForm({ ...value, server: e.target.value })}
           />
@@ -287,6 +301,7 @@ function SmtpTab() {
         <Field label="Puerto">
           <TextInput
             type="number"
+            disabled={locked}
             value={String(value.port)}
             onChange={(e) => setForm({ ...value, port: Number(e.target.value) })}
           />
@@ -295,6 +310,7 @@ function SmtpTab() {
 
       <Field label="Cifrado">
         <Select
+          disabled={locked}
           value={String(value.encryption)}
           onChange={(e) => setForm({ ...value, encryption: e.target.value })}
         >
@@ -307,6 +323,7 @@ function SmtpTab() {
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Usuario">
           <TextInput
+            disabled={locked}
             value={String(value.username ?? '')}
             onChange={(e) => setForm({ ...value, username: e.target.value })}
           />
@@ -314,6 +331,7 @@ function SmtpTab() {
         <Field label="Contraseña" hint="Vacío conserva la actual.">
           <TextInput
             type="password" value={password} autoComplete="new-password"
+            disabled={locked}
             onChange={(e) => setPassword(e.target.value)}
           />
         </Field>
@@ -321,6 +339,7 @@ function SmtpTab() {
 
       <Field label="Nombre del remitente">
         <TextInput
+          disabled={locked}
           value={String(value.sender_name ?? '')}
           onChange={(e) => setForm({ ...value, sender_name: e.target.value })}
         />
@@ -328,16 +347,19 @@ function SmtpTab() {
 
       <Checkbox
         label="Requiere autenticación"
+        disabled={locked}
         checked={Boolean(value.auth_enabled)}
         onChange={(e) => setForm({ ...value, auth_enabled: e.target.checked })}
       />
 
-      <div className="flex items-center gap-3">
-        <Button onClick={save} disabled={state.saving}>
-          {state.saving ? 'Guardando…' : 'Guardar'}
-        </Button>
-        <Saved show={state.saved} />
-      </div>
+      {!locked ? (
+        <div className="flex items-center gap-3">
+          <Button onClick={save} disabled={state.saving}>
+            {state.saving ? 'Guardando…' : 'Guardar'}
+          </Button>
+          <Saved show={state.saved} />
+        </div>
+      ) : null}
 
       <div className="border-t border-border pt-4">
         <Field label="Enviar correo de prueba">

@@ -1,7 +1,124 @@
+import os
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from app.modules.notifications.models import SMTPConfig, NotificationTemplate, InAppNotification
+
+
+class SmtpSettings:
+    """Parámetros de conexión SMTP, vengan del .env o de la base de datos."""
+
+    def __init__(self, server, port, encryption, auth_enabled, username,
+                 password, sender_name, sender_email=None, source='db'):
+        self.server = server
+        self.port = port
+        self.encryption = encryption
+        self.auth_enabled = auth_enabled
+        self.username = username
+        self.password = password
+        self.sender_name = sender_name
+        # Remitente visible. Sin él se usa el usuario de autenticación, que en
+        # servidores con dominio propio no siempre es una dirección válida.
+        self.sender_email = sender_email or username
+        self.source = source
+
+    @property
+    def is_usable(self):
+        return bool(self.server and self.port)
+
+    def __repr__(self):
+        return (f"<SmtpSettings {self.source} {self.server}:{self.port} "
+                f"{self.encryption}>")
+
+
+def _env_flag(name, default=False):
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in ('1', 'true', 'yes', 'on', 'si', 'sí')
+
+
+def smtp_settings_from_env():
+    """Lee la configuración SMTP del entorno. None si no hay servidor definido."""
+    server = (os.getenv('SMTP_SERVER') or '').strip()
+    if not server:
+        return None
+
+    try:
+        port = int(os.getenv('SMTP_PORT', '587'))
+    except ValueError:
+        port = 587
+
+    encryption = (os.getenv('SMTP_ENCRYPTION') or 'starttls').strip().lower()
+    if encryption not in ('starttls', 'ssl', 'none'):
+        encryption = 'starttls'
+
+    username = (os.getenv('SMTP_USER') or '').strip() or None
+    password = os.getenv('SMTP_PASSWORD') or None
+
+    return SmtpSettings(
+        server=server,
+        port=port,
+        encryption=encryption,
+        # Si no se declara, se asume autenticación cuando hay usuario y clave.
+        auth_enabled=_env_flag('SMTP_AUTH', bool(username and password)),
+        username=username,
+        password=password,
+        sender_name=(os.getenv('SMTP_SENDER_NAME') or 'Nexus').strip(),
+        sender_email=(os.getenv('SMTP_SENDER_EMAIL') or '').strip() or None,
+        source='env',
+    )
+
+
+def resolve_smtp_settings():
+    """Decide qué configuración SMTP usar.
+
+    Con SMTP_FORCE_ENV activo se usa siempre la del entorno y se ignora la
+    guardada en la base de datos: es lo que permite fijar el servidor de correo
+    por despliegue y que nadie lo cambie desde la interfaz. En caso contrario
+    manda la base de datos, y el entorno solo actúa como respaldo si en la BD
+    no hay nada configurado.
+    """
+    from_env = smtp_settings_from_env()
+
+    if _env_flag('SMTP_FORCE_ENV'):
+        if from_env and from_env.is_usable:
+            return from_env
+        # Se pidió forzar el .env pero está incompleto: mejor fallar visiblemente
+        # que enviar por un servidor distinto del esperado.
+        return None
+
+    config = SMTPConfig.query.first()
+    if config and config.server:
+        return SmtpSettings(
+            server=config.server,
+            port=config.port,
+            encryption=config.encryption,
+            auth_enabled=config.auth_enabled,
+            username=config.username,
+            password=config.password,
+            sender_name=config.sender_name,
+            source='db',
+        )
+
+    return from_env if (from_env and from_env.is_usable) else None
+
+
+def open_smtp(settings):
+    """Abre la conexión SMTP según el cifrado configurado."""
+    if settings.encryption == 'ssl':
+        smtp = smtplib.SMTP_SSL(settings.server, settings.port, timeout=10)
+    else:
+        smtp = smtplib.SMTP(settings.server, settings.port, timeout=10)
+        if settings.encryption == 'starttls':
+            smtp.starttls()
+
+    if os.getenv('DEBUG_SMTP', '').strip().lower() == 'true':
+        smtp.set_debuglevel(1)
+
+    if settings.auth_enabled and settings.username and settings.password:
+        smtp.login(settings.username, settings.password)
+    return smtp
 
 def add_in_app_notification(type, title, message, user_id=None):
     """
@@ -88,10 +205,13 @@ def send_notification_by_slug(slug, target_email, context=None):
         return {"status": "success", "message": "Notifications disabled globally"}
 
     try:
-        config = SMTPConfig.query.first()
+        config = resolve_smtp_settings()
         template = NotificationTemplate.query.filter_by(slug=slug).first()
-        if not config or not template:
-            return {"status": "error", "message": "Missing SMTP config or Template"}
+        if config is None:
+            return {"status": "error",
+                    "message": "No hay configuración SMTP utilizable."}
+        if not template:
+            return {"status": "error", "message": f"Plantilla '{slug}' no encontrada"}
 
         # Prepare content
         body = template.body
@@ -102,29 +222,17 @@ def send_notification_by_slug(slug, target_email, context=None):
                 subject = subject.replace(f"{{{key}}}", str(val))
 
         msg = MIMEMultipart()
-        msg['From'] = f"{config.sender_name} <{config.username}>"
+        msg['From'] = f"{config.sender_name} <{config.sender_email}>"
         msg['To'] = target_email
         msg['Subject'] = subject
         msg.attach(MIMEText(body, 'html' if template.is_html else 'plain'))
 
-        # Connection
-        if config.encryption == 'ssl':
-            smtp = smtplib.SMTP_SSL(config.server, config.port, timeout=10)
-        else:
-            smtp = smtplib.SMTP(config.server, config.port, timeout=10)
-            if config.encryption == 'starttls':
-                smtp.starttls()
-
-        import os
-        if os.getenv('DEBUG_SMTP') == 'true':
-            smtp.set_debuglevel(1)
-
-        if config.auth_enabled and config.username and config.password:
-            smtp.login(config.username, config.password)
-
+        smtp = open_smtp(config)
         smtp.send_message(msg)
         smtp.quit()
-        return {"status": "success", "message": f"Notificación '{slug}' enviada"}
+        return {"status": "success",
+                "message": f"Notificación '{slug}' enviada",
+                "source": config.source}
 
     except Exception as e:
         return {"status": "error", "message": "Error interno enviando notificación."}

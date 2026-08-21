@@ -6,6 +6,7 @@ de correo y LDAP. Un admin de área administra su tenant, no el sistema.
 """
 
 import json
+import os
 
 from flask import Blueprint, jsonify, request
 from flask_login import current_user, login_required
@@ -27,6 +28,12 @@ def _payload():
 
 def _error(message, status=400):
     return jsonify({'status': 'error', 'message': message}), status
+
+
+def _smtp_forced():
+    """True si SMTP_FORCE_ENV fija la configuración desde el entorno."""
+    from app.modules.notifications.services import _env_flag
+    return _env_flag('SMTP_FORCE_ENV')
 
 
 # --------------------------------------------------------------------------- #
@@ -124,15 +131,54 @@ def save_settings():
 @login_required
 @admin_required
 def get_smtp():
-    config = SMTPConfig.query.first()
-    # to_dict() omite la contraseña a propósito.
-    return jsonify(config.to_dict() if config else SMTPConfig().to_dict())
+    """Configuración SMTP efectiva, indicando de dónde sale.
+
+    Con SMTP_FORCE_ENV activo manda el entorno y lo guardado en la base de
+    datos se ignora, así que la interfaz muestra los valores en vigor y
+    desactiva la edición.
+    """
+    from app.modules.notifications.services import (resolve_smtp_settings,
+                                                    smtp_settings_from_env)
+
+    effective = resolve_smtp_settings()
+    forced = _smtp_forced()
+
+    if effective is not None:
+        payload = {
+            'server': effective.server,
+            'port': effective.port,
+            'encryption': effective.encryption,
+            'auth_enabled': effective.auth_enabled,
+            'username': effective.username,
+            'sender_name': effective.sender_name,
+            'sender_email': effective.sender_email,
+            # La contraseña nunca se devuelve.
+            'source': effective.source,
+        }
+    else:
+        stored = SMTPConfig.query.first()
+        payload = stored.to_dict() if stored else SMTPConfig().to_dict()
+        payload['source'] = 'none'
+
+    payload['forced_by_env'] = forced
+    # Solo se puede editar desde la interfaz si no está forzado por el entorno.
+    payload['editable'] = not forced
+    if forced and smtp_settings_from_env() is None:
+        payload['warning'] = ('SMTP_FORCE_ENV está activo pero falta '
+                              'SMTP_SERVER en el entorno.')
+    return jsonify(payload)
 
 
 @admin_bp.route('/smtp', methods=['PUT'])
 @login_required
 @admin_required
 def save_smtp():
+    # Con el entorno forzado, guardar en la base de datos no tendría efecto:
+    # es mejor rechazarlo que dejar creer que el cambio se aplicó.
+    if _smtp_forced():
+        return _error('La configuración SMTP está fijada por el entorno '
+                      '(SMTP_FORCE_ENV). Edítala en el .env del servidor.', 409)
+
     config = SMTPConfig.query.first()
     if config is None:
         config = SMTPConfig()
@@ -167,15 +213,17 @@ def test_smtp():
     if not recipient or '@' not in recipient:
         return _error('Indica un correo de destino válido.')
 
-    config = SMTPConfig.query.first()
+    from app.modules.notifications.services import (resolve_smtp_settings,
+                                                    send_test_email)
+
+    config = resolve_smtp_settings()
     if config is None:
-        return _error('Configura primero el servidor SMTP.')
+        return _error('No hay configuración SMTP utilizable.')
 
     try:
-        from app.modules.notifications.services import send_test_email
-        # Se prueba con lo guardado, salvo que el payload traiga otros valores
-        # (permite validar antes de guardar).
-        data = _payload()
+        # Se prueba lo que está en vigor; el payload puede sobrescribir campos
+        # para validar antes de guardar, salvo si el entorno manda.
+        data = {} if config.source == 'env' else _payload()
         result = send_test_email(
             server=data.get('server') or config.server,
             port=int(data.get('port') or config.port),

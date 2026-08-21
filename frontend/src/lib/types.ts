@@ -106,6 +106,14 @@ export interface SmtpConfig {
   auth_enabled: boolean;
   username: string | null;
   sender_name: string;
+  sender_email?: string | null;
+  /** De dónde sale la configuración en vigor. */
+  source?: 'env' | 'db' | 'none';
+  /** SMTP_FORCE_ENV fija los valores desde el entorno del servidor. */
+  forced_by_env?: boolean;
+  /** false cuando el entorno manda: la interfaz no puede cambiarla. */
+  editable?: boolean;
+  warning?: string;
 }
 
 export interface EmailTemplate {

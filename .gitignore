@@ -1,7 +1,7 @@
 # === INICIO GITIGNORE ===
 venv/
 .env
-.env.example
+!.env.example
 config.py
 config.conf
 *.log

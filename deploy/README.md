@@ -101,6 +101,36 @@ venv/bin/python utils/migrations/003_logo_to_db.py
 mysql -u USUARIO -p BASE < utils/migrations/004_drop_access_requests.sql
 ```
 
+## Correo (SMTP)
+
+Dos formas de configurarlo, y una variable que decide cuál manda:
+
+| `SMTP_FORCE_ENV` | Qué se usa |
+|---|---|
+| `false` (por defecto) | Lo guardado desde la interfaz. El `.env` solo actúa de respaldo si en la base de datos no hay nada. |
+| `true` | Siempre el `.env`. La interfaz pasa a solo lectura y `PUT /api/v1/smtp` responde 409. |
+
+Forzar el entorno sirve para fijar el servidor de correo por despliegue: nadie
+puede cambiarlo desde la interfaz, ni siquiera un administrador global.
+
+```ini
+SMTP_FORCE_ENV=true
+SMTP_SERVER=smtp.empresa.com
+SMTP_PORT=587
+SMTP_ENCRYPTION=starttls      # starttls | ssl | none
+SMTP_AUTH=true                # si se omite, se asume true cuando hay usuario y clave
+SMTP_USER=servicio@empresa.com
+SMTP_PASSWORD=...
+SMTP_SENDER_NAME=Nexus
+SMTP_SENDER_EMAIL=noreply@empresa.com   # remitente visible; por defecto, SMTP_USER
+```
+
+Con `SMTP_FORCE_ENV=true` y `SMTP_SERVER` vacío no se envía nada y la interfaz
+lo advierte: se prefiere fallar de forma visible a enviar por un servidor
+distinto del previsto.
+
+`ENABLE_NOTIFICATIONS=false` corta todo el correo, al margen de lo anterior.
+
 ## Seguridad
 
 Los puertos de ambos servicios deben escuchar **solo en loopback**. El backend
