@@ -18,9 +18,12 @@ const NAV: NavItem[] = [
   { href: '/', label: 'Panel' },
   { href: '/platforms', label: 'Plataformas' },
   { href: '/favorites', label: 'Favoritos' },
+  { href: '/notifications', label: 'Notificaciones' },
+  { href: '/admin/platforms', label: 'Administrar plataformas', requires: 'any_admin' },
   { href: '/areas', label: 'Áreas', requires: 'any_admin' },
   { href: '/users', label: 'Usuarios', requires: 'any_admin' },
   { href: '/audit', label: 'Auditoría' },
+  { href: '/settings', label: 'Ajustes' },
 ];
 
 function Nav() {

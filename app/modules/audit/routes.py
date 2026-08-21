@@ -1,15 +1,23 @@
 from flask import Blueprint, render_template, jsonify, current_app
+from flask import redirect
 from flask_login import login_required, current_user
 from app.authz import is_admin, is_area_admin, scoped_users
 from .models import AuditLog
 
 audit_bp = Blueprint('audit', __name__, url_prefix='/audit')
 
+
+def _frontend(path):
+    """URL del frontend Next.js, que sirve ahora esta vista."""
+    import os
+    return (os.getenv('FRONTEND_URL', '') or '') + path
+
+
 @audit_bp.route('/')
 @login_required
 def index():
     try:
-        return render_template('audit.html')
+        return redirect(_frontend('/audit'))
     except Exception as e:
         current_app.logger.error(f"Error en audit.index: {e}")
         return render_template('errors/500.html'), 500

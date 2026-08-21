@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, jsonify, g
+from flask import redirect
 from flask_login import login_required, current_user, login_user
 from app.authz import (admin_required, any_admin_required, can_manage_user,
                        scoped_areas, scoped_users, is_admin)
@@ -13,6 +14,13 @@ import ssl
 from ldap3 import Server, Connection, ALL, Tls
 
 users_bp = Blueprint('users_module', __name__, url_prefix='/admin')
+
+
+def _frontend(path):
+    """URL del frontend Next.js, que sirve ahora esta vista."""
+    import os
+    return (os.getenv('FRONTEND_URL', '') or '') + path
+
 
 @users_bp.route('/users')
 @login_required
@@ -51,9 +59,7 @@ def users_list():
         
     areas_data = [a.to_dict() for a in areas]
     
-    return render_template('users.html', 
-                         users_json=users_data, 
-                         all_areas_json=areas_data)
+    return redirect(_frontend('/users'))
 
 @users_bp.route('/areas-api')
 @login_required

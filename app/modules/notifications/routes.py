@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, jsonify
+from flask import redirect
 from flask_login import login_required, current_user
 from datetime import datetime
 from app.authz import admin_required
@@ -7,6 +8,13 @@ from app.modules.notifications.models import SMTPConfig, NotificationTemplate, I
 from app.modules.notifications.services import send_test_email
 
 notifications_bp = Blueprint("notifications", __name__, url_prefix="/notifications")
+
+
+def _frontend(path):
+    """URL del frontend Next.js, que sirve ahora esta vista."""
+    import os
+    return (os.getenv('FRONTEND_URL', '') or '') + path
+
 
 @notifications_bp.route("/")
 @login_required
@@ -61,7 +69,7 @@ def index():
     if any(slug not in existing_slugs for slug in default_slugs):
         db.session.commit()
 
-    return render_template("notifications.html", config=config)
+    return redirect(_frontend('/notifications'))
 
 @notifications_bp.route("/save", methods=["POST"])
 @login_required

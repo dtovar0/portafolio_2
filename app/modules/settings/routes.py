@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, jsonify, send_file
+from flask import redirect
 from flask_login import login_required, current_user
 from app.authz import admin_required
 from app import db
@@ -13,12 +14,19 @@ from datetime import datetime
 
 settings_bp = Blueprint("settings", __name__, url_prefix="/settings")
 
+
+def _frontend(path):
+    """URL del frontend Next.js, que sirve ahora esta vista."""
+    import os
+    return (os.getenv('FRONTEND_URL', '') or '') + path
+
+
 @settings_bp.route("/")
 @login_required
 @admin_required
 def index():
     config = SystemConfig.query.first()
-    return render_template("settings.html", sys_config=config)
+    return redirect(_frontend('/settings'))
 
 @settings_bp.route("/export", methods=["GET"])
 @login_required

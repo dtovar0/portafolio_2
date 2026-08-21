@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, jsonify, current_app
+from flask import redirect
 from flask_login import login_required, current_user
 from app import db
 from app.authz import (admin_required, any_admin_required, area_admin_required,
@@ -11,6 +12,13 @@ import json
 import os
 
 areas_bp = Blueprint('areas_module', __name__, url_prefix='/admin/areas')
+
+
+def _frontend(path):
+    """URL del frontend Next.js, que sirve ahora esta vista."""
+    import os
+    return (os.getenv('FRONTEND_URL', '') or '') + path
+
 
 @areas_bp.route('/')
 @login_required
@@ -36,9 +44,7 @@ def areas_list():
     
     users_data = [{'id': u.id, 'name': u.nombre or u.email, 'email': u.email} for u in users]
     
-    return render_template('areas.html', 
-                         areas_json=areas_data, 
-                         all_users_json=users_data)
+    return redirect(_frontend('/areas'))
 
 @areas_bp.route('/add', methods=['POST'])
 @login_required

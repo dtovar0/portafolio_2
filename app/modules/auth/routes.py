@@ -163,13 +163,8 @@ def logout():
 @auth_bp.route("/")
 @login_required
 def index():
-    try:
-        config = AuthConfig.query.first()
-        sso_enabled = os.getenv('AUTHELIA_ENABLED', 'false').lower() == 'true'
-        return render_template("auth.html", config=config, sso_enabled=sso_enabled)
-    except Exception as e:
-        current_app.logger.error(f"Error en auth.index: {e}")
-        return render_template("auth.html", config=None)
+    """La configuración del directorio vive ahora en el frontend."""
+    return redirect((os.getenv('FRONTEND_URL', '') or '') + '/settings')
 
 @auth_bp.route("/save", methods=["POST"])
 def save():

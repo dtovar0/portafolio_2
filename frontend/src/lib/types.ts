@@ -90,3 +90,85 @@ export interface AuditEntry {
   ip: string | null;
   status: string;
 }
+
+export interface SystemSettings {
+  portal_name: string;
+  portal_identity_type: 'icon' | 'image';
+  portal_icon: string | null;
+  bg_color: string;
+  text_color: string;
+}
+
+export interface SmtpConfig {
+  server: string;
+  port: number;
+  encryption: string;
+  auth_enabled: boolean;
+  username: string | null;
+  sender_name: string;
+}
+
+export interface EmailTemplate {
+  slug: string;
+  name: string;
+  subject: string;
+  body: string;
+  is_html: boolean;
+  updated_at: string | null;
+}
+
+export interface AppNotification {
+  id: number;
+  type: 'success' | 'error' | 'warning' | 'info';
+  title: string;
+  message: string;
+  is_read: boolean;
+  time: string;
+  timestamp: string;
+}
+
+export interface AuthConfig {
+  ldap_host: string | null;
+  ldap_port: number;
+  ldap_ssl: boolean;
+  ldap_base_dn: string | null;
+  ldap_user: string | null;
+  ldap_user_attr: string;
+  ldap_group_admin: string | null;
+  ldap_group_user: string | null;
+  ldap_role_mappings: string | null;
+}
+
+/** Campos editables de un área. */
+export interface AreaInput {
+  name?: string;
+  description?: string | null;
+  icon?: string;
+  color?: string;
+  status?: string;
+}
+
+/** Campos editables de una plataforma. */
+export interface PlatformInput {
+  name?: string;
+  description?: string;
+  area_id?: number;
+  direct_link?: string | null;
+  icon?: string;
+  logo_url?: string | null;
+  bg_color?: string;
+  text_color?: string;
+  status?: string;
+}
+
+/** Campos editables de un usuario. */
+export interface UserInput {
+  email?: string;
+  name?: string;
+  role?: Role;
+  password?: string;
+  is_active?: boolean;
+  auth_source?: string;
+  area_ids?: number[];
+  managed_area_ids?: number[];
+}
