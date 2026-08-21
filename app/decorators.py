@@ -1,12 +1,10 @@
-from functools import wraps
-from flask import abort, redirect, url_for, flash
-from flask_login import current_user
+"""
+Compatibilidad: los decoradores viven ahora en `app.authz`.
 
-def admin_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or current_user.role != 'administrador':
-            flash('Acceso restringido. Se requieren permisos de administrador.', 'warning')
-            return redirect(url_for('core.index'))
-        return f(*args, **kwargs)
-    return decorated_function
+Se mantiene este módulo para no romper los imports existentes. El código nuevo
+debe importar desde `app.authz`.
+"""
+
+from app.authz import admin_required, area_admin_required, platform_access_required
+
+__all__ = ['admin_required', 'area_admin_required', 'platform_access_required']

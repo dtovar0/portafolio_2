@@ -4,6 +4,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from app import db
 from app.modules.auth.models import User, AuthConfig
 from app.modules.auth.services import validate_ldap_connection
+from app.authz import is_admin
 from app.modules.audit.services import add_audit_log
 from app.modules.notifications.services import send_notification_by_slug
 
@@ -131,7 +132,7 @@ def purge_users():
     """
     Ruta administrativa para ejecutar la limpieza de inactividad.
     """
-    if current_user.role != 'administrador':
+    if not is_admin():
         return jsonify({"status": "error", "message": "Acceso denegado"}), 403
         
     try:

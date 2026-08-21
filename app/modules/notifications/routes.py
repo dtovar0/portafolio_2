@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, jsonify
 from flask_login import login_required, current_user
 from datetime import datetime
-from app.decorators import admin_required
+from app.authz import admin_required
 from app import db
 from app.modules.notifications.models import SMTPConfig, NotificationTemplate, InAppNotification
 from app.modules.notifications.services import send_test_email

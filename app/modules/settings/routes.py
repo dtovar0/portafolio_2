@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, jsonify, send_file
 from flask_login import login_required, current_user
-from app.decorators import admin_required
+from app.authz import admin_required
 from app import db
 from app.modules.settings.models import SystemConfig
 from app.modules.auth.models import User, AuthConfig

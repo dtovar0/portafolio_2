@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, send_from_directory, current_app, jsonify, redirect, url_for
 from flask_login import login_required, current_user
 from app import db
-from app.decorators import admin_required
+from app.authz import admin_required, is_admin
 from app.modules.audit.models import AuditLog
 from app.modules.core.models import Area, Platform
 import os
@@ -11,8 +11,8 @@ core_bp = Blueprint("core", __name__, url_prefix="/")
 @core_bp.route("/")
 @login_required
 def index():
-    # Role-based Redirection
-    if current_user.role != 'administrador':
+    # Los usuarios sin permisos de administración van al catálogo
+    if not is_admin():
         return redirect(url_for('core.portal'))
         
     try:

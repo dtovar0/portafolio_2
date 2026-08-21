@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, jsonify, current_app
 from flask_login import login_required, current_user
+from app.authz import is_admin
 from .models import AuditLog
 
 audit_bp = Blueprint('audit', __name__, url_prefix='/audit')
@@ -17,11 +18,8 @@ def index():
 @login_required
 def list_audit():
     try:
-        # If not admin, filter by current username
-        if current_user.role != 'administrador':
-            query = AuditLog.query.filter_by(user=current_user.email)
-        else:
-            query = AuditLog.query
+        # Si no es admin, solo ve sus propios registros
+        query = AuditLog.query if is_admin() else AuditLog.query.filter_by(user=current_user.email)
 
         logs = query.order_by(AuditLog.timestamp.desc()).limit(500).all()
         

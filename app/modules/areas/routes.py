@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, jsonify, current_app
 from flask_login import login_required, current_user
 from app import db
-from app.decorators import admin_required
+from app.authz import admin_required
 from app.modules.core.models import Area, Platform
 from app.modules.auth.models import User
 from app.modules.audit.models import AuditLog

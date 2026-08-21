@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, current_app, jsonify, request, send_file
 from flask_login import login_required, current_user
+from app.authz import is_admin, scoped_areas, scoped_platforms, user_area_ids
 from app.modules.core.models import Area, Platform, DriveActivity, StorageStat
 from app.modules.auth.models import User
 from app import db
@@ -11,12 +12,7 @@ from datetime import datetime
 drive_bp = Blueprint('drive', __name__, url_prefix='/drive')
 
 def _resolve_platform_access(path):
-    if current_user.role.lower() == 'administrador':
-        allowed_platforms = Platform.query.all()
-    else:
-        # El usuario tiene acceso a todas las plataformas de sus áreas asignadas
-        area_ids = [a.id for a in current_user.areas]
-        allowed_platforms = Platform.query.filter(Platform.area_id.in_(area_ids)).all()
+    allowed_platforms = scoped_platforms().all()
     
     # Normalizar el path solicitado
     norm_path = os.path.normpath(path)
@@ -28,7 +24,7 @@ def _resolve_platform_access(path):
             return p
     
     # Si no tiene acceso a ninguna y no es admin, fuera.
-    if current_user.role.lower() != 'administrador':
+    if not is_admin():
         raise PermissionError('No tienes acceso a esta ubicación.')
     return None
 
@@ -60,15 +56,9 @@ def index():
 def dashboard():
     try:
         user = current_user
-        if user.role.lower() == 'administrador':
-            approved_areas = Area.query.order_by(Area.name).all()
-            total_platforms = Platform.query.count()
-            total_users = User.query.count()
-        else:
-            approved_areas = [a for a in user.areas if a.status == 'Activo']
-            area_ids = [a.id for a in approved_areas]
-            total_platforms = Platform.query.filter(Platform.area_id.in_(area_ids)).count()
-            total_users = 1 # El usuario mismo
+        approved_areas = scoped_areas(user, only_active=not is_admin(user)).order_by(Area.name).all()
+        total_platforms = scoped_platforms(user).count()
+        total_users = User.query.count() if is_admin(user) else 1
             
         # Recent activity (Strictly filtered by current user for this dashboard)
         recent_activity = DriveActivity.query.filter_by(user_id=user.id)\
@@ -81,7 +71,7 @@ def dashboard():
         from app.modules.auth.models import user_platforms, user_areas
         
         # 0. Definir alcances del usuario
-        user_area_ids = [a.id for a in user.areas]
+        area_ids_scope = user_area_ids(user)
         user_platform_ids = [p.id for p in user.platforms]
 
         # 1. Distribución de Plataformas (Filtrado por mis plataformas)
@@ -180,14 +170,13 @@ def dashboard():
 def explorer():
     try:
         user = current_user
-        if user.role.lower() == 'administrador':
+        if is_admin(user):
             approved_areas = Area.query.order_by(Area.name).all()
             approved_platforms = Platform.query.filter(Platform.storage_path.isnot(None)).all()
             print(f"DEBUG EXPLORER: Admin detectado. Plataformas con path: {len(approved_platforms)}")
         else:
             approved_areas = [a for a in user.areas if a.status == 'Activo']
-            area_ids = [a.id for a in approved_areas]
-            approved_platforms = Platform.query.filter(Platform.area_id.in_(area_ids)).filter(Platform.storage_path.isnot(None)).all()
+            approved_platforms = scoped_platforms(user).filter(Platform.storage_path.isnot(None)).all()
             print(f"DEBUG EXPLORER: Usuario detectado. Áreas: {len(approved_areas)}, Plataformas: {len(approved_platforms)}")
 
         fav_ids = [f.id for f in current_user.favorites]
@@ -255,7 +244,7 @@ def list_files_api():
         requested_path = data.get('path') or request.args.get('path') or ''
         
         if not requested_path or requested_path in ['', '/']:
-            platforms = Platform.query.order_by(Platform.name).all() if current_user.role.lower() == 'administrador' else current_user.platforms
+            platforms = scoped_platforms().order_by(Platform.name).all()
             if platforms:
                 requested_path = platforms[0].storage_path or platforms[0].name
             else:
@@ -511,11 +500,11 @@ def download_folder_zip():
 def get_drive_stats():
     try:
         # KPIs
-        areas_count = Area.query.count() if current_user.role.lower() == 'administrador' else len(current_user.areas)
-        plats_count = Platform.query.count() if current_user.role.lower() == 'administrador' else len(current_user.platforms)
+        areas_count = scoped_areas().count()
+        plats_count = scoped_platforms().count()
         
         base_query = DriveActivity.query
-        if current_user.role.lower() != 'administrador':
+        if not is_admin():
             base_query = base_query.filter_by(user_id=current_user.id)
 
         downloads_count = base_query.filter_by(action='Descarga').count()
@@ -538,7 +527,7 @@ def get_drive_stats():
 def get_drive_logs():
     try:
         base_query = DriveActivity.query
-        if current_user.role.lower() != 'administrador':
+        if not is_admin():
             base_query = base_query.filter_by(user_id=current_user.id)
             
         logs = base_query.order_by(DriveActivity.created_at.desc()).limit(10).all()
