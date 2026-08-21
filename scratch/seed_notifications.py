@@ -1,3 +1,6 @@
+import sys, pathlib
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
+
 from app import create_app, db
 from app.modules.notifications.services import add_in_app_notification
 
