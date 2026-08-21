@@ -522,3 +522,76 @@ def import_backup():
     add_audit_log('IMPORTAR CONFIGURACIÓN', module='Ajustes', status='success',
                   detail=f"Restaurado: {', '.join(restored) or 'nada'}")
     return jsonify({'status': 'success', 'restored': restored})
+
+
+# --------------------------------------------------------------------------- #
+# Búsqueda en el directorio
+# --------------------------------------------------------------------------- #
+
+def _escape_ldap_filter(value):
+    """Escapa un valor para un filtro LDAP (RFC 4515).
+
+    Sin esto, un asterisco o un paréntesis en la búsqueda alteran la estructura
+    del filtro: con `*)(objectClass=*` se podría ampliar el conjunto devuelto
+    más allá de lo buscado.
+    """
+    replacements = {'\\': r'\5c', '*': r'\2a', '(': r'\28',
+                    ')': r'\29', '\0': r'\00', '/': r'\2f'}
+    return ''.join(replacements.get(char, char) for char in value)
+
+
+@admin_bp.route('/directory/search')
+@login_required
+@admin_required
+def directory_search():
+    """Busca usuarios en el directorio corporativo, para darlos de alta."""
+    query = (request.args.get('q') or '').strip()
+    if len(query) < 2:
+        return _error('Indica al menos dos caracteres.')
+
+    config = AuthConfig.query.first()
+    if not config or not config.ldap_host:
+        return _error('El directorio no está configurado.')
+
+    try:
+        import ssl as ssl_module
+
+        from ldap3 import Connection, Server, Tls
+
+        tls = None
+        if config.ldap_ssl:
+            tls = Tls(validate=ssl_module.CERT_NONE,
+                      version=ssl_module.PROTOCOL_TLSv1_2)
+        server = Server(config.ldap_host, port=int(config.ldap_port or 389),
+                        use_ssl=config.ldap_ssl, tls=tls, connect_timeout=5)
+
+        safe = _escape_ldap_filter(query)
+        ldap_filter = (f'(|(sAMAccountName=*{safe}*)(mail=*{safe}*)'
+                       f'(displayName=*{safe}*))')
+
+        with Connection(server, user=config.ldap_user, password=config.ldap_pass,
+                        auto_bind=True, auto_referrals=False) as conn:
+            conn.search(config.ldap_base_dn, ldap_filter,
+                        attributes=['mail', 'displayName', 'cn',
+                                    'sAMAccountName', 'uid'],
+                        size_limit=50)
+
+            def attr(entry, name, fallback=''):
+                return str(entry[name].value) if name in entry else fallback
+
+            results = [{
+                'name': attr(entry, 'displayName') or attr(entry, 'cn'),
+                'email': attr(entry, 'mail'),
+                'account': attr(entry, 'sAMAccountName') or attr(entry, 'uid'),
+            } for entry in conn.entries]
+
+    except Exception as exc:
+        return _error(f'No se pudo consultar el directorio: {exc}', 502)
+
+    # Marca quién existe ya en Nexus, para no ofrecer un alta duplicada.
+    from app.modules.auth.models import User
+    emails = {(u.email or '').lower() for u in User.query.all()}
+    for item in results:
+        item['exists'] = (item['email'] or '').lower() in emails
+
+    return jsonify({'count': len(results), 'users': results})

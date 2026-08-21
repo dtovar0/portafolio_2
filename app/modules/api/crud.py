@@ -404,3 +404,77 @@ def save_preferences():
         'refresh_interval': current_user.pref_refresh_interval,
         'tour_enabled': current_user.pref_tour_enabled,
     }})
+
+
+# --------------------------------------------------------------------------- #
+# Higiene de cuentas
+# --------------------------------------------------------------------------- #
+
+PURGE_MIN_DAYS = 7
+
+
+def _inactive_users(days):
+    """Cuentas candidatas a purga por inactividad.
+
+    Incluye las que nunca han iniciado sesión y son más antiguas que el
+    umbral: la versión anterior las dejaba fuera, porque comparar
+    `last_login_at < cutoff` descarta los nulos, y eran justo las más claras.
+    Nunca se purga a un superadmin.
+    """
+    from datetime import datetime, timedelta
+
+    cutoff = datetime.now() - timedelta(days=days)
+    return User.query.filter(
+        db.func.lower(db.func.coalesce(User.role, '')) != 'administrador',
+        db.or_(
+            User.last_login_at < cutoff,
+            db.and_(User.last_login_at.is_(None), User.created_at < cutoff),
+        ),
+    )
+
+
+@crud_bp.route('/users/inactive')
+@login_required
+@admin_required
+def list_inactive_users():
+    """Vista previa de la purga: qué cuentas se eliminarían."""
+    days = max(request.args.get('days', 30, type=int), PURGE_MIN_DAYS)
+    users = _inactive_users(days).order_by(User.email).all()
+    return jsonify({
+        'days': days,
+        'count': len(users),
+        'users': [{
+            'id': u.id,
+            'email': u.email,
+            'name': u.nombre or u.email,
+            'role': u.role,
+            'last_login_at': u.last_login_at.isoformat() if u.last_login_at else None,
+        } for u in users],
+    })
+
+
+@crud_bp.route('/users/purge', methods=['POST'])
+@login_required
+@admin_required
+def purge_inactive_users():
+    """Elimina las cuentas sin actividad en el periodo indicado."""
+    days = _payload().get('days', 30)
+    try:
+        days = int(days)
+    except (TypeError, ValueError):
+        return _error('Número de días no válido.')
+    if days < PURGE_MIN_DAYS:
+        # Un umbral bajo borraría cuentas recién creadas.
+        return _error(f'El periodo mínimo es de {PURGE_MIN_DAYS} días.')
+
+    users = _inactive_users(days).all()
+    purged = [u.email for u in users]
+    for user in users:
+        db.session.delete(user)
+    db.session.commit()
+
+    if purged:
+        add_audit_log(f'PURGAR CUENTAS INACTIVAS ({len(purged)})',
+                      module='Usuarios', status='warning',
+                      detail=f"Inactividad > {days} días: {', '.join(purged[:20])}")
+    return jsonify({'status': 'success', 'count': len(purged), 'purged': purged})

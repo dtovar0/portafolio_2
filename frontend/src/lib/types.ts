@@ -180,3 +180,19 @@ export interface AuthContext {
   authenticated: boolean;
   ldap_available: boolean;
 }
+
+export interface InactiveUser {
+  id: number;
+  email: string;
+  name: string;
+  role: Role;
+  last_login_at: string | null;
+}
+
+export interface DirectoryUser {
+  name: string;
+  email: string;
+  account: string;
+  /** Ya existe una cuenta en Nexus con ese correo. */
+  exists: boolean;
+}

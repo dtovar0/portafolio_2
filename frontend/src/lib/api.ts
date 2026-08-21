@@ -9,7 +9,8 @@
 import type {
   Area, AreaInput, AppNotification, AuditEntry, AuthConfig, AuthContext,
   EmailTemplate,
-  ManagedUser, Platform, PlatformInput, Session, SmtpConfig, Stats,
+  DirectoryUser, InactiveUser, ManagedUser, Platform, PlatformInput,
+  Session, SmtpConfig, Stats,
   SystemSettings, UserInput,
 } from './types';
 
@@ -135,6 +136,19 @@ export const api = {
   setUserPlatforms: (id: number, platformIds: number[]) =>
     request<{ status: string }>(`/users/${id}/platforms`,
       { method: 'PUT', body: JSON.stringify({ platform_ids: platformIds }) }),
+
+  // --- Higiene de cuentas ---
+  inactiveUsers: (days = 30) =>
+    request<{ days: number; count: number; users: InactiveUser[] }>(
+      `/users/inactive?days=${days}`),
+  purgeInactiveUsers: (days: number) =>
+    request<{ status: string; count: number; purged: string[] }>(
+      '/users/purge', { method: 'POST', body: JSON.stringify({ days }) }),
+
+  // --- Directorio ---
+  searchDirectory: (q: string) =>
+    request<{ count: number; users: DirectoryUser[] }>(
+      `/directory/search?q=${encodeURIComponent(q)}`),
 
   // --- Preferencias ---
   savePreferences: (prefs: Partial<Session['preferences']>) =>

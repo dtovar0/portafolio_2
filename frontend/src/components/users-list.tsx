@@ -5,7 +5,9 @@
 import { useState } from 'react';
 import { api } from '@/lib/api';
 import { useAsync } from '@/lib/use-async';
-import type { Area, ManagedUser, Platform, Role, UserInput } from '@/lib/types';
+import type {
+  Area, DirectoryUser, InactiveUser, ManagedUser, Platform, Role, UserInput,
+} from '@/lib/types';
 import { Button, Checkbox, ConfirmDialog, Field, Modal, Select, TextInput } from './form';
 import { useSession } from './session-provider';
 import { Badge, Card, EmptyNote, ErrorNote, Spinner } from './ui';
@@ -61,12 +63,15 @@ function UserForm({
   user,
   areas,
   platforms,
+  prefill,
   onClose,
   onSaved,
 }: {
   user: ManagedUser | null;
   areas: Area[];
   platforms: Platform[];
+  /** Datos traídos del directorio para un alta. */
+  prefill?: DirectoryUser | null;
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -76,7 +81,15 @@ function UserForm({
   const [form, setForm] = useState<UserInput>(
     user
       ? { name: user.name, role: user.role, is_active: user.is_active }
-      : { email: '', name: '', role: 'usuario', is_active: true, password: '' },
+      : {
+          email: prefill?.email ?? prefill?.account ?? '',
+          name: prefill?.name ?? '',
+          role: 'usuario',
+          is_active: true,
+          password: '',
+          // Quien viene del directorio se autentica contra él, no localmente.
+          auth_source: prefill ? 'ldap' : 'local',
+        },
   );
   const [areaIds, setAreaIds] = useState<number[]>(
     (user?.areas ?? []).map((a) => a.id),
@@ -211,6 +224,190 @@ function UserForm({
   );
 }
 
+/** Alta de usuarios desde el directorio corporativo. */
+function DirectoryPicker({
+  onPick,
+  onClose,
+}: {
+  onPick: (found: DirectoryUser) => void;
+  onClose: () => void;
+}) {
+  const [term, setTerm] = useState('');
+  const [results, setResults] = useState<DirectoryUser[] | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function search() {
+    setBusy(true);
+    setError(null);
+    try {
+      const found = await api.searchDirectory(term);
+      setResults(found.users);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo buscar');
+      setResults(null);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Modal
+      title="Buscar en el directorio"
+      onClose={onClose}
+      footer={<Button variant="ghost" onClick={onClose}>Cerrar</Button>}
+    >
+      {error ? <ErrorNote message={error} /> : null}
+
+      <div className="flex gap-2">
+        <TextInput
+          value={term}
+          onChange={(e) => setTerm(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') void search(); }}
+          placeholder="Nombre, cuenta o correo"
+          autoFocus
+        />
+        <Button onClick={search} disabled={busy || term.trim().length < 2}>
+          {busy ? 'Buscando…' : 'Buscar'}
+        </Button>
+      </div>
+
+      {results !== null ? (
+        results.length === 0 ? (
+          <p className="text-sm text-muted">Sin resultados.</p>
+        ) : (
+          <ul className="max-h-72 divide-y divide-border overflow-y-auto">
+            {results.map((found) => (
+              <li
+                key={found.account || found.email}
+                className="flex items-center justify-between gap-3 py-2"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium">{found.name}</p>
+                  <p className="truncate text-xs text-muted">
+                    {found.email || found.account}
+                  </p>
+                </div>
+                {found.exists ? (
+                  <Badge>Ya existe</Badge>
+                ) : (
+                  <Button variant="ghost" onClick={() => onPick(found)}>
+                    Dar de alta
+                  </Button>
+                )}
+              </li>
+            ))}
+          </ul>
+        )
+      ) : null}
+    </Modal>
+  );
+}
+
+/** Purga de cuentas sin actividad. */
+function PurgePanel({ onDone }: { onDone: () => void }) {
+  const [days, setDays] = useState(30);
+  const [preview, setPreview] = useState<InactiveUser[] | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [confirming, setConfirming] = useState(false);
+
+  async function load() {
+    setBusy(true);
+    setError(null);
+    try {
+      const result = await api.inactiveUsers(days);
+      setPreview(result.users);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo consultar');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function purge() {
+    setBusy(true);
+    try {
+      await api.purgeInactiveUsers(days);
+      setConfirming(false);
+      setPreview(null);
+      onDone();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo purgar');
+      setConfirming(false);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Card className="space-y-3">
+      <div>
+        <h2 className="text-sm font-medium">Purgar cuentas inactivas</h2>
+        <p className="mt-1 text-sm text-muted">
+          Elimina las cuentas sin acceso en el periodo indicado, incluidas las
+          que nunca han iniciado sesión. Nunca afecta a los administradores
+          globales.
+        </p>
+      </div>
+
+      {error ? <ErrorNote message={error} /> : null}
+
+      <div className="flex flex-wrap items-end gap-2">
+        <Field label="Días sin actividad">
+          <TextInput
+            type="number" min={7} className="w-28"
+            value={String(days)}
+            onChange={(e) => setDays(Number(e.target.value))}
+          />
+        </Field>
+        <Button variant="ghost" onClick={load} disabled={busy}>
+          {busy ? 'Consultando…' : 'Ver candidatas'}
+        </Button>
+      </div>
+
+      {preview !== null ? (
+        preview.length === 0 ? (
+          <p className="text-sm text-muted">
+            Ninguna cuenta cumple ese criterio.
+          </p>
+        ) : (
+          <div className="space-y-2">
+            <p className="text-sm">
+              <strong>{preview.length}</strong> cuenta(s) se eliminarían:
+            </p>
+            <ul className="max-h-48 space-y-1 overflow-y-auto text-sm text-muted">
+              {preview.map((user) => (
+                <li key={user.id} className="truncate">
+                  {user.email}
+                  {' · '}
+                  {user.last_login_at
+                    ? `último acceso ${user.last_login_at.slice(0, 10)}`
+                    : 'nunca ha entrado'}
+                </li>
+              ))}
+            </ul>
+            <Button variant="danger" onClick={() => setConfirming(true)}>
+              Purgar {preview.length} cuenta(s)
+            </Button>
+          </div>
+        )
+      ) : null}
+
+      {confirming ? (
+        <ConfirmDialog
+          title="Purgar cuentas inactivas"
+          message={`Se eliminarán ${preview?.length ?? 0} cuenta(s) de forma permanente.`}
+          confirmLabel="Purgar"
+          onConfirm={purge}
+          onCancel={() => setConfirming(false)}
+          busy={busy}
+        />
+      ) : null}
+    </Card>
+  );
+}
+
 export function UsersList() {
   const { session } = useSession();
   const users = useAsync(() => api.users(), []);
@@ -221,6 +418,11 @@ export function UsersList() {
   const [removing, setRemoving] = useState<ManagedUser | null>(null);
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
+  const [directory, setDirectory] = useState(false);
+  const [showPurge, setShowPurge] = useState(false);
+  const [prefill, setPrefill] = useState<DirectoryUser | null>(null);
+
+  const isAdmin = session?.permissions.is_admin ?? false;
 
   async function remove() {
     if (!removing) return;
@@ -248,8 +450,22 @@ export function UsersList() {
               : 'Usuarios de las áreas que administras.'}
           </p>
         </div>
-        <Button onClick={() => setCreating(true)}>Nuevo usuario</Button>
+        <div className="flex flex-wrap gap-2">
+          {isAdmin ? (
+            <>
+              <Button variant="ghost" onClick={() => setDirectory(true)}>
+                Buscar en directorio
+              </Button>
+              <Button variant="ghost" onClick={() => setShowPurge((v) => !v)}>
+                {showPurge ? 'Ocultar purga' : 'Purgar inactivas'}
+              </Button>
+            </>
+          ) : null}
+          <Button onClick={() => setCreating(true)}>Nuevo usuario</Button>
+        </div>
       </div>
+
+      {showPurge ? <PurgePanel onDone={users.reload} /> : null}
 
       {problem ? <ErrorNote message={problem} /> : null}
       {users.loading ? <Spinner /> : null}
@@ -318,11 +534,28 @@ export function UsersList() {
         )
       ) : null}
 
+      {directory ? (
+        <DirectoryPicker
+          onClose={() => setDirectory(false)}
+          onPick={(found) => {
+            // Prellena el alta con lo que devuelve el directorio.
+            setPrefill(found);
+            setDirectory(false);
+            setCreating(true);
+          }}
+        />
+      ) : null}
+
       {creating ? (
         <UserForm
           user={null} areas={areas.data ?? []} platforms={platforms.data ?? []}
-          onClose={() => setCreating(false)}
-          onSaved={() => { setCreating(false); users.reload(); }}
+          prefill={prefill}
+          onClose={() => { setCreating(false); setPrefill(null); }}
+          onSaved={() => {
+            setCreating(false);
+            setPrefill(null);
+            users.reload();
+          }}
         />
       ) : null}
 

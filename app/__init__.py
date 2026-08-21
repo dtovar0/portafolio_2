@@ -137,6 +137,13 @@ def create_app():
         csrf.exempt(bp)
         app.register_blueprint(bp)
 
+    # Los blueprints heredados ya no procesan datos: solo redirigen o devuelven
+    # 410. Sin exentarlos, el CSRF los intercepta antes y responde un 400 en
+    # HTML, ocultando la indicación del endpoint que los reemplaza.
+    for bp in (auth_bp, users_bp, areas_bp, audit_bp, notifications_bp,
+               settings_bp, core_bp):
+        csrf.exempt(bp)
+
 
 
     # Sincronizar Modelos (Importar antes de crear tablas)
@@ -165,6 +172,13 @@ def create_app():
 
     # Flask es API: los errores se responden en JSON. Las páginas de error de
     # la interfaz las sirve el frontend.
+    from flask_wtf.csrf import CSRFError
+
+    @app.errorhandler(CSRFError)
+    def csrf_error(error):
+        return jsonify({'status': 'error',
+                        'message': 'Token CSRF ausente o no válido.'}), 400
+
     @app.errorhandler(404)
     def not_found(error):
         return jsonify({'status': 'error', 'message': 'Recurso no encontrado.'}), 404
