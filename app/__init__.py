@@ -94,6 +94,7 @@ def create_app():
     from app.modules.areas.routes import areas_bp
     from app.modules.drive.routes import drive_bp
     from app.modules.drive_platforms.routes import drive_platforms_bp
+    from app.modules.api.routes import api_bp
 
 
 
@@ -110,6 +111,10 @@ def create_app():
     app.register_blueprint(areas_bp)
     app.register_blueprint(drive_bp)
     app.register_blueprint(drive_platforms_bp)
+    # La API v1 usa la cookie de sesión y no formularios, así que no
+    # participa del CSRF de Flask-WTF.
+    csrf.exempt(api_bp)
+    app.register_blueprint(api_bp)
 
 
 
