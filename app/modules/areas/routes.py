@@ -6,7 +6,7 @@ from app.authz import (admin_required, any_admin_required, area_admin_required,
 from app.modules.core.models import Area, Platform
 from app.modules.auth.models import User
 from app.modules.audit.models import AuditLog
-from app.modules.drive.utils import StorageManager
+from app.utils.naming import sanitize_display_name
 import json
 import os
 
@@ -47,8 +47,7 @@ def add_area():
     try:
         data = request.get_json()
         name = data.get('name')
-        # Saneamiento de nombre para seguridad de archivos
-        safe_name = StorageManager.sanitize_filename(name)
+        safe_name = sanitize_display_name(name)
         
         if Area.query.filter_by(name=safe_name).first():
             return jsonify({'status': 'error', 'message': 'El nombre del área ya existe o es inválido'}), 400
@@ -68,14 +67,6 @@ def add_area():
             new_area.area_users = users
             
         db.session.add(new_area)
-        
-        # Crear Carpeta Física del Área en el Root Storage
-        try:
-            area_path = StorageManager.get_safe_path(name)
-            if not os.path.exists(area_path):
-                os.makedirs(area_path, exist_ok=True)
-        except Exception as e:
-            current_app.logger.error(f"Error creando carpeta física para área {name}: {e}")
         
         # Audit Log
         log = AuditLog(
@@ -104,28 +95,10 @@ def edit_area(area_id):
         data = request.get_json()
         
         # Check name uniqueness if changed
-        new_name = data.get('name')
+        new_name = sanitize_display_name(data.get('name'))
         if new_name != area.name and Area.query.filter_by(name=new_name).first():
             return jsonify({'status': 'error', 'message': 'El nombre del área ya existe'}), 400
             
-        # Gestionar cambio de nombre físico (Renombrado de Carpeta)
-        old_name = area.name
-        if new_name != old_name:
-            try:
-                old_path = StorageManager.get_safe_path(old_name)
-                new_path = StorageManager.get_safe_path(new_name)
-                
-                if os.path.exists(old_path):
-                    os.rename(old_path, new_path)
-                elif not os.path.exists(new_path):
-                    os.makedirs(new_path, exist_ok=True)
-                
-                # Actualizar storage_path de todas las plataformas del área
-                for p in area.platforms:
-                    p.storage_path = os.path.join(new_name, p.name)
-            except Exception as e:
-                current_app.logger.error(f"Error al renombrar carpeta de área {old_name} a {new_name}: {e}")
-
         area.name = new_name
         area.description = data.get('description')
         area.icon = data.get('icon')

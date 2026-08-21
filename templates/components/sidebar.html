@@ -30,28 +30,11 @@
                 <span class="sidebar-text text-sm font-bold whitespace-nowrap">Dashboard</span>
             </a>
 
-            <!-- SECCIÓN DE PORTALES (NIVEL USUARIO) -->
-            <p class="text-[12px] font-black text-label/40 uppercase tracking-[0.2em] px-3 mb-2 mt-6 sidebar-text">Ecosistemas</p>
-            <hr class="sidebar-divider">
-            
-            <a href="{{ url_for('drive.index') }}" title="Nexus Drive" data-nx-tooltip="Portal de Archivos"
-               class="nav-item {% if request.endpoint == 'drive.index' %}nav-item-active{% endif %} gap-4 px-4 py-3 text-label hover:text-primary hover:bg-primary/5 transition-all group">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
-                <span class="sidebar-text text-sm font-bold whitespace-nowrap text-primary">Nexus Drive</span>
-            </a>
-
 
             <!-- SECCIÓN ADMINISTRATIVA (SOLO ADMIN) -->
             {% if current_user.role == 'administrador' %}
             <p class="text-[12px] font-black text-label/40 uppercase tracking-[0.2em] px-3 mb-2 mt-8 sidebar-text">Gestión Master</p>
             <hr class="sidebar-divider">
-
-            <a href="{{ url_for('drive_platforms.index') }}" title="Gestión de Unidades" data-nx-tooltip="Configurar Almacenamiento"
-               class="nav-item {% if request.endpoint == 'drive_platforms.index' %}nav-item-active{% endif %} gap-4 px-4 py-3 text-label hover:text-primary hover:bg-primary/5 transition-all group">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                <span class="sidebar-text text-sm font-bold whitespace-nowrap">Unidades de Drive</span>
-            </a>
-
 
             <a href="{{ url_for('areas_module.areas_list') }}" title="Estructura de Áreas" data-nx-tooltip="Configurar Áreas"
                class="nav-item {% if request.endpoint == 'areas_module.areas_list' %}nav-item-active{% endif %} gap-4 px-4 py-3 text-label hover:text-primary hover:bg-primary/5 transition-all group">
