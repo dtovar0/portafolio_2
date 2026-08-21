@@ -9,6 +9,7 @@ config.conf
 __pycache__/
 *.pyc
 instance/
+*.db
 .pytest_cache/
 secret.key
 *.zip
