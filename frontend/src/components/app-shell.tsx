@@ -110,7 +110,7 @@ function Frame({ children }: { children: React.ReactNode }) {
             </p>
           </div>
           <a
-            href="/auth/logout"
+            href="/logout"
             className="rounded-lg border border-border px-3 py-1.5 text-sm text-muted hover:text-content"
           >
             Salir

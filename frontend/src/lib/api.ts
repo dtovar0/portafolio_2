@@ -7,7 +7,8 @@
  */
 
 import type {
-  Area, AreaInput, AppNotification, AuditEntry, AuthConfig, EmailTemplate,
+  Area, AreaInput, AppNotification, AuditEntry, AuthConfig, AuthContext,
+  EmailTemplate,
   ManagedUser, Platform, PlatformInput, Session, SmtpConfig, Stats,
   SystemSettings, UserInput,
 } from './types';
@@ -165,6 +166,19 @@ export const api = {
       { method: 'POST', body: JSON.stringify(ids ? { ids } : {}) }),
   clearNotifications: () =>
     request<{ status: string }>('/notifications', { method: 'DELETE' }),
+
+  // --- Autenticación ---
+  authContext: () => request<AuthContext>('/auth/context'),
+  ssoLogin: () =>
+    request<{ status: string; role: string }>('/auth/sso', { method: 'POST' }),
+  login: (email: string, password: string, method: 'directory' | 'local') =>
+    request<{ status: string; role: string }>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password, method }),
+    }),
+  logout: () =>
+    request<{ status: string; redirect: string | null }>(
+      '/auth/logout', { method: 'POST' }),
 
   authConfig: () => request<AuthConfig>('/auth-config'),
   saveAuthConfig: (input: Partial<AuthConfig> & { ldap_pass?: string }) =>

@@ -1,4 +1,4 @@
-from flask import Flask, send_from_directory
+from flask import Flask, jsonify, send_from_directory
 from flask_compress import Compress
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
@@ -63,9 +63,28 @@ def create_app():
     db.init_app(app)
     login_manager.init_app(app)
     csrf.init_app(app)
+    # La pantalla de acceso vive en el frontend; sin esto, Flask redirigiría a
+    # su ruta heredada y el navegador daría un salto de más.
     login_manager.login_view = 'auth.login'
     login_manager.login_message = "Por favor, inicie sesión para acceder."
     login_manager.login_message_category = "info"
+
+    @login_manager.unauthorized_handler
+    def unauthorized():
+        """Sin sesión: JSON para las llamadas de API, redirección para el resto."""
+        from flask import redirect, request as req
+        wants_json = (
+            req.is_json
+            or '/api/' in req.path
+            or req.headers.get('X-Requested-With') == 'XMLHttpRequest'
+            or req.accept_mimetypes['application/json']
+            >= req.accept_mimetypes['text/html']
+        )
+        if wants_json:
+            return jsonify({'status': 'error',
+                            'message': 'Sesión no válida.'}), 401
+        target = (os.getenv('FRONTEND_URL', '') or '') + '/login'
+        return redirect(target)
 
     # Configuración de Redis
     from app.utils.redis_client import registry as redis_registry
@@ -95,6 +114,7 @@ def create_app():
     from app.modules.api.routes import api_bp
     from app.modules.api.crud import crud_bp
     from app.modules.api.admin import admin_bp
+    from app.modules.api.auth import auth_api_bp
 
 
 
@@ -111,7 +131,7 @@ def create_app():
     app.register_blueprint(areas_bp)
     # La API v1 usa la cookie de sesión y no formularios, así que no
     # participa del CSRF de Flask-WTF.
-    for bp in (api_bp, crud_bp, admin_bp):
+    for bp in (api_bp, crud_bp, admin_bp, auth_api_bp):
         csrf.exempt(bp)
         app.register_blueprint(bp)
 

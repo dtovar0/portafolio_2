@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash
+from flask import Blueprint, request, jsonify, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from app import db
 from app.modules.auth.models import User, AuthConfig
@@ -10,121 +10,20 @@ from app.modules.notifications.services import send_notification_by_slug
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
+
+def _frontend(path):
+    """URL del frontend Next.js, que sirve la interfaz."""
+    return (os.getenv('FRONTEND_URL', '') or '') + path
+
+
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
-    try:
-        # 1. Si ya está logueado, ir al inicio
-        if current_user.is_authenticated:
-            return redirect(url_for('core.index'))
-            
-        # --- DEBUG DE CABECERAS TOTAL (SIN FILTROS) ---
-        if os.getenv('DEBUG_AUTH', 'false').lower() == 'true':
-            all_headers = {h: v for h, v in request.headers.items()}
-            print("\n" + "="*50)
-            print(f"DEBUG AUTH TOTAL: {all_headers}")
-            print("="*50 + "\n")
-            
-            # Guardar en Auditoría para visualización en UI
-            add_audit_log(
-                "DEBUG SSO FULL HEADERS", 
-                status="info", 
-                detail=f"Todas las cabeceras recibidas: {all_headers}"
-            )
+    """Ruta heredada. La pantalla de acceso vive en el frontend y la lógica de
+    autenticación en /api/v1/auth."""
+    if current_user.is_authenticated:
+        return redirect(_frontend('/'))
+    return redirect(_frontend('/login'))
 
-        # 2. INTENTO DE SSO / AUTHELIA (Soporta GET y POST)
-        if os.getenv('AUTHELIA_ENABLED', 'false').lower() == 'true':
-            header_user = os.getenv('AUTHELIA_HEADER_USER', 'Remote-Email')
-            authelia_user = request.headers.get(header_user)
-            
-            if authelia_user:
-                print(f"DEBUG: Usuario detectado -> {authelia_user}")
-                header_name = os.getenv('AUTHELIA_HEADER_NAME', 'Remote-Name')
-                header_groups = os.getenv('AUTHELIA_HEADER_GROUPS', 'Remote-Groups')
-                
-                print("DEBUG: Buscando usuario en DB...")
-                user = User.query.filter_by(email=authelia_user).first()
-                authelia_name = request.headers.get(header_name, authelia_user)
-                authelia_groups = request.headers.get(header_groups, '')
-                
-                # Lógica de Roles Dinámica (Soporta múltiples grupos de admin)
-                inferred_role = 'usuario'
-                admin_groups_env = os.getenv('AUTHELIA_GROUP_ADMIN', 'administrador')
-                admin_groups = [g.strip().lower() for g in admin_groups_env.split(',')]
-                
-                if authelia_groups:
-                    user_groups = [g.strip().lower() for g in authelia_groups.split(',')]
-                    # Si el usuario pertenece a CUALQUIERA de los grupos de admin definidos
-                    if any(group in user_groups for group in admin_groups):
-                        inferred_role = 'administrador'
-
-                if not user:
-                    print("DEBUG: Usuario nuevo. Creando registro...")
-                    user = User(
-                        email=authelia_user,
-                        nombre=authelia_name,
-                        role=inferred_role,
-                        auth_source='sso'
-                    )
-                    db.session.add(user)
-                    db.session.commit()
-                    # Notificar bienvenida SSO
-                    if os.getenv('NOTIFY_USER_CREATED', 'true').lower() == 'true':
-                        base_url = os.getenv('BASE_URL', request.host_url.rstrip('/'))
-                        send_notification_by_slug('usuario_creado', authelia_user, context={
-                            'nombre': authelia_name,
-                            'usuario': authelia_user,
-                            'base_url': base_url,
-                            'url': f"{base_url}/auth/login"
-                        })
-                else:
-                    print("DEBUG: Usuario existente. Actualizando metadatos...")
-                    user.nombre = authelia_name
-                    user.role = inferred_role
-                    db.session.commit()
-                
-                print(f"DEBUG: Procediendo a login_user para {user.email}")
-                login_user(user, remember=True)
-                print("DEBUG: Registro en auditoría...")
-                add_audit_log(f"ACCESO SSO: {authelia_user}", status="success", detail=f"Sesión iniciada exitosamente vía Portal Authelia")
-                print("DEBUG: Redirigiendo a index...")
-                return redirect(url_for('core.index'))
-
-        # 3. LOGIN TRADICIONAL (Solo si es POST)
-        if request.method == "POST":
-            email = request.form.get("email")
-            password = request.form.get("password")
-            auth_type = request.form.get("auth_type", "directory")
-            
-            if auth_type == "directory":
-                from app.modules.auth.services import authenticate_user_ldap
-                ldap_result = authenticate_user_ldap(email, password)
-                if ldap_result.get("status") == "success":
-                    user = ldap_result["user"]
-                    login_user(user, remember=True)
-                    add_audit_log(f"ACCESO DIRECTORIO: {email}", status="success", detail=f"Autenticación corporativa exitosa")
-                    return redirect(url_for('core.index'))
-                else:
-                    flash(f"Error: {ldap_result.get('message')}", "error")
-            else:
-                user = User.query.filter_by(email=email).first()
-                if user and user.check_password(password):
-                    login_user(user, remember=True)
-                    add_audit_log(f"ACCESO LOCAL: {email}", status="success", detail=f"Autenticación manual exitosa")
-                    return redirect(url_for('core.index'))
-                flash("Credenciales incorrectas", "error")
-
-        # 4. FALLBACK: Mostrar formulario de login manual
-        return render_template("login.html", sso_enabled=os.getenv('AUTHELIA_ENABLED', 'false').lower() == 'true')
-
-    except Exception as e:
-        import traceback
-        print("\n" + "!"*50)
-        print(f"ERROR CRÍTICO EN LOGIN: {str(e)}")
-        traceback.print_exc()
-        print("!"*50 + "\n")
-        from flask import current_app
-        current_app.logger.error(f"Error en login: {e}")
-        return render_template("login.html", error="Error en el servicio de autenticación")
 
 @auth_bp.route("/users/purge", methods=["POST"])
 @login_required
@@ -143,22 +42,10 @@ def purge_users():
         return jsonify({"status": "error", "message": "Ocurrió un error al procesar el usuario."}), 500
 
 @auth_bp.route("/logout")
-@login_required
 def logout():
-    user_email = current_user.email
-    logout_user()
-    add_audit_log(f"CIERRE DE SESIÓN: {user_email}", status="success", detail=f"El usuario ha finalizado su sesión de forma manual")
-    
-    # --- LOGOUT COORDINADO CON AUTHELIA (SSO) ---
-    if os.getenv('AUTHELIA_ENABLED', 'false').lower() == 'true':
-        slo_url = os.getenv('AUTHELIA_SLO_URL')
-        if slo_url:
-            # Redirigimos al login para romper el bucle
-            redirect_url = f"{slo_url}?rd={request.host_url}auth/login"
-            return redirect(redirect_url)
-        
-    flash("Has cerrado sesión correctamente.", "info")
-    return redirect(url_for('auth.login'))
+    """Ruta heredada: el cierre de sesión lo gestiona /api/v1/auth/logout."""
+    return redirect(_frontend('/logout'))
+
 
 @auth_bp.route("/")
 @login_required

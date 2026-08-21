@@ -172,3 +172,11 @@ export interface UserInput {
   area_ids?: number[];
   managed_area_ids?: number[];
 }
+
+export interface AuthContext {
+  sso_enabled: boolean;
+  /** Identidad que ya aporta Authelia, si el proxy la inyectó. */
+  sso_user: string | null;
+  authenticated: boolean;
+  ldap_available: boolean;
+}

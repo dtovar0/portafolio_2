@@ -24,8 +24,9 @@ const SessionContext = createContext<SessionState>({
   error: null,
 });
 
-/** URL de login de Flask, que sigue siendo quien autentica. */
-const LOGIN_URL = '/auth/login';
+/** Pantalla de acceso. Flask sigue emitiendo la sesión, pero la interfaz
+ *  de login vive ya en el frontend. */
+const LOGIN_URL = '/login';
 
 export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<SessionState>({
@@ -43,7 +44,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       })
       .catch((error: unknown) => {
         if (!active) return;
-        // Sin sesión válida, deja que Flask (y Authelia detrás) autentique.
+        // Sin sesión válida, a la pantalla de acceso.
         if (error instanceof ApiError && error.isUnauthenticated) {
           window.location.href = LOGIN_URL;
           return;

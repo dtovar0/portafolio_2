@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify, send_file
+from flask import Blueprint, request, jsonify, send_file
 from flask import redirect
 from flask_login import login_required, current_user
 from app.authz import admin_required

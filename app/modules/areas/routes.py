@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify, current_app
+from flask import Blueprint, request, jsonify, current_app
 from flask import redirect
 from flask_login import login_required, current_user
 from app import db
