@@ -21,12 +21,14 @@ ExecStart=/opt/nexus/venv/bin/gunicorn \
 Restart=on-failure
 RestartSec=5
 
-# Endurecimiento: solo se permite escribir en storage y logs.
+# Endurecimiento: el backend no escribe en disco —los datos van a la base de
+# datos y el logo del portal se guarda como data URI—, así que solo necesita
+# poder escribir sus registros.
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=/opt/nexus/storage /var/log/nexus
+ReadWritePaths=/var/log/nexus
 
 [Install]
 WantedBy=multi-user.target

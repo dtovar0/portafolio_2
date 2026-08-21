@@ -48,29 +48,51 @@ datos; Next.js no accede a la base de datos, solo consume la API. Ver
 └── run.py                # Punto de entrada del backend
 ```
 
-## ⚙️ Configuración Rápida
+## ⚙️ Desarrollo
 
-1.  **Clonar y configurar entorno**:
+1.  **Configurar entorno**:
     ```bash
-    cp .env.example .env
-    # Editar .env con tus credenciales
+    cp .env.example .env    # editar con las credenciales
     ```
-2.  **Instalar dependencias**:
+2.  **Backend** (Python 3.12):
     ```bash
-    pip install -r requirements.txt          # backend
-    cd frontend && npm ci && npm run build   # frontend
+    python3.12 -m venv venv
+    venv/bin/pip install -r requirements.txt
+    venv/bin/python run.py            # API en :5001
     ```
-3.  **Iniciar los dos servicios**:
+3.  **Frontend** (Node 18.18+, se recomienda 22 LTS):
     ```bash
-    python run.py                    # API en :5001
-    cd frontend && npm run dev       # interfaz en :3000
+    cd frontend
+    npm ci
+    npm run dev                       # interfaz en :3000
     ```
+
+El `next.config.ts` reenvía `/api` y `/auth` al backend en desarrollo, así que
+el navegador ve un solo origen y la cookie de sesión viaja sin CORS.
+
+## 🚀 Instalación en servidor (Rocky Linux 8)
+
+```bash
+./deploy/preflight.sh          # evalúa el sistema, no modifica nada
+sudo ./deploy/install.sh --domain nexus.example.com
+```
+
+`preflight.sh` comprueba distribución, recursos, Python, Node, cabeceras de
+compilación, conectividad con la base de datos y Redis, puertos libres, nginx,
+SELinux y firewalld. Sale con código 1 si hay algo que resolver antes.
+
+`install.sh` instala los paquetes, crea el usuario de servicio, copia el
+proyecto, monta el venv, construye el frontend, registra las dos unidades
+systemd y configura nginx. Es idempotente. Opciones: `--prefix`, `--user`,
+`--domain`, `--skip-packages`.
+
+Detalles y notas de seguridad en [deploy/README.md](deploy/README.md).
 
 ## 📚 Documentación Adicional
 
 *   [Reglas de Negocio](docs/business_rules.md): Lineamientos operativos y de diseño.
 *   [Arquitectura Técnica](docs/ARCHITECTURE.md): Detalles sobre el flujo de datos y base de datos.
-*   [Guía de Estilos](UI_GUIDE.md): Design tokens y componentes reutilizables.
+*   [Despliegue](deploy/README.md): Servicios systemd y reverse proxy.
 
 ## 🚧 Desarrollos Pendientes (Roadmap)
 

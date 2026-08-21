@@ -10,12 +10,14 @@ Wants=nexus-backend.service
 Type=simple
 User=nexus
 Group=nexus
-WorkingDirectory=/opt/nexus/frontend
+# server.js resuelve .next/static y public/ relativos a su propio directorio,
+# así que el WorkingDirectory debe ser standalone, no frontend/.
+WorkingDirectory=/opt/nexus/frontend/.next/standalone
 Environment=NODE_ENV=production
 Environment=PORT=3000
 Environment=HOSTNAME=127.0.0.1
 # Con `output: standalone` hay que arrancar este server.js, no `next start`.
-ExecStart=/usr/bin/node /opt/nexus/frontend/.next/standalone/server.js
+ExecStart=/usr/bin/node server.js
 Restart=on-failure
 RestartSec=5
 
