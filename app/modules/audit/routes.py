@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, jsonify, current_app
 from flask_login import login_required, current_user
-from app.authz import is_admin
+from app.authz import is_admin, is_area_admin, scoped_users
 from .models import AuditLog
 
 audit_bp = Blueprint('audit', __name__, url_prefix='/audit')
@@ -18,8 +18,15 @@ def index():
 @login_required
 def list_audit():
     try:
-        # Si no es admin, solo ve sus propios registros
-        query = AuditLog.query if is_admin() else AuditLog.query.filter_by(user=current_user.email)
+        # El superadmin ve todo; un admin de área, los registros de los
+        # usuarios de sus áreas; un usuario, solo los propios.
+        if is_admin():
+            query = AuditLog.query
+        elif is_area_admin():
+            emails = [u.email for u in scoped_users().all()]
+            query = AuditLog.query.filter(AuditLog.user.in_(emails))
+        else:
+            query = AuditLog.query.filter_by(user=current_user.email)
 
         logs = query.order_by(AuditLog.timestamp.desc()).limit(500).all()
         

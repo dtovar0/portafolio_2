@@ -28,7 +28,7 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(120), unique=True, nullable=False)
     nombre = db.Column(db.String(100), nullable=True) # Nombre visible del usuario
     password_hash = db.Column(db.String(255), nullable=True) # Nulo para usuarios LDAP
-    role = db.Column(db.String(20), default='usuario') # administrador, usuario
+    role = db.Column(db.String(20), default='usuario') # administrador, admin_area, usuario
     auth_source = db.Column(db.String(10), default='local') # local, ldap
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.now)
@@ -38,6 +38,8 @@ class User(db.Model, UserMixin):
     areas = db.relationship('Area', secondary='user_areas', backref=db.backref('area_users', lazy=True))
     platforms = db.relationship('Platform', secondary='user_platforms', backref=db.backref('platform_users', lazy='dynamic'))
     favorites = db.relationship('Platform', secondary='user_favorites', backref=db.backref('favorited_by', lazy='dynamic'))
+    # Áreas que este usuario administra (rol admin_area)
+    managed_areas = db.relationship('Area', secondary='area_admins', backref=db.backref('admins', lazy=True))
 
     # User Interface Preferences
     pref_notifications = db.Column(db.Boolean, default=True)
@@ -82,3 +84,11 @@ class AuthConfig(db.Model):
             "ldap_group_user": self.ldap_group_user,
             "ldap_role_mappings": self.ldap_role_mappings
         }
+
+
+# Helper Table for Area Administrators (Multitenant)
+# Un usuario con rol 'admin_area' administra las áreas listadas aquí.
+area_admins = db.Table('area_admins',
+    db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True),
+    db.Column('area_id', db.Integer, db.ForeignKey('areas.id'), primary_key=True)
+)

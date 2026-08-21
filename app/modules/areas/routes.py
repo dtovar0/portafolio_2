@@ -1,7 +1,8 @@
 from flask import Blueprint, render_template, request, jsonify, current_app
 from flask_login import login_required, current_user
 from app import db
-from app.authz import admin_required
+from app.authz import (admin_required, any_admin_required, area_admin_required,
+                       can_manage_area, scoped_areas, scoped_users)
 from app.modules.core.models import Area, Platform
 from app.modules.auth.models import User
 from app.modules.audit.models import AuditLog
@@ -13,10 +14,11 @@ areas_bp = Blueprint('areas_module', __name__, url_prefix='/admin/areas')
 
 @areas_bp.route('/')
 @login_required
-@admin_required
+@any_admin_required
 def areas_list():
-    areas = Area.query.all()
-    users = User.query.filter_by(is_active=True).all()
+    # Un admin de área solo ve las áreas que administra
+    areas = scoped_areas().all()
+    users = scoped_users().filter_by(is_active=True).all()
     
     # Adapt data for JS
     areas_data = []
@@ -95,7 +97,7 @@ def add_area():
 
 @areas_bp.route('/edit/<int:area_id>', methods=['POST'])
 @login_required
-@admin_required
+@area_admin_required('area_id')
 def edit_area(area_id):
     try:
         area = Area.query.get_or_404(area_id)
@@ -156,7 +158,7 @@ def edit_area(area_id):
 
 @areas_bp.route('/delete/<int:area_id>', methods=['DELETE'])
 @login_required
-@admin_required
+@area_admin_required('area_id')
 def delete_area(area_id):
     try:
         area = Area.query.get_or_404(area_id)
@@ -231,7 +233,7 @@ def delete_areas_bulk():
 
 @areas_bp.route('/users/<int:area_id>')
 @login_required
-@admin_required
+@area_admin_required('area_id')
 def get_area_users(area_id):
     try:
         area = Area.query.get_or_404(area_id)
@@ -241,7 +243,7 @@ def get_area_users(area_id):
         return jsonify({'status': 'error', 'message': str(e)}), 500
 @areas_bp.route('/users/update/<int:area_id>', methods=['POST'])
 @login_required
-@admin_required
+@area_admin_required('area_id')
 def update_area_users(area_id):
     try:
         area = Area.query.get_or_404(area_id)

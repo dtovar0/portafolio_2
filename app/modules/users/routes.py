@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, jsonify, g
 from flask_login import login_required, current_user, login_user
-from app.authz import admin_required
+from app.authz import (admin_required, any_admin_required, can_manage_user,
+                       scoped_areas, scoped_users, is_admin)
 from app import db
 from app.modules.auth.models import User, AuthConfig
 from app.modules.core.models import Area, Platform
@@ -15,10 +16,11 @@ users_bp = Blueprint('users_module', __name__, url_prefix='/admin')
 
 @users_bp.route('/users')
 @login_required
-@admin_required
+@any_admin_required
 def users_list():
-    users = User.query.all()
-    areas = Area.query.all()
+    # Un admin de área solo ve los usuarios y áreas que administra
+    users = scoped_users().all()
+    areas = scoped_areas().all()
     
     users_data = []
     for u in users:
@@ -55,14 +57,14 @@ def users_list():
 
 @users_bp.route('/areas-api')
 @login_required
-@admin_required
+@any_admin_required
 def areas_api():
-    areas = Area.query.all()
+    areas = scoped_areas().all()
     return jsonify([a.to_dict() for a in areas])
 
 @users_bp.route('/add-user', methods=['POST'])
 @login_required
-@admin_required
+@any_admin_required
 def add_user():
     try:
         nombre = request.form.get('name')
@@ -75,6 +77,10 @@ def add_user():
         
         if email.lower().strip() == 'admin' or nombre.lower().strip() == 'admin':
             return jsonify({"success": False, "error": "El identificador 'admin' es reservado del sistema."}), 403
+
+        # Un admin de área no puede crear superadministradores
+        if not is_admin() and role == 'administrador':
+            return jsonify({"success": False, "error": "No puedes asignar el rol de administrador global."}), 403
 
         if User.query.filter_by(email=email).first():
             return jsonify({"success": False, "error": "El correo ya está registrado."}), 409
@@ -89,9 +95,10 @@ def add_user():
         new_user.set_password(password)
         
         area_names = json.loads(areas_json)
-        selected_areas = Area.query.filter(Area.name.in_(area_names)).all()
+        # scoped_areas impide asignar áreas que el creador no administra
+        selected_areas = scoped_areas().filter(Area.name.in_(area_names)).all()
         new_user.areas = selected_areas
-        
+
         db.session.add(new_user)
         db.session.commit()
         
@@ -104,14 +111,20 @@ def add_user():
 
 @users_bp.route('/edit-user/<int:user_id>', methods=['POST'])
 @login_required
-@admin_required
+@any_admin_required
 def edit_user(user_id):
+    target = User.query.get_or_404(user_id)
+    if not can_manage_user(target):
+        return jsonify({"success": False, "error": "No puedes administrar este usuario."}), 403
     try:
         user = User.query.get(user_id)
         if not user:
             return jsonify({"success": False, "error": "Usuario no encontrado"}), 404
             
         role = request.form.get('role', '').strip()
+        # Un admin de área no puede promover a superadministrador
+        if role == 'administrador' and not is_admin():
+            return jsonify({"success": False, "error": "No puedes asignar el rol de administrador global."}), 403
         status_str = request.form.get('status', '').strip()
         areas_json = request.form.get('areas', '[]')
         
@@ -164,8 +177,11 @@ def edit_user(user_id):
 
 @users_bp.route('/delete-user/<int:user_id>', methods=['POST'])
 @login_required
-@admin_required
+@any_admin_required
 def delete_user(user_id):
+    target = User.query.get_or_404(user_id)
+    if not can_manage_user(target):
+        return jsonify({"success": False, "error": "No puedes administrar este usuario."}), 403
     try:
         user = User.query.get(user_id)
         if not user:
@@ -189,8 +205,11 @@ def delete_user(user_id):
 
 @users_bp.route('/user-access/<int:user_id>')
 @login_required
-@admin_required
+@any_admin_required
 def user_access(user_id):
+    target = User.query.get_or_404(user_id)
+    if not can_manage_user(target):
+        return jsonify({"success": False, "error": "No puedes administrar este usuario."}), 403
     try:
         user = User.query.get(user_id)
         if not user:
@@ -217,8 +236,11 @@ def user_access(user_id):
 
 @users_bp.route('/update-user-access/<int:user_id>', methods=['POST'])
 @login_required
-@admin_required
+@any_admin_required
 def update_user_access(user_id):
+    target = User.query.get_or_404(user_id)
+    if not can_manage_user(target):
+        return jsonify({"success": False, "error": "No puedes administrar este usuario."}), 403
     try:
         user = User.query.get(user_id)
         if not user:
@@ -292,8 +314,11 @@ def ldap_search_api():
 
 @users_bp.route('/update-user-areas/<int:user_id>', methods=['POST'])
 @login_required
-@admin_required
+@any_admin_required
 def update_user_areas(user_id):
+    target = User.query.get_or_404(user_id)
+    if not can_manage_user(target):
+        return jsonify({"success": False, "error": "No puedes administrar este usuario."}), 403
     try:
         user = User.query.get(user_id)
         if not user:

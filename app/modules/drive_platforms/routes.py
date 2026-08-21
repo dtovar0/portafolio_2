@@ -1,7 +1,9 @@
 from flask import Blueprint, render_template, request, jsonify, current_app
 from flask_login import login_required, current_user
 from app import db
-from app.authz import admin_required
+from app.authz import (admin_required, any_admin_required, can_manage_area,
+                       area_admin_required, platform_manage_required, scoped_areas, scoped_platforms,
+                       scoped_users)
 from app.modules.core.models import Area, Platform
 from app.modules.auth.models import User
 from app.modules.audit.models import AuditLog
@@ -13,12 +15,12 @@ drive_platforms_bp = Blueprint('drive_platforms', __name__, url_prefix='/admin/d
 
 @drive_platforms_bp.route('/')
 @login_required
-@admin_required
+@any_admin_required
 def index():
     # Only drive units (platforms with storage_path)
-    drive_units = Platform.query.filter(Platform.storage_path.isnot(None)).all()
-    areas = Area.query.all()
-    users = User.query.filter_by(is_active=True).all()
+    drive_units = scoped_platforms().filter(Platform.storage_path.isnot(None)).all()
+    areas = scoped_areas().all()
+    users = scoped_users().filter_by(is_active=True).all()
     
     # Data structure for the JS catalog
     grouped_platforms = {}
@@ -60,12 +62,16 @@ def index():
 
 @drive_platforms_bp.route('/add', methods=['POST'])
 @login_required
-@admin_required
+@any_admin_required
 def add_unit():
     try:
         data = request.form
         name = data.get('name')
         area_id = data.get('area_id')
+
+        # No se puede crear una plataforma en un área que no se administra
+        if not can_manage_area(area_id):
+            return jsonify({"success": False, "error": "No administras el área indicada."}), 403
         
         area = Area.query.get(area_id)
         if not area:
@@ -131,7 +137,7 @@ def add_unit():
 
 @drive_platforms_bp.route('/edit/<int:unit_id>', methods=['POST'])
 @login_required
-@admin_required
+@platform_manage_required('unit_id')
 def edit_unit(unit_id):
     try:
         unit = Platform.query.get_or_404(unit_id)
@@ -184,7 +190,7 @@ def edit_unit(unit_id):
 
 @drive_platforms_bp.route('/delete/<int:unit_id>', methods=['POST'])
 @login_required
-@admin_required
+@platform_manage_required('unit_id')
 def delete_unit(unit_id):
     try:
         unit = Platform.query.get_or_404(unit_id)
@@ -197,7 +203,7 @@ def delete_unit(unit_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 @drive_platforms_bp.route('/api/list/<int:area_id>')
 @login_required
-@admin_required
+@area_admin_required('area_id')
 def list_units_api(area_id):
     try:
         units = Platform.query.filter_by(area_id=area_id).filter(Platform.storage_path.isnot(None)).all()
