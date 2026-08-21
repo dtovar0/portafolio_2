@@ -1,0 +1,28 @@
+# Frontend Next.js de Nexus.
+# Requiere `npm ci && npm run build` previo: el build standalone deja el
+# servidor en .next/standalone/server.js
+[Unit]
+Description=Nexus Frontend (Next.js)
+After=network.target nexus-backend.service
+Wants=nexus-backend.service
+
+[Service]
+Type=simple
+User=nexus
+Group=nexus
+WorkingDirectory=/opt/nexus/frontend
+Environment=NODE_ENV=production
+Environment=PORT=3000
+Environment=HOSTNAME=127.0.0.1
+# Con `output: standalone` hay que arrancar este server.js, no `next start`.
+ExecStart=/usr/bin/node /opt/nexus/frontend/.next/standalone/server.js
+Restart=on-failure
+RestartSec=5
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

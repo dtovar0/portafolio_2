@@ -1,0 +1,32 @@
+# API Flask de Nexus.
+# Instalar en /etc/systemd/system/ y ajustar User, WorkingDirectory y rutas.
+[Unit]
+Description=Nexus API (Flask/Gunicorn)
+After=network.target mysql.service
+Wants=mysql.service
+
+[Service]
+Type=simple
+User=nexus
+Group=nexus
+WorkingDirectory=/opt/nexus
+EnvironmentFile=/opt/nexus/.env
+ExecStart=/opt/nexus/venv/bin/gunicorn \
+    --workers 4 \
+    --bind 127.0.0.1:5001 \
+    --timeout 120 \
+    --access-logfile /var/log/nexus/access.log \
+    --error-logfile /var/log/nexus/error.log \
+    "run:app"
+Restart=on-failure
+RestartSec=5
+
+# Endurecimiento: solo se permite escribir en storage y logs.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/nexus/storage /var/log/nexus
+
+[Install]
+WantedBy=multi-user.target
