@@ -3,9 +3,13 @@ from app.modules.audit.models import AuditLog
 from flask import request
 from flask_login import current_user
 
-def add_audit_log(action, status='info', detail=None, user_override=None):
+def add_audit_log(action, status='info', detail=None, user_override=None,
+                  module=None, target=None):
     """
     Registra un evento en la tabla de auditoría.
+
+    `module` y `target` son columnas de AuditLog que hasta ahora quedaban
+    vacías; los nuevos endpoints las rellenan para poder filtrar por módulo.
     """
     try:
         user_name = user_override or (current_user.email if current_user.is_authenticated else 'SYSTEM')
@@ -24,6 +28,8 @@ def add_audit_log(action, status='info', detail=None, user_override=None):
             action=action,
             status=status,
             detail=detail,
+            module=module,
+            target=target,
             ip_address=ip
         )
         db.session.add(log)
