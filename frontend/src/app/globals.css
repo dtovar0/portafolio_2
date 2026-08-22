@@ -1,32 +1,17 @@
+/**
+ * Hoja de estilos de la aplicación.
+ *
+ * Los tres archivos que se importan son los del portal original, copiados sin
+ * modificar: tokens.css define el sistema "Deep Sapphire" (paleta, radios y
+ * escala tipográfica), y components.css y global.css las clases que usan las
+ * pantallas. No se redefine ningún color aquí: cualquier cambio de diseño va
+ * en esos archivos, que son la única fuente.
+ */
+
+@import '../styles/tokens.css';
+@import '../styles/global.css';
+@import '../styles/components.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/**
- * Paleta como canales RGB para que Tailwind pueda aplicarles opacidad.
- * Los valores replican los de `static/css/tokens.css` del portal Flask, para
- * que ambos frontends se vean igual mientras convivan.
- */
-:root {
-  --nx-surface: 248 250 252;
-  --nx-panel: 255 255 255;
-  --nx-border: 226 232 240;
-  --nx-content: 15 23 42;
-  --nx-muted: 100 116 139;
-  --nx-accent: 99 102 241;
-}
-
-.dark {
-  --nx-surface: 15 23 42;
-  --nx-panel: 30 41 59;
-  --nx-border: 51 65 85;
-  --nx-content: 241 245 249;
-  --nx-muted: 148 163 184;
-  --nx-accent: 129 140 248;
-}
-
-body {
-  background-color: rgb(var(--nx-surface));
-  color: rgb(var(--nx-content));
-  -webkit-font-smoothing: antialiased;
-}
