@@ -61,9 +61,9 @@ export function PlatformCard({
           disabled={busy}
           aria-pressed={favorite}
           aria-label={favorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}
-          className="rounded p-1 text-lg leading-none transition-colors hover:bg-border/50 disabled:opacity-50"
+          className="rounded p-1 text-lg leading-none transition-colors hover:bg-surface-container disabled:opacity-50"
         >
-          <span className={favorite ? 'text-amber-400' : 'text-muted'}>
+          <span className={favorite ? 'text-amber-400' : 'text-label'}>
             {favorite ? '★' : '☆'}
           </span>
         </button>
@@ -71,7 +71,7 @@ export function PlatformCard({
 
       <div className="mt-3 min-w-0">
         <p className="truncate font-medium">{platform.name}</p>
-        <p className="mt-0.5 line-clamp-2 text-sm text-muted">
+        <p className="mt-0.5 line-clamp-2 text-sm text-label">
           {platform.description}
         </p>
       </div>
@@ -97,7 +97,7 @@ export function PlatformCard({
   );
 
   const shell =
-    'flex flex-col rounded-card border border-border bg-panel p-4 transition-colors';
+    'flex flex-col rounded-xl border border-panel-border bg-panel-fill p-4 transition-colors';
 
   if (disabled) {
     return <div className={`${shell} opacity-70`}>{body}</div>;
@@ -109,7 +109,7 @@ export function PlatformCard({
       target="_blank"
       rel="noopener noreferrer"
       onClick={registerVisit}
-      className={`${shell} hover:border-accent/60`}
+      className={`${shell} hover:border-primary/60`}
     >
       {body}
     </a>

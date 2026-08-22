@@ -1,4 +1,9 @@
 import type { Metadata } from 'next';
+// El orden importa: primero los tokens del portal, que definen las variables;
+// después sus clases; y al final las utilidades de Tailwind, que las consumen.
+import '../styles/tokens.css';
+import '../styles/global.css';
+import '../styles/components.css';
 import './globals.css';
 
 export const metadata: Metadata = {

@@ -49,8 +49,8 @@ function Nav() {
             aria-current={active ? 'page' : undefined}
             className={`rounded-lg px-3 py-2 text-sm transition-colors ${
               active
-                ? 'bg-accent/15 font-medium text-accent'
-                : 'text-muted hover:bg-border/40 hover:text-content'
+                ? 'bg-primary/15 font-medium text-primary'
+                : 'text-label hover:bg-surface-container hover:text-body-text'
             }`}
           >
             {item.label}
@@ -93,16 +93,16 @@ function Frame({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen">
-      <aside className="hidden w-60 shrink-0 border-r border-border bg-panel p-4 md:block">
+      <aside className="hidden w-60 shrink-0 border-r border-panel-border bg-panel-fill p-4 md:block">
         <p className="px-3 pb-4 text-lg font-semibold">Nexus</p>
         <Nav />
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between gap-4 border-b border-border bg-panel px-6 py-3">
+        <header className="flex items-center justify-between gap-4 border-b border-panel-border bg-panel-fill px-6 py-3">
           <div className="min-w-0">
             <p className="truncate text-sm font-medium">{session.name}</p>
-            <p className="truncate text-xs text-muted">
+            <p className="truncate text-xs text-label">
               <RoleLabel role={session.role} />
               {session.managed_areas.length > 0
                 ? ` · ${session.managed_areas.length} área(s)`
@@ -111,7 +111,7 @@ function Frame({ children }: { children: React.ReactNode }) {
           </div>
           <a
             href="/logout"
-            className="rounded-lg border border-border px-3 py-1.5 text-sm text-muted hover:text-content"
+            className="rounded-lg border border-panel-border px-3 py-1.5 text-sm text-label hover:text-body-text"
           >
             Salir
           </a>

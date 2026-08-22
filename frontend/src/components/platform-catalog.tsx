@@ -35,7 +35,7 @@ export function PlatformCatalog() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Plataformas</h1>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-sm text-label">
           Accesos a los sistemas de tus áreas.
         </p>
       </div>
@@ -47,7 +47,7 @@ export function PlatformCatalog() {
           onChange={(event) => setTerm(event.target.value)}
           placeholder="Buscar plataforma…"
           aria-label="Buscar plataforma"
-          className="min-w-56 flex-1 rounded-lg border border-border bg-panel px-3 py-2 text-sm outline-none placeholder:text-muted focus:border-accent"
+          className="min-w-56 flex-1 rounded-lg border border-panel-border bg-panel-fill px-3 py-2 text-sm outline-none placeholder:text-label focus:border-primary"
         />
         <select
           value={areaId ?? ''}
@@ -55,7 +55,7 @@ export function PlatformCatalog() {
             setAreaId(event.target.value ? Number(event.target.value) : null)
           }
           aria-label="Filtrar por área"
-          className="rounded-lg border border-border bg-panel px-3 py-2 text-sm outline-none focus:border-accent"
+          className="rounded-lg border border-panel-border bg-panel-fill px-3 py-2 text-sm outline-none focus:border-primary"
         >
           <option value="">Todas las áreas</option>
           {(areas.data ?? []).map((area) => (

@@ -78,7 +78,7 @@ function PlatformForm({
       onClose={onClose}
       footer={
         <>
-          <Button variant="ghost" onClick={onClose}>
+          <Button variant="secondary" onClick={onClose}>
             Cancelar
           </Button>
           <Button onClick={save} disabled={saving}>
@@ -189,7 +189,7 @@ export function PlatformAdmin() {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold">Administrar plataformas</h1>
-          <p className="mt-1 text-sm text-muted">
+          <p className="mt-1 text-sm text-label">
             Los enlaces del catálogo y a qué área pertenecen.
           </p>
         </div>
@@ -217,7 +217,7 @@ export function PlatformAdmin() {
         ) : (
           <Card className="overflow-x-auto p-0">
             <table className="w-full min-w-[44rem] text-sm">
-              <thead className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">
+              <thead className="border-b border-panel-border text-left text-xs uppercase tracking-wide text-label">
                 <tr>
                   <th className="px-4 py-3 font-medium">Plataforma</th>
                   <th className="px-4 py-3 font-medium">Área</th>
@@ -226,7 +226,7 @@ export function PlatformAdmin() {
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-y divide-panel-border">
                 {(platforms.data ?? []).map((platform) => (
                   <tr key={platform.id}>
                     <td className="px-4 py-2.5">
@@ -244,12 +244,12 @@ export function PlatformAdmin() {
                         <span className="truncate font-medium">{platform.name}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-2.5 text-muted">
+                    <td className="px-4 py-2.5 text-label">
                       {platform.area_name ?? '—'}
                     </td>
                     <td className="max-w-xs px-4 py-2.5">
                       {platform.direct_link ? (
-                        <span className="block truncate text-muted" title={platform.direct_link}>
+                        <span className="block truncate text-label" title={platform.direct_link}>
                           {platform.direct_link}
                         </span>
                       ) : (
@@ -267,7 +267,7 @@ export function PlatformAdmin() {
                           <button
                             type="button"
                             onClick={() => setEditing(platform)}
-                            className="rounded px-2 py-1 text-xs text-accent hover:bg-accent/10"
+                            className="rounded px-2 py-1 text-xs text-primary hover:bg-primary/10"
                           >
                             Editar
                           </button>

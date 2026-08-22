@@ -1,65 +1,89 @@
 import type { Config } from 'tailwindcss';
 
 /**
- * Los colores salen de los tokens del portal original (src/styles/tokens.css),
- * que están declarados como canales «R G B» sueltos. Envolverlos en rgb(...)
- * permite además aplicarles opacidad con la sintaxis `bg-primary/10`.
+ * Configuración portada de assets/js/tailwind-config.js del portal original,
+ * con los mismos nombres de utilidad para que el marcado de las plantillas
+ * funcione sin traducción. Los valores salen de src/styles/tokens.css.
  *
- * Los nombres replican los de los tokens: no se inventan alias.
+ * Se añade `<alpha-value>` a los tokens declarados como canales «R G B» para
+ * poder usar `bg-primary/10`; los que el original define como color completo
+ * (body-bg, header, input) se dejan tal cual.
  */
-const channel = (token: string) => `rgb(var(${token}) / <alpha-value>)`;
-
 export default {
   content: ['./src/**/*.{ts,tsx}'],
-  // El portal alterna el tema con la clase .dark en <html>.
   darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        primary: channel('--color-primary'),
-        brand: channel('--color-brand'),
-        secondary: channel('--color-secondary'),
-        accent: channel('--color-accent'),
-        'accent-sky': channel('--color-accent-sky'),
-        'accent-violet': channel('--color-accent-violet'),
-        'accent-peach': channel('--color-accent-peach'),
-        success: channel('--color-success'),
-        warning: channel('--color-warning'),
-        danger: channel('--color-danger'),
+        // Main Palette
+        primary: 'rgb(var(--color-primary) / <alpha-value>)',
+        secondary: 'rgb(var(--color-secondary) / <alpha-value>)',
+        accent: 'rgb(var(--color-accent) / <alpha-value>)',
+        'accent-sky': 'rgb(var(--color-accent-sky) / <alpha-value>)',
+        'accent-violet': 'rgb(var(--color-accent-violet) / <alpha-value>)',
+        peach: 'rgb(var(--color-accent-peach) / <alpha-value>)',
+        violet: 'rgb(var(--color-accent-violet) / <alpha-value>)',
+        sky: 'rgb(var(--color-accent-sky) / <alpha-value>)',
+        brand: 'rgb(var(--color-brand) / <alpha-value>)',
 
-        // Superficies y paneles
-        panel: channel('--color-panel-fill'),
-        'panel-border': channel('--color-panel-border'),
-        'panel-header': channel('--color-panel-header-bg'),
-        'panel-header-text': channel('--color-panel-header-text'),
-        container: channel('--color-surface-container-bg'),
-        'container-border': channel('--color-surface-container-border'),
+        // Surfaces & Backgrounds
+        'body-bg': 'var(--color-body-bg)',
+        'body-text': 'var(--color-body-text)',
+        header: 'var(--color-header-bg)',
+        'header-text': 'var(--color-header-text)',
+        'panel-fill': 'rgb(var(--color-panel-fill) / <alpha-value>)',
+        'panel-border': 'rgb(var(--color-panel-border) / <alpha-value>)',
+        'panel-header': 'rgb(var(--color-panel-header-bg) / <alpha-value>)',
+        'panel-header-text': 'rgb(var(--color-panel-header-text) / <alpha-value>)',
+        'audit-body': 'rgb(var(--color-audit-body) / <alpha-value>)',
+        'surface-container': 'rgb(var(--color-surface-container-bg) / <alpha-value>)',
+        'surface-container-border':
+          'rgb(var(--color-surface-container-border) / <alpha-value>)',
 
-        // Formularios
-        input: channel('--color-input-bg'),
-        'input-border': channel('--color-input-border'),
-        label: channel('--color-label-text'),
+        // Buttons & Interaction
+        'button-bg': 'rgb(var(--color-button-bg) / <alpha-value>)',
+        'button-text': 'rgb(var(--color-button-text) / <alpha-value>)',
+        'button-disabled': 'rgb(var(--color-button-disabled-bg) / <alpha-value>)',
+        'button-disabled-text':
+          'rgb(var(--color-button-disabled-text) / <alpha-value>)',
 
-        // Texto
-        'text-main': channel('--color-bi-text-main'),
-        'text-muted': channel('--color-bi-text-muted'),
+        // Inputs
+        input: 'var(--color-input-text)',
+        'input-bg': 'rgb(var(--color-input-bg) / <alpha-value>)',
+        'input-border': 'rgb(var(--color-input-border) / <alpha-value>)',
+        'input-focus': 'rgb(var(--color-input-focus) / <alpha-value>)',
+        label: 'rgb(var(--color-label-text) / <alpha-value>)',
 
-        // Pestañas
-        'tab-bar': channel('--color-tab-bar-bg'),
-        'tab-inactive': channel('--color-tab-inactive-bg'),
-        'tab-inactive-text': channel('--color-tab-inactive-text'),
+        // Navigation & Tabs
+        'tab-bar': 'rgb(var(--color-tab-bar-bg) / <alpha-value>)',
+        'tab-active': 'rgb(var(--color-tab-active-bg) / <alpha-value>)',
+        'tab-active-text': 'rgb(var(--color-tab-active-text) / <alpha-value>)',
+        'tab-inactive': 'rgb(var(--color-tab-inactive-bg) / <alpha-value>)',
+        'tab-inactive-text': 'rgb(var(--color-tab-inactive-text) / <alpha-value>)',
+
+        // Business Intelligence (BI) & Status
+        'bi-logistics': 'rgb(var(--color-bi-card-logistics) / <alpha-value>)',
+        'bi-ring': 'rgb(var(--color-bi-ring-bg) / <alpha-value>)',
+        'bi-main': 'rgb(var(--color-bi-text-main) / <alpha-value>)',
+        'bi-muted': 'rgb(var(--color-bi-text-muted) / <alpha-value>)',
+        'kpi-highlight': 'rgb(var(--color-kpi-highlight) / <alpha-value>)',
+
+        success: 'rgb(var(--color-success) / <alpha-value>)',
+        warning: '#f59e0b',
+        error: '#ef4444',
+        info: '#3b82f6',
+
+        // Alias usados por el marcado de base.html
+        bg: 'var(--color-body-bg)',
+        text: 'var(--color-body-text)',
       },
       borderRadius: {
         base: 'var(--radius-base)',
         panel: 'var(--radius-panel)',
       },
-      fontSize: {
-        xs: 'var(--text-xs)',
-        sm: 'var(--text-sm)',
-        base: 'var(--text-base)',
-        md: 'var(--text-md)',
-        lg: 'var(--text-lg)',
-        xl: 'var(--text-xl)',
+      fontFamily: {
+        // base.html carga Inter desde Google Fonts.
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
     },
   },

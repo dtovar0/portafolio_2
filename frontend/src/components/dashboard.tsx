@@ -24,7 +24,7 @@ export function Dashboard() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Panel</h1>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-sm text-label">
           {session?.permissions.is_admin
             ? 'Vista global del sistema.'
             : 'Datos de las áreas a las que tienes acceso.'}
@@ -44,7 +44,7 @@ export function Dashboard() {
         <Card>
           <h2 className="text-sm font-medium">Plataformas por área</h2>
           {byArea.length === 0 ? (
-            <p className="pt-4 text-sm text-muted">Sin datos todavía.</p>
+            <p className="pt-4 text-sm text-label">Sin datos todavía.</p>
           ) : (
             <div className="h-64 pt-4">
               <ResponsiveContainer width="100%" height="100%">
@@ -88,16 +88,16 @@ export function Dashboard() {
         <Card>
           <h2 className="text-sm font-medium">Más visitadas</h2>
           {stats.most_visited.length === 0 ? (
-            <p className="pt-4 text-sm text-muted">Sin visitas registradas.</p>
+            <p className="pt-4 text-sm text-label">Sin visitas registradas.</p>
           ) : (
-            <ul className="divide-y divide-border pt-2">
+            <ul className="divide-y divide-panel-border pt-2">
               {stats.most_visited.map((row) => (
                 <li
                   key={row.id}
                   className="flex items-center justify-between py-2.5 text-sm"
                 >
                   <span className="truncate pr-4">{row.name}</span>
-                  <span className="tabular-nums text-muted">{row.visits}</span>
+                  <span className="tabular-nums text-label">{row.visits}</span>
                 </li>
               ))}
             </ul>

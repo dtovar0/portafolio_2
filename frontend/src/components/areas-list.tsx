@@ -56,7 +56,7 @@ function AreaForm({
       onClose={onClose}
       footer={
         <>
-          <Button variant="ghost" onClick={onClose}>Cancelar</Button>
+          <Button variant="secondary" onClick={onClose}>Cancelar</Button>
           <Button onClick={save} disabled={saving}>
             {saving ? 'Guardando…' : 'Guardar'}
           </Button>
@@ -129,7 +129,7 @@ export function AreasList() {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold">Áreas</h1>
-          <p className="mt-1 text-sm text-muted">
+          <p className="mt-1 text-sm text-label">
             {isAdmin ? 'Todas las áreas del sistema.' : 'Áreas que administras.'}
           </p>
         </div>
@@ -169,27 +169,27 @@ export function AreasList() {
                   </div>
 
                   <p className="mt-3 truncate font-medium">{area.name}</p>
-                  <p className="mt-0.5 line-clamp-2 text-sm text-muted">
+                  <p className="mt-0.5 line-clamp-2 text-sm text-label">
                     {area.description || 'Sin descripción.'}
                   </p>
 
-                  <dl className="mt-4 flex gap-6 border-t border-border pt-3 text-sm">
+                  <dl className="mt-4 flex gap-6 border-t border-panel-border pt-3 text-sm">
                     <div>
-                      <dt className="text-xs text-muted">Plataformas</dt>
+                      <dt className="text-xs text-label">Plataformas</dt>
                       <dd className="font-medium tabular-nums">{area.platforms_count}</dd>
                     </div>
                     <div>
-                      <dt className="text-xs text-muted">Usuarios</dt>
+                      <dt className="text-xs text-label">Usuarios</dt>
                       <dd className="font-medium tabular-nums">{area.users_count}</dd>
                     </div>
                   </dl>
 
                   {canEdit ? (
-                    <div className="mt-3 flex gap-1 border-t border-border pt-3">
+                    <div className="mt-3 flex gap-1 border-t border-panel-border pt-3">
                       <button
                         type="button"
                         onClick={() => setEditing(area)}
-                        className="rounded px-2 py-1 text-xs text-accent hover:bg-accent/10"
+                        className="rounded px-2 py-1 text-xs text-primary hover:bg-primary/10"
                       >
                         Editar
                       </button>

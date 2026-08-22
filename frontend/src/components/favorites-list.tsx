@@ -14,7 +14,7 @@ export function FavoritesList() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Favoritos</h1>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-sm text-label">
           Tus accesos marcados para consulta rápida.
         </p>
       </div>

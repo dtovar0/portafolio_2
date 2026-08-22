@@ -80,7 +80,7 @@ export function LoginForm() {
       <div className="w-full max-w-sm">
         <div className="mb-6 text-center">
           <h1 className="text-2xl font-semibold">Nexus</h1>
-          <p className="mt-1 text-sm text-muted">
+          <p className="mt-1 text-sm text-label">
             Catálogo centralizado de plataformas
           </p>
         </div>
@@ -142,7 +142,7 @@ export function LoginForm() {
           )}
 
           {context.sso_enabled && !context.sso_user ? (
-            <p className="border-t border-border pt-3 text-xs text-muted">
+            <p className="border-t border-panel-border pt-3 text-xs text-label">
               El acceso único está activo pero el portal no ha enviado tu
               identidad. Usa tus credenciales o accede desde el portal
               corporativo.

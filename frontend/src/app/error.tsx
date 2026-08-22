@@ -19,9 +19,9 @@ export default function ErrorPage({
   return (
     <div className="grid min-h-screen place-items-center p-4">
       <div className="max-w-md text-center">
-        <p className="text-5xl font-semibold tabular-nums text-muted">500</p>
+        <p className="text-5xl font-semibold tabular-nums text-label">500</p>
         <h1 className="mt-3 text-xl font-medium">Algo ha fallado</h1>
-        <p className="mt-2 text-sm text-muted">
+        <p className="mt-2 text-sm text-label">
           No se pudo completar la operación. Vuelve a intentarlo; si persiste,
           avisa al administrador.
         </p>
@@ -29,13 +29,13 @@ export default function ErrorPage({
           <button
             type="button"
             onClick={reset}
-            className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white"
           >
             Reintentar
           </button>
           <a
             href="/"
-            className="rounded-lg border border-border px-4 py-2 text-sm text-muted"
+            className="rounded-lg border border-panel-border px-4 py-2 text-sm text-label"
           >
             Ir al inicio
           </a>

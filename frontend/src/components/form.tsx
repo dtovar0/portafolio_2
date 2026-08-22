@@ -1,6 +1,12 @@
 'use client';
 
-/** Controles de formulario y modal compartidos. */
+/**
+ * Controles de formulario y modal.
+ *
+ * Las clases replican el marcado de las plantillas del portal: inputs
+ * `h-12 bg-surface-container/30 border border-panel-border rounded-xl`, botones
+ * `.nexus-btn`, casillas `.nexus-checkbox` y modales `.nx-modal-glass`.
+ */
 
 import { useEffect, useRef } from 'react';
 
@@ -15,15 +21,23 @@ export function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-sm font-medium">{label}</span>
+      <span className="mb-2 block text-xs font-black uppercase tracking-[0.1em] text-label">
+        {label}
+      </span>
       {children}
-      {hint ? <span className="mt-1 block text-xs text-muted">{hint}</span> : null}
+      {hint ? (
+        <span className="mt-1.5 block text-xs text-label/60">{hint}</span>
+      ) : null}
     </label>
   );
 }
 
+// users.html: el input estándar del portal.
 const INPUT =
-  'w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none placeholder:text-muted focus:border-accent';
+  'w-full h-12 bg-surface-container/30 border border-panel-border rounded-xl px-4 ' +
+  'text-sm font-bold text-body-text placeholder:text-label/30 ' +
+  'focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all ' +
+  'disabled:opacity-50';
 
 export function TextInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={`${INPUT} ${props.className ?? ''}`} />;
@@ -33,13 +47,14 @@ export function TextArea(
   props: React.TextareaHTMLAttributes<HTMLTextAreaElement>,
 ) {
   return (
-    <textarea {...props} className={`${INPUT} ${props.className ?? ''}`} />
+    <textarea
+      {...props}
+      className={`${INPUT} h-auto py-3 ${props.className ?? ''}`}
+    />
   );
 }
 
-export function Select(
-  props: React.SelectHTMLAttributes<HTMLSelectElement>,
-) {
+export function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
   return <select {...props} className={`${INPUT} ${props.className ?? ''}`} />;
 }
 
@@ -48,12 +63,8 @@ export function Checkbox({
   ...props
 }: React.InputHTMLAttributes<HTMLInputElement> & { label: string }) {
   return (
-    <label className="flex items-center gap-2 text-sm">
-      <input
-        type="checkbox"
-        {...props}
-        className="h-4 w-4 rounded border-border accent-accent"
-      />
+    <label className="flex items-center gap-3 text-sm font-bold text-body-text">
+      <input type="checkbox" {...props} className="nexus-checkbox" />
       {label}
     </label>
   );
@@ -63,24 +74,25 @@ export function Button({
   variant = 'primary',
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: 'primary' | 'ghost' | 'danger';
+  variant?: 'primary' | 'secondary' | 'danger';
 }) {
-  const styles = {
-    primary: 'bg-accent text-white hover:opacity-90',
-    ghost: 'border border-border text-muted hover:text-content',
-    danger:
-      'border border-red-500/40 text-red-600 hover:bg-red-500/10 dark:text-red-300',
+  // .nexus-btn y sus variantes vienen de components.css.
+  const variants = {
+    primary: 'nexus-btn-primary',
+    secondary: 'nexus-btn-secondary',
+    // El portal aplica el color con un override sobre la variante primaria.
+    danger: 'nexus-btn-primary !bg-error shadow-error/20',
   };
   return (
     <button
       type="button"
       {...props}
-      className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-60 ${styles[variant]} ${props.className ?? ''}`}
+      className={`nexus-btn ${variants[variant]} disabled:opacity-40 disabled:pointer-events-none ${props.className ?? ''}`}
     />
   );
 }
 
-/** Diálogo modal. Cierra con Escape y al pulsar el fondo. */
+/** Diálogo modal, con el cristal del portal (.nx-modal-glass). */
 export function Modal({
   title,
   onClose,
@@ -99,7 +111,6 @@ export function Modal({
       if (event.key === 'Escape') onClose();
     }
     document.addEventListener('keydown', onKey);
-    // Evita que el fondo haga scroll mientras el modal está abierto.
     const previous = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     panel.current?.focus();
@@ -111,7 +122,7 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 sm:items-center"
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 backdrop-blur-sm p-4 sm:items-center"
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
@@ -122,22 +133,24 @@ export function Modal({
         aria-modal="true"
         aria-label={title}
         tabIndex={-1}
-        className="w-full max-w-lg rounded-card border border-border bg-panel outline-none"
+        className="nx-modal-glass w-full max-w-lg rounded-2xl shadow-2xl outline-none"
       >
-        <div className="flex items-center justify-between border-b border-border px-5 py-3">
-          <h2 className="font-medium">{title}</h2>
+        <div className="flex items-center justify-between border-b border-panel-border px-6 py-4">
+          <h2 className="text-sm font-black uppercase tracking-[0.15em] text-panel-header-text">
+            {title}
+          </h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Cerrar"
-            className="rounded p-1 text-muted hover:bg-border/50 hover:text-content"
+            className="w-9 h-9 flex items-center justify-center rounded-base text-label hover:bg-surface-container transition-colors"
           >
             ✕
           </button>
         </div>
-        <div className="space-y-4 px-5 py-4">{children}</div>
+        <div className="space-y-5 px-6 py-5">{children}</div>
         {footer ? (
-          <div className="flex justify-end gap-2 border-t border-border px-5 py-3">
+          <div className="flex justify-end gap-3 border-t border-panel-border px-6 py-4">
             {footer}
           </div>
         ) : null}
@@ -146,7 +159,6 @@ export function Modal({
   );
 }
 
-/** Confirmación para acciones destructivas. */
 export function ConfirmDialog({
   title,
   message,
@@ -168,7 +180,7 @@ export function ConfirmDialog({
       onClose={onCancel}
       footer={
         <>
-          <Button variant="ghost" onClick={onCancel}>
+          <Button variant="secondary" onClick={onCancel}>
             Cancelar
           </Button>
           <Button variant="danger" onClick={onConfirm} disabled={busy}>
@@ -177,7 +189,7 @@ export function ConfirmDialog({
         </>
       }
     >
-      <p className="text-sm text-muted">{message}</p>
+      <p className="text-sm font-bold text-label">{message}</p>
     </Modal>
   );
 }

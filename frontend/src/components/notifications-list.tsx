@@ -16,7 +16,7 @@ const TONES: Record<string, string> = {
   success: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-300',
   error: 'bg-red-500/15 text-red-600 dark:text-red-300',
   warning: 'bg-amber-500/15 text-amber-600 dark:text-amber-300',
-  info: 'bg-accent/15 text-accent',
+  info: 'bg-primary/15 text-primary',
 };
 
 export function NotificationsList() {
@@ -52,13 +52,13 @@ export function NotificationsList() {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold">Notificaciones</h1>
-          <p className="mt-1 text-sm text-muted">
+          <p className="mt-1 text-sm text-label">
             {unread > 0 ? `${unread} sin leer.` : 'Todo al día.'}
           </p>
         </div>
         <div className="flex gap-2">
           {unread > 0 ? (
-            <Button variant="ghost" onClick={markAll} disabled={busy}>
+            <Button variant="secondary" onClick={markAll} disabled={busy}>
               Marcar todas como leídas
             </Button>
           ) : null}
@@ -81,7 +81,7 @@ export function NotificationsList() {
             {(data ?? []).map((item) => (
               <Card
                 key={item.id}
-                className={item.is_read ? 'opacity-70' : 'border-accent/40'}
+                className={item.is_read ? 'opacity-70' : 'border-primary/40'}
               >
                 <div className="flex gap-3">
                   <span
@@ -93,9 +93,9 @@ export function NotificationsList() {
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-baseline justify-between gap-2">
                       <p className="font-medium">{item.title}</p>
-                      <span className="text-xs text-muted">{item.time}</span>
+                      <span className="text-xs text-label">{item.time}</span>
                     </div>
-                    <p className="mt-0.5 text-sm text-muted">{item.message}</p>
+                    <p className="mt-0.5 text-sm text-label">{item.message}</p>
                   </div>
                 </div>
               </Card>

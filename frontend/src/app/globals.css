@@ -1,16 +1,11 @@
 /**
- * Hoja de estilos de la aplicación.
+ * Utilidades de Tailwind, configuradas en tailwind.config.ts con los nombres
+ * del portal original.
  *
- * Los tres archivos que se importan son los del portal original, copiados sin
- * modificar: tokens.css define el sistema "Deep Sapphire" (paleta, radios y
- * escala tipográfica), y components.css y global.css las clases que usan las
- * pantallas. No se redefine ningún color aquí: cualquier cambio de diseño va
- * en esos archivos, que son la única fuente.
+ * El diseño en sí (tokens, clases .nexus-* y .nx-*) vive en src/styles/, que
+ * layout.tsx importa aparte: mezclarlo aquí con @import dejaba a PostCSS sin
+ * procesar las directivas y el build salía sin ninguna utilidad.
  */
-
-@import '../styles/tokens.css';
-@import '../styles/global.css';
-@import '../styles/components.css';
 
 @tailwind base;
 @tailwind components;

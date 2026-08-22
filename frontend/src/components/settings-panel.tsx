@@ -106,7 +106,7 @@ function PortalTab() {
             <img
               src={value.portal_icon}
               alt="Logo actual"
-              className="h-10 w-10 rounded border border-border object-contain"
+              className="h-10 w-10 rounded border border-panel-border object-contain"
             />
           ) : null}
           <input
@@ -116,11 +116,11 @@ function PortalTab() {
               const file = e.target.files?.[0];
               if (file) pickLogo(file);
             }}
-            className="text-sm text-muted"
+            className="text-sm text-label"
           />
           {value.portal_identity_type === 'image' ? (
             <Button
-              variant="ghost"
+              variant="secondary"
               onClick={() =>
                 setForm({ ...value, portal_identity_type: 'icon', portal_icon: '' })
               }
@@ -191,7 +191,7 @@ function BackupTab() {
 
       <div>
         <h2 className="text-sm font-medium">Descargar respaldo</h2>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-sm text-label">
           Incluye la identidad del portal, el directorio, el correo, las
           plantillas y las cuentas locales.
         </p>
@@ -200,9 +200,9 @@ function BackupTab() {
         </Button>
       </div>
 
-      <div className="border-t border-border pt-5">
+      <div className="border-t border-panel-border pt-5">
         <h2 className="text-sm font-medium">Restaurar</h2>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-sm text-label">
           Sobrescribe la configuración con la del paquete. Las cuentas que ya
           existan no se modifican.
         </p>
@@ -214,7 +214,7 @@ function BackupTab() {
             const file = e.target.files?.[0];
             if (file) restore(file);
           }}
-          className="mt-3 block text-sm text-muted"
+          className="mt-3 block text-sm text-label"
         />
       </div>
     </Card>
@@ -283,7 +283,7 @@ function SmtpTab() {
       {data.warning ? <ErrorNote message={data.warning} /> : null}
 
       {locked ? (
-        <div className="rounded-card border border-accent/40 bg-accent/10 p-3 text-sm">
+        <div className="rounded-xl border border-primary/40 bg-primary/10 p-3 text-sm">
           Estos valores vienen del <code>.env</code> del servidor
           (<code>SMTP_FORCE_ENV</code>) y no se pueden cambiar desde aquí. Para
           modificarlos, edita el archivo y reinicia el servicio.
@@ -361,14 +361,14 @@ function SmtpTab() {
         </div>
       ) : null}
 
-      <div className="border-t border-border pt-4">
+      <div className="border-t border-panel-border pt-4">
         <Field label="Enviar correo de prueba">
           <div className="flex gap-2">
             <TextInput
               type="email" placeholder="destino@ejemplo.com" value={target}
               onChange={(e) => setTarget(e.target.value)}
             />
-            <Button variant="ghost" onClick={test} disabled={!target}>
+            <Button variant="secondary" onClick={test} disabled={!target}>
               Enviar
             </Button>
           </div>
@@ -421,12 +421,12 @@ function TemplatesTab() {
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="min-w-0">
                 <p className="truncate font-medium">{template.name}</p>
-                <p className="truncate text-xs text-muted">
+                <p className="truncate text-xs text-label">
                   {template.slug} · {template.subject}
                 </p>
               </div>
               <Button
-                variant="ghost"
+                variant="secondary"
                 onClick={() => {
                   if (isOpen) {
                     setOpen(null);
@@ -446,7 +446,7 @@ function TemplatesTab() {
             </div>
 
             {isOpen ? (
-              <div className="mt-4 space-y-4 border-t border-border pt-4">
+              <div className="mt-4 space-y-4 border-t border-panel-border pt-4">
                 {problem ? <ErrorNote message={problem} /> : null}
                 <Field label="Asunto">
                   <TextInput
@@ -607,7 +607,7 @@ function LdapTab() {
         <Button onClick={save} disabled={state.saving}>
           {state.saving ? 'Guardando…' : 'Guardar'}
         </Button>
-        <Button variant="ghost" onClick={probe}>
+        <Button variant="secondary" onClick={probe}>
           Probar conexión
         </Button>
         <Saved show={state.saved} />
@@ -708,14 +708,14 @@ export function SettingsPanel() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Ajustes</h1>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-sm text-label">
           {isAdmin
             ? 'Configuración del sistema y preferencias personales.'
             : 'Tus preferencias personales.'}
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-1 border-b border-border" role="tablist">
+      <div className="flex flex-wrap gap-1 border-b border-panel-border" role="tablist">
         {tabs.map((item) => (
           <button
             key={item.id}
@@ -725,8 +725,8 @@ export function SettingsPanel() {
             onClick={() => setTab(item.id)}
             className={`-mb-px border-b-2 px-3 py-2 text-sm transition-colors ${
               tab === item.id
-                ? 'border-accent font-medium text-accent'
-                : 'border-transparent text-muted hover:text-content'
+                ? 'border-primary font-medium text-primary'
+                : 'border-transparent text-label hover:text-body-text'
             }`}
           >
             {item.label}

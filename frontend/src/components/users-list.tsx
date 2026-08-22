@@ -31,7 +31,7 @@ function TagPicker<T extends { id: number; name: string }>({
   empty: string;
 }) {
   if (options.length === 0) {
-    return <p className="text-xs text-muted">{empty}</p>;
+    return <p className="text-xs text-label">{empty}</p>;
   }
   return (
     <div className="flex flex-wrap gap-2">
@@ -47,8 +47,8 @@ function TagPicker<T extends { id: number; name: string }>({
             }
             className={`rounded-full border px-2.5 py-1 text-xs transition-colors ${
               on
-                ? 'border-accent bg-accent/15 text-accent'
-                : 'border-border text-muted hover:text-content'
+                ? 'border-primary bg-primary/15 text-primary'
+                : 'border-panel-border text-label hover:text-body-text'
             }`}
           >
             {option.name}
@@ -138,7 +138,7 @@ function UserForm({
       onClose={onClose}
       footer={
         <>
-          <Button variant="ghost" onClick={onClose}>Cancelar</Button>
+          <Button variant="secondary" onClick={onClose}>Cancelar</Button>
           <Button onClick={save} disabled={saving}>
             {saving ? 'Guardando…' : 'Guardar'}
           </Button>
@@ -255,7 +255,7 @@ function DirectoryPicker({
     <Modal
       title="Buscar en el directorio"
       onClose={onClose}
-      footer={<Button variant="ghost" onClick={onClose}>Cerrar</Button>}
+      footer={<Button variant="secondary" onClick={onClose}>Cerrar</Button>}
     >
       {error ? <ErrorNote message={error} /> : null}
 
@@ -274,9 +274,9 @@ function DirectoryPicker({
 
       {results !== null ? (
         results.length === 0 ? (
-          <p className="text-sm text-muted">Sin resultados.</p>
+          <p className="text-sm text-label">Sin resultados.</p>
         ) : (
-          <ul className="max-h-72 divide-y divide-border overflow-y-auto">
+          <ul className="max-h-72 divide-y divide-panel-border overflow-y-auto">
             {results.map((found) => (
               <li
                 key={found.account || found.email}
@@ -284,14 +284,14 @@ function DirectoryPicker({
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">{found.name}</p>
-                  <p className="truncate text-xs text-muted">
+                  <p className="truncate text-xs text-label">
                     {found.email || found.account}
                   </p>
                 </div>
                 {found.exists ? (
                   <Badge>Ya existe</Badge>
                 ) : (
-                  <Button variant="ghost" onClick={() => onPick(found)}>
+                  <Button variant="secondary" onClick={() => onPick(found)}>
                     Dar de alta
                   </Button>
                 )}
@@ -344,7 +344,7 @@ function PurgePanel({ onDone }: { onDone: () => void }) {
     <Card className="space-y-3">
       <div>
         <h2 className="text-sm font-medium">Purgar cuentas inactivas</h2>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-sm text-label">
           Elimina las cuentas sin acceso en el periodo indicado, incluidas las
           que nunca han iniciado sesión. Nunca afecta a los administradores
           globales.
@@ -361,14 +361,14 @@ function PurgePanel({ onDone }: { onDone: () => void }) {
             onChange={(e) => setDays(Number(e.target.value))}
           />
         </Field>
-        <Button variant="ghost" onClick={load} disabled={busy}>
+        <Button variant="secondary" onClick={load} disabled={busy}>
           {busy ? 'Consultando…' : 'Ver candidatas'}
         </Button>
       </div>
 
       {preview !== null ? (
         preview.length === 0 ? (
-          <p className="text-sm text-muted">
+          <p className="text-sm text-label">
             Ninguna cuenta cumple ese criterio.
           </p>
         ) : (
@@ -376,7 +376,7 @@ function PurgePanel({ onDone }: { onDone: () => void }) {
             <p className="text-sm">
               <strong>{preview.length}</strong> cuenta(s) se eliminarían:
             </p>
-            <ul className="max-h-48 space-y-1 overflow-y-auto text-sm text-muted">
+            <ul className="max-h-48 space-y-1 overflow-y-auto text-sm text-label">
               {preview.map((user) => (
                 <li key={user.id} className="truncate">
                   {user.email}
@@ -444,7 +444,7 @@ export function UsersList() {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold">Usuarios</h1>
-          <p className="mt-1 text-sm text-muted">
+          <p className="mt-1 text-sm text-label">
             {session?.permissions.is_admin
               ? 'Todos los usuarios del sistema.'
               : 'Usuarios de las áreas que administras.'}
@@ -453,10 +453,10 @@ export function UsersList() {
         <div className="flex flex-wrap gap-2">
           {isAdmin ? (
             <>
-              <Button variant="ghost" onClick={() => setDirectory(true)}>
+              <Button variant="secondary" onClick={() => setDirectory(true)}>
                 Buscar en directorio
               </Button>
-              <Button variant="ghost" onClick={() => setShowPurge((v) => !v)}>
+              <Button variant="secondary" onClick={() => setShowPurge((v) => !v)}>
                 {showPurge ? 'Ocultar purga' : 'Purgar inactivas'}
               </Button>
             </>
@@ -481,7 +481,7 @@ export function UsersList() {
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="truncate font-medium">{user.name}</p>
-                    <p className="truncate text-sm text-muted">{user.email}</p>
+                    <p className="truncate text-sm text-label">{user.email}</p>
                   </div>
                   <div className="flex flex-wrap items-center gap-1.5">
                     <Badge>{ROLE_LABELS[user.role] ?? user.role}</Badge>
@@ -494,12 +494,12 @@ export function UsersList() {
 
                 <div className="mt-3 flex flex-wrap items-center gap-1.5">
                   {user.areas.length === 0 ? (
-                    <span className="text-xs text-muted">Sin áreas asignadas</span>
+                    <span className="text-xs text-label">Sin áreas asignadas</span>
                   ) : (
                     user.areas.map((area) => (
                       <span
                         key={area.id}
-                        className="rounded-full bg-border/60 px-2 py-0.5 text-xs text-muted"
+                        className="rounded-full bg-surface-container px-2 py-0.5 text-xs text-label"
                       >
                         {area.name}
                       </span>
@@ -512,11 +512,11 @@ export function UsersList() {
                   ) : null}
                 </div>
 
-                <div className="mt-3 flex gap-1 border-t border-border pt-3">
+                <div className="mt-3 flex gap-1 border-t border-panel-border pt-3">
                   <button
                     type="button"
                     onClick={() => setEditing(user)}
-                    className="rounded px-2 py-1 text-xs text-accent hover:bg-accent/10"
+                    className="rounded px-2 py-1 text-xs text-primary hover:bg-primary/10"
                   >
                     Editar
                   </button>

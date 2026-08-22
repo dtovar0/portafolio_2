@@ -1,4 +1,11 @@
-/** Piezas de interfaz compartidas. */
+/**
+ * Piezas de interfaz.
+ *
+ * El marcado y las clases se toman de las plantillas del portal original, para
+ * que el resultado sea el mismo: paneles `bg-panel-fill border border-panel-border
+ * rounded-xl shadow-*`, botones `.nexus-btn`, y los colores vía los tokens.
+ * No se define aquí ningún estilo propio.
+ */
 
 export function Card({
   children,
@@ -7,10 +14,29 @@ export function Card({
   children: React.ReactNode;
   className?: string;
 }) {
+  // index.html: bg-panel-fill border border-panel-border rounded-xl p-6 shadow-sm
   return (
     <div
-      className={`rounded-card border border-border bg-panel p-5 ${className}`}
+      className={`bg-panel-fill border border-panel-border rounded-xl p-6 shadow-sm ${className}`}
     >
+      {children}
+    </div>
+  );
+}
+
+/** Cabecera de panel, como la de los paneles de index.html. */
+export function PanelHeader({
+  title,
+  children,
+}: {
+  title: React.ReactNode;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div className="shrink-0 p-6 border-b border-panel-border bg-surface-container/20 flex items-center justify-between">
+      <h2 className="text-xs font-black uppercase tracking-[0.15em] text-label">
+        {title}
+      </h2>
       {children}
     </div>
   );
@@ -27,21 +53,23 @@ export function StatTile({
 }) {
   return (
     <Card>
-      <p className="text-sm text-muted">{label}</p>
-      <p className="mt-1 text-3xl font-semibold tabular-nums">{value}</p>
-      {hint ? <p className="mt-1 text-xs text-muted">{hint}</p> : null}
+      <p className="text-xs font-black uppercase tracking-[0.15em] text-label">
+        {label}
+      </p>
+      <p className="mt-2 text-3xl font-black tabular-nums text-bi-main">{value}</p>
+      {hint ? <p className="mt-1 text-xs text-bi-muted">{hint}</p> : null}
     </Card>
   );
 }
 
 export function Spinner({ label = 'Cargando…' }: { label?: string }) {
   return (
-    <div className="flex items-center gap-3 p-6 text-muted" role="status">
+    <div className="flex items-center gap-3 p-6 text-label" role="status">
       <span
-        className="h-4 w-4 animate-spin rounded-full border-2 border-border border-t-accent"
+        className="h-4 w-4 animate-spin rounded-full border-2 border-panel-border border-t-primary"
         aria-hidden
       />
-      <span className="text-sm">{label}</span>
+      <span className="text-sm font-bold">{label}</span>
     </div>
   );
 }
@@ -50,7 +78,7 @@ export function ErrorNote({ message }: { message: string }) {
   return (
     <div
       role="alert"
-      className="rounded-card border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-600 dark:text-red-300"
+      className="rounded-xl border border-error/30 bg-error/10 p-4 text-sm font-bold text-error"
     >
       {message}
     </div>
@@ -59,27 +87,19 @@ export function ErrorNote({ message }: { message: string }) {
 
 export function EmptyNote({ message }: { message: string }) {
   return (
-    <Card className="text-center text-sm text-muted">{message}</Card>
+    <Card className="text-center">
+      <p className="text-sm font-bold text-label/60">{message}</p>
+    </Card>
   );
 }
 
+/** Insignia. Usa las clases .nx-badge del portal. */
 export function Badge({
   children,
-  tone = 'neutral',
+  tone = 'slate',
 }: {
   children: React.ReactNode;
-  tone?: 'neutral' | 'success' | 'warning';
+  tone?: 'primary' | 'success' | 'error' | 'warning' | 'violet' | 'sky' | 'slate' | 'cyan';
 }) {
-  const tones = {
-    neutral: 'bg-border/60 text-muted',
-    success: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-300',
-    warning: 'bg-amber-500/15 text-amber-600 dark:text-amber-300',
-  };
-  return (
-    <span
-      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${tones[tone]}`}
-    >
-      {children}
-    </span>
-  );
+  return <span className={`nx-badge nx-badge-${tone}`}>{children}</span>;
 }
