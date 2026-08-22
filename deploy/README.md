@@ -4,8 +4,10 @@ Dos servicios tras un reverse proxy:
 
 | Servicio | Escucha | Sirve |
 |---|---|---|
-| `nexus-backend` (Flask/Gunicorn) | 127.0.0.1:5001 | API `/api/v1` |
-| `nexus-frontend` (Next.js) | 127.0.0.1:3000 | La interfaz |
+| `<nombre>-backend` (Flask/Gunicorn) | 127.0.0.1:5001 | API `/api/v1` |
+| `<nombre>-frontend` (Next.js) | 127.0.0.1:3000 | La interfaz |
+
+`<nombre>` lo define `--name` (por defecto `nexus`).
 
 Nginx enruta `/api/` y `/auth/` al backend y el resto al frontend. Ambos van
 bajo el mismo dominio a propósito: así la cookie de sesión que emite Flask
@@ -35,6 +37,33 @@ sudo ./deploy/install.sh --domain nexus.ejemplo.com
 `install.sh` acepta `--prefix` (por defecto `/opt/nexus`), `--user`,
 `--domain`, `--python`, `--proxy`, `--no-proxy`, `--create-user` y
 `--skip-packages`. Es idempotente: repetirlo actualiza la instalación.
+
+### Nombre del despliegue
+
+`--name` define todo lo que lleva el nombre, de una sola vez:
+
+```bash
+sudo ./deploy/install.sh --name portal --domain portal.ejemplo.com
+```
+
+| Qué | Valor |
+|---|---|
+| Unidades systemd | `portal-backend`, `portal-frontend` |
+| Prefijo | `/opt/portal` |
+| Registros | `/var/log/portal` |
+| Config de nginx | `/etc/nginx/conf.d/portal.conf` |
+| Upstreams de nginx | `portal_api`, `portal_web` |
+
+Cada uno se puede ajustar aparte con `--prefix` y `--logdir`; `--title` cambia
+solo el texto de `Description=`. El nombre admite minúsculas, dígitos, `-` y
+`_`, hasta 32 caracteres: acaba en rutas, unidades systemd y nombres de
+upstream, y debe ser válido en los tres.
+
+Para que `preflight.sh` compruebe el mismo nombre:
+
+```bash
+APP_NAME=portal ./deploy/preflight.sh
+```
 
 ### Usuario de servicio
 

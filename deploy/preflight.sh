@@ -21,6 +21,9 @@ MIN_DISK_MB=2048               # node_modules + venv + build
 MIN_RAM_MB=1024                # `next build` es lo que más consume
 API_PORT="${API_PORT:-5001}"
 WEB_PORT="${WEB_PORT:-3000}"
+# Nombre del despliegue: define las unidades systemd y las rutas que se
+# comprobarán. Debe coincidir con el --name que se pase al instalador.
+APP_NAME="${APP_NAME:-nexus}"
 
 problems=0
 warnings=0
@@ -292,6 +295,24 @@ if systemctl is-active --quiet firewalld 2>/dev/null; then
 else
     printf "  firewalld: inactivo\n"
 fi
+
+# --- 10a. Nombre del despliegue ----------------------------------------------
+head2 "Nombre del despliegue"
+if [[ "$APP_NAME" =~ ^[a-z][a-z0-9_-]{0,31}$ ]]; then
+    ok "APP_NAME=$APP_NAME"
+else
+    bad "APP_NAME='$APP_NAME' no es válido (minúsculas, dígitos, '-' o '_')"
+fi
+printf "  unidades:  %s-backend, %s-frontend\n" "$APP_NAME" "$APP_NAME"
+printf "  prefijo:   /opt/%s\n" "$APP_NAME"
+printf "  registros: /var/log/%s\n" "$APP_NAME"
+printf "  nginx:     /etc/nginx/conf.d/%s.conf\n" "$APP_NAME"
+for u in "${APP_NAME}-backend" "${APP_NAME}-frontend"; do
+    if systemctl list-unit-files "$u.service" 2>/dev/null | grep -q "$u"; then
+        warn "$u.service ya existe; la instalación lo sobrescribirá"
+    fi
+done
+printf "  cambiar con: APP_NAME=otro ./deploy/preflight.sh\n"
 
 # --- 10b. Usuario de servicio ------------------------------------------------
 head2 "Usuario de servicio"

@@ -1,18 +1,18 @@
-# Frontend Next.js de Nexus.
+# Frontend Next.js de @APP_TITLE@.
 # Requiere `npm ci && npm run build` previo: el build standalone deja el
 # servidor en .next/standalone/server.js
 [Unit]
-Description=Nexus Frontend (Next.js)
-After=network.target nexus-backend.service
-Wants=nexus-backend.service
+Description=@APP_TITLE@ Frontend (Next.js)
+After=network.target @APP_NAME@-backend.service
+Wants=@APP_NAME@-backend.service
 
 [Service]
 Type=simple
-User=nexus
-Group=nexus
+User=@SVC_USER@
+Group=@SVC_GROUP@
 # server.js resuelve .next/static y public/ relativos a su propio directorio,
 # así que el WorkingDirectory debe ser standalone, no frontend/.
-WorkingDirectory=/opt/nexus/frontend/.next/standalone
+WorkingDirectory=@PREFIX@/frontend/.next/standalone
 Environment=NODE_ENV=production
 Environment=PORT=3000
 Environment=HOSTNAME=127.0.0.1

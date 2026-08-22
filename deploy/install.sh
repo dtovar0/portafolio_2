@@ -2,9 +2,14 @@
 #
 # Instalación de Nexus en Rocky Linux 8.
 #
-#   sudo ./deploy/install.sh [--prefix /opt/nexus] [--user nexus]
+#   sudo ./deploy/install.sh [--name miapp] [--prefix /opt/miapp] [--user cuenta]
 #                            [--domain nexus.example.com] [--python /usr/bin/python3.11]
 #                            [--proxy http://proxy:3128] [--no-proxy localhost,10.0.0.0/8]
+#
+# --name define el nombre del despliegue: unidades NOMBRE-backend y
+# NOMBRE-frontend, prefijo /opt/NOMBRE, registros /var/log/NOMBRE y
+# /etc/nginx/conf.d/NOMBRE.conf. Se puede ajustar cada uno por separado con
+# --prefix y --logdir. --title cambia solo el texto descriptivo.
 #
 # --user debe ser una cuenta existente (por defecto, quien invoca sudo); con
 # --create-user el script la crea si no está.
@@ -26,7 +31,12 @@
 
 set -Eeuo pipefail
 
-PREFIX="/opt/nexus"
+# Nombre del despliegue. De él se derivan las unidades systemd, el prefijo, el
+# directorio de registros y el fichero de nginx, salvo que se indiquen aparte.
+APP_NAME="nexus"
+APP_TITLE=""                   # por defecto, APP_NAME capitalizado
+PREFIX=""                      # por defecto, /opt/$APP_NAME
+LOGDIR=""                      # por defecto, /var/log/$APP_NAME
 # Usuario con el que corren los servicios. Debe existir ya: el script no crea
 # cuentas. Por defecto, el que invoca sudo.
 SVC_USER="${SUDO_USER:-$(id -un)}"
@@ -46,6 +56,9 @@ NO_PROXY_LIST="${no_proxy:-${NO_PROXY:-localhost,127.0.0.1,::1}}"
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
+        --name)   APP_NAME="$2"; shift 2 ;;
+        --title)  APP_TITLE="$2"; shift 2 ;;
+        --logdir) LOGDIR="$2"; shift 2 ;;
         --prefix) PREFIX="$2"; shift 2 ;;
         --user)   SVC_USER="$2"; shift 2 ;;
         --domain) DOMAIN="$2"; shift 2 ;;
@@ -58,6 +71,17 @@ while [[ $# -gt 0 ]]; do
         *) echo "Opción desconocida: $1" >&2; exit 2 ;;
     esac
 done
+
+# El nombre acaba en rutas, unidades systemd y nginx: se restringe a lo que es
+# válido en todos esos sitios.
+[[ "$APP_NAME" =~ ^[a-z][a-z0-9_-]{0,31}$ ]] \
+    || { echo "ERROR: --name debe ser minúsculas, dígitos, '-' o '_' (máx. 32)" >&2; exit 2; }
+
+: "${PREFIX:=/opt/$APP_NAME}"
+: "${LOGDIR:=/var/log/$APP_NAME}"
+: "${APP_TITLE:=$(tr '[:lower:]' '[:upper:]' <<< "${APP_NAME:0:1}")${APP_NAME:1}}"
+BACKEND_UNIT="${APP_NAME}-backend"
+FRONTEND_UNIT="${APP_NAME}-frontend"
 
 SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
@@ -196,7 +220,7 @@ note "los servicios correrán como $SVC_USER:$SVC_GROUP"
 
 # --- 3. Copia del proyecto ---------------------------------------------------
 log "Copiando el proyecto a $PREFIX"
-mkdir -p "$PREFIX" /var/log/nexus
+mkdir -p "$PREFIX" "$LOGDIR"
 
 if [[ "$(realpath "$SRC")" == "$(realpath "$PREFIX")" ]]; then
     note "el origen ya es $PREFIX; no se copia"
@@ -220,7 +244,7 @@ fi
 # Contiene credenciales de base de datos: solo el usuario del servicio.
 chown "$SVC_USER:$SVC_GROUP" "$PREFIX/.env"
 chmod 600 "$PREFIX/.env"
-chown -R "$SVC_USER:$SVC_GROUP" "$PREFIX" /var/log/nexus
+chown -R "$SVC_USER:$SVC_GROUP" "$PREFIX" "$LOGDIR"
 
 # --- 4. Backend --------------------------------------------------------------
 log "Backend (venv y dependencias)"
@@ -259,18 +283,33 @@ note "build en $PREFIX/frontend/.next/standalone"
 
 # --- 6. Servicios ------------------------------------------------------------
 log "Servicios systemd"
-for unit in nexus-backend nexus-frontend; do
-    # El orden importa: primero las rutas, luego usuario y grupo.
-    sed -e "s|/opt/nexus|${PREFIX}|g" \
-        -e "s|^User=.*|User=${SVC_USER}|" \
-        -e "s|^Group=.*|Group=${SVC_GROUP}|" \
-        "$PREFIX/deploy/${unit}.service" > "/etc/systemd/system/${unit}.service"
-    note "instalada ${unit}.service"
-done
+render() {
+    # Sustituye los marcadores de una plantilla. '|' como separador, así que los
+    # valores no pueden contenerlo (las rutas no lo hacen).
+    sed -e "s|@APP_NAME@|${APP_NAME}|g" \
+        -e "s|@APP_TITLE@|${APP_TITLE}|g" \
+        -e "s|@PREFIX@|${PREFIX}|g" \
+        -e "s|@LOGDIR@|${LOGDIR}|g" \
+        -e "s|@SVC_USER@|${SVC_USER}|g" \
+        -e "s|@SVC_GROUP@|${SVC_GROUP}|g" \
+        -e "s|@DOMAIN@|${DOMAIN:-_}|g" \
+        "$1"
+}
+
+render "$PREFIX/deploy/backend.service.tmpl"  > "/etc/systemd/system/${BACKEND_UNIT}.service"
+render "$PREFIX/deploy/frontend.service.tmpl" > "/etc/systemd/system/${FRONTEND_UNIT}.service"
+note "instaladas ${BACKEND_UNIT}.service y ${FRONTEND_UNIT}.service"
+
+# Un marcador sin sustituir dejaría la unidad inservible.
+if grep -l "@[A-Z_]*@" "/etc/systemd/system/${BACKEND_UNIT}.service" \
+        "/etc/systemd/system/${FRONTEND_UNIT}.service" 2>/dev/null; then
+    die "quedaron marcadores sin sustituir en las unidades"
+fi
+
 systemctl daemon-reload
-systemctl enable --now nexus-backend nexus-frontend
+systemctl enable --now "$BACKEND_UNIT" "$FRONTEND_UNIT"
 sleep 3
-for unit in nexus-backend nexus-frontend; do
+for unit in "$BACKEND_UNIT" "$FRONTEND_UNIT"; do
     systemctl is-active --quiet "$unit" \
         && note "$unit activo" \
         || { journalctl -u "$unit" -n 20 --no-pager; die "$unit no arrancó"; }
@@ -278,13 +317,12 @@ done
 
 # --- 7. Reverse proxy --------------------------------------------------------
 log "nginx"
-conf="/etc/nginx/conf.d/nexus.conf"
+conf="/etc/nginx/conf.d/${APP_NAME}.conf"
+render "$PREFIX/deploy/nginx.conf.tmpl" > "$conf"
 if [[ -n "$DOMAIN" ]]; then
-    sed "s|nexus.example.com|${DOMAIN}|g" "$PREFIX/deploy/nginx-nexus.conf" > "$conf"
-    note "configuración escrita para $DOMAIN"
+    note "configuración escrita en $conf para $DOMAIN"
 else
-    cp "$PREFIX/deploy/nginx-nexus.conf" "$conf"
-    note "configuración escrita; falta ajustar server_name y los certificados"
+    note "configuración escrita en $conf; falta ajustar server_name y certificados"
 fi
 
 if command -v getenforce >/dev/null 2>&1 && [[ "$(getenforce)" == "Enforcing" ]]; then
