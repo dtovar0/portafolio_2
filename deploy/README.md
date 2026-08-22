@@ -32,9 +32,28 @@ sudo ./deploy/install.sh --domain nexus.ejemplo.com
 - Puertos 5001 y 3000 libres
 - nginx, SELinux (`httpd_can_network_connect`) y firewalld
 
-`install.sh` acepta `--prefix` (por defecto `/opt/nexus`), `--user` (`nexus`),
-`--domain` y `--skip-packages`. Es idempotente: repetirlo actualiza la
-instalación.
+`install.sh` acepta `--prefix` (por defecto `/opt/nexus`), `--user`,
+`--domain`, `--python`, `--proxy`, `--no-proxy`, `--create-user` y
+`--skip-packages`. Es idempotente: repetirlo actualiza la instalación.
+
+### Usuario de servicio
+
+El script **no crea cuentas por defecto**. Usa la que indique `--user`, y si se
+omite, la que invoca sudo:
+
+```bash
+sudo ./deploy/install.sh --user www-data      # cuenta existente
+```
+
+Si la cuenta no existe, aborta indicando cómo proceder. Para que la cree —una
+cuenta de sistema sin shell ni directorio propio— hay que pedirlo:
+
+```bash
+sudo ./deploy/install.sh --user nexus --create-user
+```
+
+Sobre una cuenta que ya existe, `--create-user` no la modifica. El grupo se
+toma del que tenga el usuario, sin asumir que coincida con su nombre.
 
 ### Servidor detrás de un proxy corporativo
 

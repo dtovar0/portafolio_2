@@ -6,14 +6,17 @@
 #                            [--domain nexus.example.com] [--python /usr/bin/python3.11]
 #                            [--proxy http://proxy:3128] [--no-proxy localhost,10.0.0.0/8]
 #
+# --user debe ser una cuenta existente (por defecto, quien invoca sudo); con
+# --create-user el script la crea si no está.
+#
 # Usa el Python del sistema si es 3.11 o superior; solo instala uno si no hay.
 #
 # Ejecutar antes ./deploy/preflight.sh: este script asume que la evaluación pasó.
 # Es idempotente: se puede repetir para actualizar una instalación existente.
 #
 # Qué hace, en orden:
-#   1. Paquetes del sistema (Python 3.12, Node 22, nginx, cabeceras de compilación)
-#   2. Usuario de servicio sin shell
+#   1. Paquetes del sistema (Python, Node, nginx, cabeceras de compilación)
+#   2. Comprobación del usuario de servicio (solo lo crea con --create-user)
 #   3. Copia del proyecto al prefijo y permisos
 #   4. venv del backend y build del frontend
 #   5. Unidades systemd
@@ -24,7 +27,12 @@
 set -Eeuo pipefail
 
 PREFIX="/opt/nexus"
-SVC_USER="nexus"
+# Usuario con el que corren los servicios. Debe existir ya: el script no crea
+# cuentas. Por defecto, el que invoca sudo.
+SVC_USER="${SUDO_USER:-$(id -un)}"
+# Crear la cuenta solo si se pide explícitamente, con --create-user o
+# CREATE_USER=1. Sin ello, el usuario indicado tiene que existir ya.
+CREATE_USER="${CREATE_USER:-0}"
 DOMAIN=""
 # El proyecto funciona con Python 3.11 o superior. Se usa el intérprete que ya
 # haya en el sistema; --python fuerza uno concreto.
@@ -43,6 +51,7 @@ while [[ $# -gt 0 ]]; do
         --domain) DOMAIN="$2"; shift 2 ;;
         --python) PY_BIN="$2"; shift 2 ;;
         --proxy)  PROXY_URL="$2"; shift 2 ;;
+        --create-user) CREATE_USER=1; shift ;;
         --no-proxy) NO_PROXY_LIST="$2"; shift 2 ;;
         --skip-packages) SKIP_PKGS=1; shift ;;
         -h|--help) sed -n '2,22p' "$0"; exit 0 ;;
@@ -170,12 +179,20 @@ fi
 # --- 2. Usuario de servicio --------------------------------------------------
 log "Usuario de servicio"
 if id "$SVC_USER" >/dev/null 2>&1; then
-    note "$SVC_USER ya existe"
+    note "$SVC_USER ya existe; no se modifica"
+elif [[ "$CREATE_USER" == "1" ]]; then
+    # Cuenta de servicio: sin shell y sin directorio propio, solo ejecuta los
+    # servicios. Se crea únicamente porque se ha pedido.
+    useradd --system --no-create-home --shell /sbin/nologin "$SVC_USER" \
+        || die "no se pudo crear el usuario '$SVC_USER'"
+    note "creado $SVC_USER (cuenta de sistema, sin shell)"
 else
-    # Sin shell y sin home propio: solo ejecuta los servicios.
-    useradd --system --no-create-home --shell /sbin/nologin "$SVC_USER"
-    note "creado $SVC_USER (sin shell)"
+    die "el usuario '$SVC_USER' no existe.
+    Indicar una cuenta existente con --user NOMBRE, o añadir --create-user
+    para que el script la cree."
 fi
+SVC_GROUP="$(id -gn "$SVC_USER")"
+note "los servicios correrán como $SVC_USER:$SVC_GROUP"
 
 # --- 3. Copia del proyecto ---------------------------------------------------
 log "Copiando el proyecto a $PREFIX"
@@ -201,9 +218,9 @@ if [[ ! -f "$PREFIX/.env" ]]; then
     die ".env no existe en $PREFIX. Copiarlo y rellenar las credenciales antes de seguir."
 fi
 # Contiene credenciales de base de datos: solo el usuario del servicio.
-chown "$SVC_USER:$SVC_USER" "$PREFIX/.env"
+chown "$SVC_USER:$SVC_GROUP" "$PREFIX/.env"
 chmod 600 "$PREFIX/.env"
-chown -R "$SVC_USER:$SVC_USER" "$PREFIX" /var/log/nexus
+chown -R "$SVC_USER:$SVC_GROUP" "$PREFIX" /var/log/nexus
 
 # --- 4. Backend --------------------------------------------------------------
 log "Backend (venv y dependencias)"
@@ -246,7 +263,7 @@ for unit in nexus-backend nexus-frontend; do
     # El orden importa: primero las rutas, luego usuario y grupo.
     sed -e "s|/opt/nexus|${PREFIX}|g" \
         -e "s|^User=.*|User=${SVC_USER}|" \
-        -e "s|^Group=.*|Group=${SVC_USER}|" \
+        -e "s|^Group=.*|Group=${SVC_GROUP}|" \
         "$PREFIX/deploy/${unit}.service" > "/etc/systemd/system/${unit}.service"
     note "instalada ${unit}.service"
 done

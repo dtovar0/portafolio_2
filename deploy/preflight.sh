@@ -293,6 +293,17 @@ else
     printf "  firewalld: inactivo\n"
 fi
 
+# --- 10b. Usuario de servicio ------------------------------------------------
+head2 "Usuario de servicio"
+SVC_USER="${SVC_USER:-${SUDO_USER:-$(id -un)}}"
+if id "$SVC_USER" >/dev/null 2>&1; then
+    ok "$SVC_USER existe (grupo $(id -gn "$SVC_USER"))"
+    printf "  los servicios correrán con esta cuenta\n"
+else
+    warn "$SVC_USER no existe: indicar otra con --user, o --create-user al instalar"
+fi
+printf "  cambiar con: SVC_USER=otro ./deploy/preflight.sh\n"
+
 # --- 11. Estado del proyecto -------------------------------------------------
 head2 "Proyecto"
 [[ -f run.py && -d app ]] && ok "backend presente" || bad "no parece la raíz del proyecto"
