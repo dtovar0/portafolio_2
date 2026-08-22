@@ -2,7 +2,10 @@
 #
 # Instalación de Nexus en Rocky Linux 8.
 #
-#   sudo ./deploy/install.sh [--prefix /opt/nexus] [--user nexus] [--domain nexus.example.com]
+#   sudo ./deploy/install.sh [--prefix /opt/nexus] [--user nexus]
+#                            [--domain nexus.example.com] [--python /usr/bin/python3.11]
+#
+# Usa el Python del sistema si es 3.11 o superior; solo instala uno si no hay.
 #
 # Ejecutar antes ./deploy/preflight.sh: este script asume que la evaluación pasó.
 # Es idempotente: se puede repetir para actualizar una instalación existente.
@@ -22,7 +25,10 @@ set -Eeuo pipefail
 PREFIX="/opt/nexus"
 SVC_USER="nexus"
 DOMAIN=""
-PY_BIN="python3.12"
+# El proyecto funciona con Python 3.11 o superior. Se usa el intérprete que ya
+# haya en el sistema; --python fuerza uno concreto.
+PY_MIN_MINOR=11
+PY_BIN=""
 NODE_MAJOR="22"
 SKIP_PKGS=0
 
@@ -31,8 +37,9 @@ while [[ $# -gt 0 ]]; do
         --prefix) PREFIX="$2"; shift 2 ;;
         --user)   SVC_USER="$2"; shift 2 ;;
         --domain) DOMAIN="$2"; shift 2 ;;
+        --python) PY_BIN="$2"; shift 2 ;;
         --skip-packages) SKIP_PKGS=1; shift ;;
-        -h|--help) sed -n '2,20p' "$0"; exit 0 ;;
+        -h|--help) sed -n '2,22p' "$0"; exit 0 ;;
         *) echo "Opción desconocida: $1" >&2; exit 2 ;;
     esac
 done
@@ -45,6 +52,23 @@ die()  { printf "\nERROR: %s\n" "$1" >&2; exit 1; }
 
 trap 'die "falló en la línea $LINENO. Nada más se ha modificado."' ERR
 
+resolve_python() {
+    # Rutas del sistema explícitas: con un venv activo, `command -v python3`
+    # devolvería su intérprete y el venv nuevo quedaría anidado.
+    local candidate minor
+    for candidate in /usr/bin/python3.13 /usr/bin/python3.12 /usr/bin/python3.11 \
+                     /usr/local/bin/python3.12 /usr/local/bin/python3.11 \
+                     /usr/bin/python3; do
+        [[ -x "$candidate" ]] || continue
+        minor=$("$candidate" -c 'import sys; print(sys.version_info[1])' 2>/dev/null) || continue
+        if [[ -n "$minor" ]] && (( minor >= PY_MIN_MINOR )); then
+            printf '%s' "$candidate"
+            return 0
+        fi
+    done
+    return 1
+}
+
 [[ $EUID -eq 0 ]] || die "hay que ejecutarlo como root (sudo)."
 [[ -f "$SRC/run.py" && -f "$SRC/frontend/package.json" ]] \
     || die "no encuentro el proyecto en $SRC"
@@ -52,17 +76,30 @@ trap 'die "falló en la línea $LINENO. Nada más se ha modificado."' ERR
 # --- 1. Paquetes -------------------------------------------------------------
 if (( SKIP_PKGS )); then
     log "Paquetes del sistema (omitido por --skip-packages)"
+    [[ -z "$PY_BIN" ]] && PY_BIN="$(resolve_python || true)"
+    [[ -n "$PY_BIN" && -x "$PY_BIN" ]] \
+        || die "no hay Python >= 3.${PY_MIN_MINOR}; ejecutar sin --skip-packages"
+    note "usando $PY_BIN"
 else
     log "Paquetes del sistema"
 
-    # Python 3.12 y Node 22 vienen como módulos de AppStream en RHEL 8.
-    if ! command -v "$PY_BIN" >/dev/null 2>&1; then
-        note "instalando python312"
-        dnf -y module reset python312 >/dev/null 2>&1 || true
-        dnf -y module enable python312 >/dev/null 2>&1 || true
-        dnf -y install python312 python312-devel
+    # Se reutiliza el Python del sistema si sirve, para no acumular versiones.
+    if [[ -z "$PY_BIN" ]]; then
+        PY_BIN="$(resolve_python || true)"
+    fi
+    if [[ -n "$PY_BIN" && -x "$PY_BIN" ]]; then
+        note "$($PY_BIN --version) ya presente en $PY_BIN; no se instala otro"
+        "$PY_BIN" -c 'import venv' 2>/dev/null || \
+            die "$PY_BIN no tiene el módulo venv; instalar su paquete -devel"
     else
-        note "$($PY_BIN --version) ya presente"
+        # Rocky 8 trae 3.6: hace falta un módulo de AppStream. Se prefiere 3.11
+        # por ser el mínimo que el proyecto necesita.
+        note "no hay Python >= 3.${PY_MIN_MINOR}; instalando python311"
+        dnf -y module reset python311 >/dev/null 2>&1 || true
+        dnf -y module enable python311 >/dev/null 2>&1 || true
+        dnf -y install python311 python311-devel || \
+            die "no se pudo instalar Python; revisar los repositorios AppStream"
+        PY_BIN="$(resolve_python)" || die "Python instalado pero no localizado"
     fi
 
     node_major_now=0

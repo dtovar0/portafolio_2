@@ -23,7 +23,7 @@ sudo ./deploy/install.sh --domain nexus.ejemplo.com
 
 - Distribución y arquitectura
 - Espacio (2 GB) y memoria (1 GB; `next build` es lo que más consume)
-- Python 3.12 con `venv`, y Node ≥ 18.18
+- Python **3.11 o superior** con `venv`, y Node ≥ 18.18
 - Cabeceras de compilación (`gcc`, `openssl-devel`, `libffi-devel`,
   `openldap-devel`), que `cryptography` y `ldap3` necesitan si no hay rueda
   binaria para la plataforma
@@ -38,8 +38,11 @@ instalación.
 
 ### Notas propias de Rocky 8
 
-- **Python 3.12** no es el del sistema (que es 3.6): viene como módulo de
-  AppStream. El script hace `dnf module enable python312`.
+- **Python**: el proyecto funciona con 3.11 o superior, y el instalador
+  reutiliza el intérprete que ya haya en el servidor para no acumular
+  versiones. Solo si no encuentra ninguno válido instala `python311` desde
+  AppStream (Rocky 8 trae 3.6 de serie). Con `--python /ruta/al/python` se
+  fuerza uno concreto.
 - **Node 22** puede no estar en AppStream según la versión menor de Rocky; si
   falta el módulo, el script cae al repositorio de NodeSource.
 - **SELinux** en `Enforcing` impide que nginx conecte con los upstream locales,
@@ -50,8 +53,8 @@ instalación.
 ## Instalación manual
 
 ```bash
-# Backend
-python3.12 -m venv venv
+# Backend — sirve cualquier Python >= 3.11
+python3.11 -m venv venv          # o python3.12, el que tengas
 venv/bin/pip install -r requirements.txt
 
 # Frontend

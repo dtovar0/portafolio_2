@@ -54,9 +54,9 @@ datos; Next.js no accede a la base de datos, solo consume la API. Ver
     ```bash
     cp .env.example .env    # editar con las credenciales
     ```
-2.  **Backend** (Python 3.12):
+2.  **Backend** (Python 3.11 o superior):
     ```bash
-    python3.12 -m venv venv
+    python3.11 -m venv venv   # o la versión que tengas
     venv/bin/pip install -r requirements.txt
     venv/bin/python run.py            # API en :5001
     ```

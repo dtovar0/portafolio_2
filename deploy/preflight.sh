@@ -12,8 +12,10 @@
 set -uo pipefail
 
 # --- Requisitos del proyecto -------------------------------------------------
-PY_MODULE="python312"          # Rocky 8 sirve Python 3.12 como módulo AppStream
-PY_BIN="python3.12"
+# El proyecto funciona con Python 3.11 o superior; no exige 3.12. Se usa el
+# intérprete ya instalado y solo se instala uno si no hay ninguno válido.
+PY_MIN_MINOR=11
+PY_BIN=""                      # se resuelve más abajo
 NODE_MAJOR="22"                # Next.js 15 requiere Node >= 18.18; se usa 22 LTS
 MIN_DISK_MB=2048               # node_modules + venv + build
 MIN_RAM_MB=1024                # `next build` es lo que más consume
@@ -88,21 +90,31 @@ fi
 # --- 4. Python ---------------------------------------------------------------
 head2 "Python"
 
-if command -v "$PY_BIN" >/dev/null 2>&1; then
-    ok "$($PY_BIN --version) presente"
-    "$PY_BIN" -c "import venv" 2>/dev/null \
-        && ok "módulo venv disponible" \
-        || bad "falta el módulo venv (paquete ${PY_MODULE})"
-else
-    bad "$PY_BIN no está instalado (se instalará el módulo ${PY_MODULE})"
-    if dnf module list "$PY_MODULE" >/dev/null 2>&1; then
-        ok "el módulo ${PY_MODULE} está disponible en los repositorios"
-    else
-        warn "no se encontró el módulo ${PY_MODULE}; revisar repos AppStream"
+# Se aprovecha el intérprete que ya haya, de mayor a menor versión, para no
+# acumular instalaciones de Python en el servidor.
+# Rutas del sistema explícitas: si un venv está activo, `command -v` daría su
+# intérprete y el venv se crearía anidado sobre otro venv.
+for candidate in /usr/bin/python3.13 /usr/bin/python3.12 /usr/bin/python3.11 \
+                 /usr/local/bin/python3.12 /usr/local/bin/python3.11 /usr/bin/python3; do
+    [[ -x "$candidate" ]] || continue
+    minor=$("$candidate" -c 'import sys; print(sys.version_info[1])' 2>/dev/null) || continue
+    if [[ -n "$minor" ]] && (( minor >= PY_MIN_MINOR )); then
+        PY_BIN="$candidate"
+        break
     fi
-fi
+done
 
-printf "  python3 del sistema: %s\n" "$(python3 --version 2>&1 || echo 'ausente')"
+if [[ -n "$PY_BIN" ]]; then
+    ok "$($PY_BIN --version) en $PY_BIN"
+    "$PY_BIN" -c "import venv" >/dev/null 2>&1 \
+        && ok "módulo venv disponible" \
+        || bad "falta el módulo venv (instalar el paquete -devel del intérprete)"
+    printf "  se usará este intérprete; no hace falta instalar otro\n"
+else
+    sys_ver=$(python3 --version 2>&1 || echo 'ausente')
+    bad "no hay Python >= 3.${PY_MIN_MINOR} (el del sistema es ${sys_ver})"
+    printf "  opciones en Rocky 8: dnf module enable python311  (o python312)\n"
+fi
 
 # --- 5. Node -----------------------------------------------------------------
 head2 "Node.js"
