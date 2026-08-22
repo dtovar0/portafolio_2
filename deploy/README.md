@@ -36,6 +36,39 @@ sudo ./deploy/install.sh --domain nexus.ejemplo.com
 `--domain` y `--skip-packages`. Es idempotente: repetirlo actualiza la
 instalación.
 
+### Servidor detrás de un proxy corporativo
+
+Si el servidor no tiene salida directa a Internet, hay que indicar el proxy o
+la instalación fallará al descargar paquetes:
+
+```bash
+PROXY_URL=http://proxy.empresa.com:3128 ./deploy/preflight.sh
+sudo ./deploy/install.sh --proxy http://proxy.empresa.com:3128 \
+                        --no-proxy localhost,127.0.0.1,10.0.0.0/8
+```
+
+Cada herramienta lee el proxy de un sitio distinto, y el script cubre los tres:
+
+| Herramienta | De dónde lo lee |
+|---|---|
+| `dnf` | `/etc/dnf/dnf.conf` — ignora las variables de entorno |
+| `pip` | `--proxy` por línea de órdenes |
+| `npm` | `--proxy` / `--https-proxy` por línea de órdenes |
+
+Los dos últimos se pasan explícitamente porque `sudo -u` no hereda el entorno
+del invocador. Antes de tocar `dnf.conf` se guarda una copia.
+
+`preflight.sh` comprueba la salida real contra pypi.org y el registro de npm, y
+enmascara las credenciales del proxy al mostrarlas.
+
+Si el proxy usa autenticación, conviene exportar `PROXY_URL` en lugar de pasar
+`--proxy` en la orden, para que la contraseña no quede en el historial de bash:
+
+```bash
+export PROXY_URL='http://usuario:clave@proxy.empresa.com:3128'
+sudo -E ./deploy/install.sh --domain nexus.ejemplo.com
+```
+
 ### Notas propias de Rocky 8
 
 - **Python**: el proyecto funciona con 3.11 o superior, y el instalador

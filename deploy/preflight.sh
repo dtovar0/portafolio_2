@@ -145,6 +145,69 @@ done
 rpm -q openldap-devel >/dev/null 2>&1 && ok "openldap-devel" \
     || warn "openldap-devel ausente (necesario para ldap3 en algunos casos)"
 
+# --- 6b. Salida a Internet ---------------------------------------------------
+head2 "Salida a Internet"
+
+# Se acepta el proxy por variable de entorno o por --proxy en el instalador.
+PROXY_URL="${PROXY_URL:-${https_proxy:-${HTTPS_PROXY:-${http_proxy:-${HTTP_PROXY:-}}}}}"
+
+if [[ -n "$PROXY_URL" ]]; then
+    # No se imprime la URL completa: puede llevar usuario y contraseña.
+    printf "  proxy configurado: %s\n" "$(sed -E 's#(://).*@#\1***@#' <<< "$PROXY_URL")"
+    ok "se usará ese proxy para dnf, pip y npm"
+    [[ -n "${no_proxy:-${NO_PROXY:-}}" ]] \
+        && printf "  no_proxy: %s\n" "${no_proxy:-$NO_PROXY}" \
+        || warn "no_proxy sin definir: conviene excluir localhost y la red interna"
+else
+    printf "  sin proxy definido (conexión directa)\n"
+fi
+
+probe_url() {
+    # --proxy vacío fuerza conexión directa cuando no hay proxy configurado.
+    if [[ -n "$PROXY_URL" ]]; then
+        curl -fsS --max-time 12 --proxy "$PROXY_URL" -o /dev/null "$1" 2>/dev/null
+    else
+        curl -fsS --max-time 12 -o /dev/null "$1" 2>/dev/null
+    fi
+}
+
+if ! command -v curl >/dev/null 2>&1; then
+    warn "curl no está instalado; no se puede comprobar la salida a Internet"
+else
+    reachable=0
+    for target in "https://registry.npmjs.org/-/ping" "https://pypi.org/simple/" ; do
+        if probe_url "$target"; then
+            ok "alcanzable: ${target%%/-/*}"
+            reachable=$((reachable+1))
+        else
+            bad "no se alcanza $target"
+        fi
+    done
+    if (( reachable == 0 )); then
+        printf "  sin salida no se pueden descargar dependencias.\n"
+        printf "  si hay proxy corporativo: PROXY_URL=http://proxy:3128 ./deploy/preflight.sh\n"
+    fi
+fi
+
+# dnf lee su propio proxy de /etc/dnf/dnf.conf, no del entorno.
+if [[ -f /etc/dnf/dnf.conf ]]; then
+    if grep -qE '^\s*proxy\s*=' /etc/dnf/dnf.conf; then
+        ok "dnf ya tiene proxy en /etc/dnf/dnf.conf"
+    elif [[ -n "$PROXY_URL" ]]; then
+        warn "dnf no tiene proxy configurado; el instalador lo añadirá a dnf.conf"
+    fi
+fi
+
+# npm lo lee de su propia configuración.
+if command -v npm >/dev/null 2>&1; then
+    npm_proxy="$(npm config get https-proxy 2>/dev/null)"
+    if [[ -n "$npm_proxy" && "$npm_proxy" != "null" ]]; then
+        ok "npm ya tiene proxy configurado"
+    elif [[ -n "$PROXY_URL" ]]; then
+        warn "npm no tiene proxy; el instalador lo configurará"
+    fi
+fi
+
 # --- 7. Servicios de datos ---------------------------------------------------
 head2 "Base de datos y Redis"
 

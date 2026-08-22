@@ -4,6 +4,7 @@
 #
 #   sudo ./deploy/install.sh [--prefix /opt/nexus] [--user nexus]
 #                            [--domain nexus.example.com] [--python /usr/bin/python3.11]
+#                            [--proxy http://proxy:3128] [--no-proxy localhost,10.0.0.0/8]
 #
 # Usa el Python del sistema si es 3.11 o superior; solo instala uno si no hay.
 #
@@ -31,6 +32,9 @@ PY_MIN_MINOR=11
 PY_BIN=""
 NODE_MAJOR="22"
 SKIP_PKGS=0
+# Proxy de salida. Se toma de --proxy o del entorno; vacío = conexión directa.
+PROXY_URL="${PROXY_URL:-${https_proxy:-${HTTPS_PROXY:-${http_proxy:-${HTTP_PROXY:-}}}}}"
+NO_PROXY_LIST="${no_proxy:-${NO_PROXY:-localhost,127.0.0.1,::1}}"
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -38,6 +42,8 @@ while [[ $# -gt 0 ]]; do
         --user)   SVC_USER="$2"; shift 2 ;;
         --domain) DOMAIN="$2"; shift 2 ;;
         --python) PY_BIN="$2"; shift 2 ;;
+        --proxy)  PROXY_URL="$2"; shift 2 ;;
+        --no-proxy) NO_PROXY_LIST="$2"; shift 2 ;;
         --skip-packages) SKIP_PKGS=1; shift ;;
         -h|--help) sed -n '2,22p' "$0"; exit 0 ;;
         *) echo "Opción desconocida: $1" >&2; exit 2 ;;
@@ -72,6 +78,38 @@ resolve_python() {
 [[ $EUID -eq 0 ]] || die "hay que ejecutarlo como root (sudo)."
 [[ -f "$SRC/run.py" && -f "$SRC/frontend/package.json" ]] \
     || die "no encuentro el proyecto en $SRC"
+
+# --- 0. Proxy de salida ------------------------------------------------------
+# Cada herramienta lo lee de un sitio distinto: dnf de su propio fichero, pip y
+# npm del entorno o de su configuración. Se cubren los tres.
+# El separador de credenciales es el último @: una contraseña puede contener
+# ese carácter, y con el primero quedaría parte visible.
+mask_proxy() { sed -E 's#(://).*@#\1***@#' <<< "$1"; }
+
+if [[ -n "$PROXY_URL" ]]; then
+    log "Proxy de salida"
+    note "usando $(mask_proxy "$PROXY_URL")"
+
+    export http_proxy="$PROXY_URL"  HTTP_PROXY="$PROXY_URL"
+    export https_proxy="$PROXY_URL" HTTPS_PROXY="$PROXY_URL"
+    export no_proxy="$NO_PROXY_LIST" NO_PROXY="$NO_PROXY_LIST"
+
+    # dnf ignora las variables de entorno: hay que dejarlo en su configuración.
+    if [[ -f /etc/dnf/dnf.conf ]] && ! grep -qE '^\s*proxy\s*=' /etc/dnf/dnf.conf; then
+        cp /etc/dnf/dnf.conf "/etc/dnf/dnf.conf.bak-$(date +%s 2>/dev/null || echo prev)"
+        printf 'proxy=%s\n' "$PROXY_URL" >> /etc/dnf/dnf.conf
+        note "proxy añadido a /etc/dnf/dnf.conf (copia previa guardada)"
+    fi
+
+    if ! curl -fsS --max-time 15 --proxy "$PROXY_URL" -o /dev/null \
+              https://pypi.org/simple/ 2>/dev/null; then
+        die "el proxy no da salida a pypi.org; revisar la URL y las credenciales"
+    fi
+    note "salida a Internet comprobada"
+else
+    log "Proxy de salida"
+    note "no configurado; se asume conexión directa"
+fi
 
 # --- 1. Paquetes -------------------------------------------------------------
 if (( SKIP_PKGS )); then
@@ -114,6 +152,7 @@ else
         else
             # AppStream de Rocky 8 puede no llegar a Node 22; NodeSource sí.
             note "el módulo nodejs:${NODE_MAJOR} no está; usando NodeSource"
+            # curl y el script de NodeSource ya ven el proxy por el entorno.
             curl -fsSL "https://rpm.nodesource.com/setup_${NODE_MAJOR}.x" | bash -
             dnf -y install nodejs
         fi
@@ -169,15 +208,27 @@ chown -R "$SVC_USER:$SVC_USER" "$PREFIX" /var/log/nexus
 # --- 4. Backend --------------------------------------------------------------
 log "Backend (venv y dependencias)"
 sudo -u "$SVC_USER" "$PY_BIN" -m venv "$PREFIX/venv"
-sudo -u "$SVC_USER" "$PREFIX/venv/bin/pip" install --quiet --upgrade pip wheel
-sudo -u "$SVC_USER" "$PREFIX/venv/bin/pip" install --quiet -r "$PREFIX/requirements.txt" \
+# sudo -u no hereda el entorno, así que el proxy se pasa a pip explícitamente.
+PIP_PROXY_ARG=()
+[[ -n "$PROXY_URL" ]] && PIP_PROXY_ARG=(--proxy "$PROXY_URL")
+sudo -u "$SVC_USER" "$PREFIX/venv/bin/pip" install --quiet "${PIP_PROXY_ARG[@]}" \
+    --upgrade pip wheel
+sudo -u "$SVC_USER" "$PREFIX/venv/bin/pip" install --quiet "${PIP_PROXY_ARG[@]}" \
+    -r "$PREFIX/requirements.txt" \
     || die "fallo instalando dependencias de Python"
 note "venv listo en $PREFIX/venv"
 
 # --- 5. Frontend -------------------------------------------------------------
 log "Frontend (dependencias y build)"
 pushd "$PREFIX/frontend" >/dev/null
-sudo -u "$SVC_USER" npm ci --no-audit --no-fund \
+# npm tampoco hereda el entorno con sudo -u: se le pasa por línea de órdenes.
+NPM_PROXY_ARG=()
+if [[ -n "$PROXY_URL" ]]; then
+    NPM_PROXY_ARG=(--proxy "$PROXY_URL" --https-proxy "$PROXY_URL"
+                   --noproxy "$NO_PROXY_LIST")
+    note "npm usará el proxy"
+fi
+sudo -u "$SVC_USER" npm ci --no-audit --no-fund "${NPM_PROXY_ARG[@]}" \
     || die "fallo en npm ci"
 sudo -u "$SVC_USER" npm run build \
     || die "fallo en 'next build' (si es por memoria, añadir swap)"
